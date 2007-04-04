@@ -17,8 +17,7 @@ import javax.swing.*;
 public class TSessionPanel extends javax.swing.JPanel {
     
     /** Creates new form TSessionPanel */
-    public TSessionPanel(INodeModel model) {
-        mModel = model;
+    public TSessionPanel() {
         initComponents();
     }
     
@@ -73,5 +72,9 @@ public class TSessionPanel extends javax.swing.JPanel {
     private javax.swing.JTree mSessionTree;
     // End of variables declaration//GEN-END:variables
  
-     private INodeModel mModel;
+    private TNode mNode = null;
+     
+    public void setNode(TNode node) {
+        mNode = node;
+    }
 }

@@ -47,15 +47,21 @@ public class TWorkingNodeModel implements INodeModel {
     
     /** private variables **/
     HashMap<Class, ICmdInvoke> mCmdDispatcher;
-    INodeView mView = null;
+    TNode mNode;
     
     /** Creates a new instance of TWorkingNodeModel */
     public TWorkingNodeModel() {
+        
+        mNode = null;
         initDispatcher();
     }
     
-    public void setView(INodeView view) {
-        mView = view;
+    public TNode getNode() {
+        return mNode;
+    }
+    
+    public void setNode(TNode node) {
+        mNode = node;
     }
 
     /** dispatcher for TNodeCommand **/
@@ -153,7 +159,7 @@ public class TWorkingNodeModel implements INodeModel {
             Thread t = new Thread() {
                 public void run() {
                     sleepImpl(1000);
-                    mView.execute( new TWorkingNodeView.TNotfiyLockResultCmd() );
+                    mNode.execute( new TWorkingNodeView.TNotfiyLockResultCmd() );
                     TLogManager.logMessage("TWorkingNodeModel: lock paragraph done");
                 }
             };
@@ -174,7 +180,7 @@ public class TWorkingNodeModel implements INodeModel {
             Thread t = new Thread() {
                 public void run() {
                     sleepImpl(1000);
-                    mView.execute( new TWorkingNodeView.TNotfiyCommitResultCmd() );
+                    mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd() );
                     TLogManager.logMessage("TWorkingNodeModel: commit paragraph done");
                 }
             };

@@ -17,8 +17,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
     /**
      * Creates new form TDocumentPanel
      */
-    public TDocumentPanel(INodeModel model) {
-        mModel = model;
+    public TDocumentPanel() {
         initComponents();
     }
     
@@ -81,12 +80,14 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
     private void mCommitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCommitBtnActionPerformed
 // TODO add your handling code here:
-        mModel.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
+        if(mNode != null)
+            mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
     }//GEN-LAST:event_mCommitBtnActionPerformed
 
     private void mLockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mLockBtnActionPerformed
 // TODO add your handling code here:
-        mModel.execute( new TWorkingNodeModel.TLockParagraphCmd() );
+        if(mNode != null)
+            mNode.execute( new TWorkingNodeModel.TLockParagraphCmd() );
     }//GEN-LAST:event_mLockBtnActionPerformed
     
     
@@ -99,7 +100,11 @@ public class TDocumentPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
     
     
-    private INodeModel mModel;
+    private TNode mNode = null;
+    
+    public void setNode(TNode node) {
+        mNode = node;
+    }
     
     public void notifyLockResult(boolean result) {
         

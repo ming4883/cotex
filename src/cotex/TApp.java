@@ -7,6 +7,7 @@
 package cotex;
 
 //look and feel
+import java.awt.Graphics;
 import net.infonode.gui.laf.*;
 
 // docking util
@@ -53,7 +54,7 @@ public class TApp extends javax.swing.JFrame {
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 
-        mNode.getModel().execute( new TExitCmd() );
+        mNode.execute( new TExitCmd() );
     }//GEN-LAST:event_formWindowClosing
 
     
@@ -62,8 +63,11 @@ public class TApp extends javax.swing.JFrame {
     
     private TNode mNode;
     private TConfig mConfig;
-    private TConnectionManager mConnectionMgr;
     private TConsolePanel mConsole;
+    private RootWindow mDockingRootWindow;
+    
+    private java.util.ArrayList<View> mDockingViews;
+    private View mConsoleDockingView;
     
     private static final javax.swing.Icon DEFAULT_ICON = new javax.swing.Icon() {
         
@@ -80,8 +84,9 @@ public class TApp extends javax.swing.JFrame {
         public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
             //java.awt.Color oldColor = g.getColor();
             
-            //g.setColor(java.awt.Color.BLACK);
+            //g.setColor(java.awt.Color.WHITE);
             //g.fillOval(x, y, ICON_SIZE, ICON_SIZE);
+            
             
             //g.setColor(oldColor);
         }
@@ -92,12 +97,12 @@ public class TApp extends javax.swing.JFrame {
             initLoggers();
 
             mConfig = new TConfig("cotex.config.xml");
-
-            mConnectionMgr = new TConnectionManager( mConfig.getSetting("General", "ConnectionType") );
-
-            mNode = TNodeFactory.createInstance( mConfig.getSetting("General", "NodeType") );
+            
+            mNode = TNodeFactory.createInstance( mConfig.getSetting("General", "NodeType"), mConfig );
 
             initGui();
+            
+            initLayout();
             
             initLookAndFeel();
             
@@ -118,7 +123,7 @@ public class TApp extends javax.swing.JFrame {
             
             javax.swing.JOptionPane.showMessageDialog(
                 null,
-                "Failed to startup Cotex\n Unknown exception\n" + e.toString() );
+                "Failed to startup Cotex\n Unknown exception\n" + e.getStackTrace() );
             
             System.exit(1);
         } 
@@ -144,7 +149,7 @@ public class TApp extends javax.swing.JFrame {
         
         StringViewMap dockingViewMap = new StringViewMap();
         
-        java.util.ArrayList<View> views = new java.util.ArrayList<View>();
+        mDockingViews = new java.util.ArrayList<View>();
         
         while( iter.hasNext() ) {
          
@@ -159,31 +164,21 @@ public class TApp extends javax.swing.JFrame {
             
             dockingViewMap.addView( comp.getName(), dockingView );
             
-            views.add(dockingView);
+            mDockingViews.add(dockingView);
         }
         
-        View consoleView = new View(mConsole.getName(), DEFAULT_ICON, mConsole);
-        dockingViewMap.addView(mConsole.getName(), consoleView );
+        mConsoleDockingView = new View(mConsole.getName(), DEFAULT_ICON, mConsole);
+        dockingViewMap.addView(mConsole.getName(), mConsoleDockingView );
         
-        RootWindow dockingRootWindow = DockingUtil.createRootWindow(dockingViewMap, false);
-        dockingRootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
-        dockingRootWindow.getWindowBar(Direction.LEFT).setEnabled(true);
-        
-        // apply docking theme
-        DockingWindowsTheme theme = new ShapedGradientDockingTheme();
-        //DockingWindowsTheme theme = new ClassicDockingTheme();
-        
-        dockingRootWindow.getRootWindowProperties().addSuperObject( theme.getRootWindowProperties() );
-        
-        // enable title bar style
-        RootWindowProperties titleBarStyleProperties =
-            PropertiesUtil.createTitleBarStyleRootWindowProperties();
-        
-        dockingRootWindow.getRootWindowProperties().addSuperObject(
-            titleBarStyleProperties);
+        mDockingRootWindow = DockingUtil.createRootWindow(dockingViewMap, false);
+        mDockingRootWindow.getWindowBar(Direction.DOWN).setEnabled(true);
+        mDockingRootWindow.getWindowBar(Direction.LEFT).setEnabled(true);
         
         // add to main frame
-        this.getContentPane().add(dockingRootWindow, java.awt.BorderLayout.CENTER);
+        this.getContentPane().add(mDockingRootWindow, java.awt.BorderLayout.CENTER);
+    }
+
+    private void initLayout() {
         
         // init layout
         boolean retry = true;
@@ -192,15 +187,15 @@ public class TApp extends javax.swing.JFrame {
             
             try {
 
-               DockingWindow currWnd = views.get(0);
+               DockingWindow currWnd = mDockingViews.get(0);
 
-               for(int i=1; i<views.size(); ++i) {
+               for(int i=1; i<mDockingViews.size(); ++i) {
 
                     currWnd = new SplitWindow(
                         true,
                         0.3f,
                         currWnd,
-                        views.get(i) );
+                        mDockingViews.get(i) );
 
                 }
 
@@ -208,9 +203,9 @@ public class TApp extends javax.swing.JFrame {
                     false,
                     0.8f,
                     currWnd,
-                    consoleView );
+                    mConsoleDockingView );
 
-                dockingRootWindow.setWindow(layout);
+                mDockingRootWindow.setWindow(layout);
                 
                 retry = false;
                 
@@ -225,31 +220,45 @@ public class TApp extends javax.swing.JFrame {
     private void initLookAndFeel() {
         
         try {
-            
+        
+            // apply docking theme
+            DockingWindowsTheme dockingTheme = new ShapedGradientDockingTheme();
+            //DockingWindowsTheme dockingTheme = new ClassicDockingTheme();
+
+            mDockingRootWindow.getRootWindowProperties().addSuperObject( dockingTheme.getRootWindowProperties() );
+
+            // enable title bar style
+            RootWindowProperties titleBarStyleProperties =
+                PropertiesUtil.createTitleBarStyleRootWindowProperties();
+
+            mDockingRootWindow.getRootWindowProperties().addSuperObject(
+                titleBarStyleProperties);
+
             ///*
-            InfoNodeLookAndFeelTheme theme = InfoNodeLookAndFeelThemes.getDarkBlueGreenTheme();
-            //InfoNodeLookAndFeelTheme theme = InfoNodeLookAndFeelThemes.getBlueIceTheme();
+            InfoNodeLookAndFeelTheme lnfTheme = InfoNodeLookAndFeelThemes.getDarkBlueGreenTheme();
             
-            theme.setBackgroundColor( new Color(144, 144, 144) );
-            theme.setSelectedMenuBackgroundColor( new Color(96, 96, 96) );
-            theme.setSelectedTextBackgroundColor( new Color(96, 96, 96) );
+            lnfTheme.setBackgroundColor( new Color(144, 144, 144) );
+            lnfTheme.setSelectedMenuBackgroundColor( new Color(96, 96, 96) );
+            lnfTheme.setSelectedTextBackgroundColor( new Color(96, 96, 96) );
             
-            theme.setControlColor( new Color(128, 128, 144) );
-            //theme.setControlColor( SystemColor.control );
-            theme.setShadingFactor( 0.125f );
+            lnfTheme.setControlColor( new Color(110, 110, 110) );
+            //lnfTheme.setControlColor( SystemColor.control );
+            lnfTheme.setShadingFactor( 0.125f );
             
-            //theme.setActiveInternalFrameTitleGradientColor(  theme.getInactiveInternalFrameTitleGradientColor() );
-            //theme.setActiveInternalFrameTitleBackgroundColor( new java.awt.Color(96, 96, 96) );
+            //TLogManager.logMessage("bg = " + lnfTheme.getInactiveInternalFrameTitleBackgroundColor().toString() );
+            //TLogManager.logMessage("grad = " + lnfTheme.getInactiveInternalFrameTitleGradientColor().toString() );
+            
+            lnfTheme.setActiveInternalFrameTitleGradientColor( new Color(160, 160, 160) );
+            lnfTheme.setActiveInternalFrameTitleBackgroundColor( new Color(96, 96, 96) );
+            
+            lnfTheme.setInactiveInternalFrameTitleGradientColor( new Color(120, 120, 120) );
+            lnfTheme.setInactiveInternalFrameTitleBackgroundColor( new Color(96, 96, 96) );
             /**/
             
             //InfoNodeLookAndFeelTheme theme = InfoNodeLookAndFeelThemes.getBlueIceTheme();
             
             javax.swing.UIManager.setLookAndFeel(
-                new InfoNodeLookAndFeel(theme) );
-            
-                    
-            //javax.swing.UIManager.setLookAndFeel(
-            //    "com.sun.java.swing.plaf.windows.WindowsLookAndFeel" );
+                new InfoNodeLookAndFeel(lnfTheme) );
             
             javax.swing.SwingUtilities.updateComponentTreeUI(this);
             

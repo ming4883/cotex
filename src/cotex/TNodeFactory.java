@@ -19,18 +19,14 @@ public class TNodeFactory {
     private TNodeFactory() {
     }
     
-    static public TNode createInstance(String nodeType) throws TException {
+    static public TNode createInstance(String nodeType, TConfig config) throws TException {
         
         if( nodeType.equals("working") ) {
             
             cotex.working.TWorkingNodeModel model = new cotex.working.TWorkingNodeModel();
-            cotex.working.TWorkingNodeView view = new cotex.working.TWorkingNodeView(model);
+            cotex.working.TWorkingNodeView view = new cotex.working.TWorkingNodeView();
             
-            model.setView(view);
-            
-            return new TNode(
-                view,
-                model );
+            return new TNode(view, model, config);
         }
         
         throw new TException("TNodeFactory.createInstance", "unknown node type: " + nodeType); 
