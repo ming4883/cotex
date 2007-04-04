@@ -19,6 +19,9 @@ import net.infonode.util.Direction;
 import java.util.List;
 import java.util.Iterator;
 
+import java.awt.Color;
+import java.awt.SystemColor;
+
 /**
  *
  * @author  Ming
@@ -225,13 +228,15 @@ public class TApp extends javax.swing.JFrame {
             
             ///*
             InfoNodeLookAndFeelTheme theme = InfoNodeLookAndFeelThemes.getDarkBlueGreenTheme();
+            //InfoNodeLookAndFeelTheme theme = InfoNodeLookAndFeelThemes.getBlueIceTheme();
             
-            theme.setBackgroundColor( new java.awt.Color(144, 144, 144) );
-            theme.setSelectedMenuBackgroundColor( new java.awt.Color(96, 96, 96) );
-            theme.setSelectedTextBackgroundColor( new java.awt.Color(96, 96, 96) );
+            theme.setBackgroundColor( new Color(144, 144, 144) );
+            theme.setSelectedMenuBackgroundColor( new Color(96, 96, 96) );
+            theme.setSelectedTextBackgroundColor( new Color(96, 96, 96) );
             
-            theme.setControlColor( new java.awt.Color(128, 128, 128) );
-            theme.setShadingFactor( 0.25f );
+            theme.setControlColor( new Color(128, 128, 144) );
+            //theme.setControlColor( SystemColor.control );
+            theme.setShadingFactor( 0.125f );
             
             //theme.setActiveInternalFrameTitleGradientColor(  theme.getInactiveInternalFrameTitleGradientColor() );
             //theme.setActiveInternalFrameTitleBackgroundColor( new java.awt.Color(96, 96, 96) );

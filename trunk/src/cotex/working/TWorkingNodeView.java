@@ -11,6 +11,7 @@ package cotex.working;
 
 import cotex.*;
 import javax.swing.JComponent;
+import java.util.HashMap;
 
 /**
  *
@@ -18,8 +19,29 @@ import javax.swing.JComponent;
  */
 public class TWorkingNodeView implements INodeView {
     
+    /** Commands **/
+    
+    public static class TNotfiyLockResultCmd extends TNodeCommand {
+    }
+    
+    public static class TNotfiyCommitResultCmd extends TNodeCommand {
+    }
+    
+    /** dispatching interface **/
+    private interface ICmdInvoke {
+        
+        public abstract void invoke( TNodeCommand cmd );
+        
+    }
+    
+    /** private variables **/
+    HashMap<Class, ICmdInvoke> mCmdDispatcher;
+    
     java.util.ArrayList<javax.swing.JComponent> mGuiList;
     INodeModel mModel;
+    
+    TSessionPanel mSessionPanel;
+    TDocumentPanel mDocumentPanel;
     
     /** Creates a new instance of TWorkingNodeView */
     public TWorkingNodeView(INodeModel model) {
@@ -28,12 +50,48 @@ public class TWorkingNodeView implements INodeView {
         
         mGuiList = new java.util.ArrayList<javax.swing.JComponent>();
         
-        mGuiList.add( new TSessionPanel(model) );
-        mGuiList.add( new TDocumentPanel(model) );
+        mGuiList.add( mSessionPanel = new TSessionPanel(model) );
+        mGuiList.add( mDocumentPanel = new TDocumentPanel(model) );
         
+        initDispatcher();
     }
+
     
     public java.util.List getGuiComponents() {
         return mGuiList;
+    }
+    
+    public void execute(TNodeCommand cmd) {
+        if( mCmdDispatcher.containsKey( cmd.getClass() ) )
+            mCmdDispatcher.get( cmd.getClass() ).invoke(cmd);
+    }
+    
+    private void initDispatcher() {
+        
+        mCmdDispatcher = new HashMap<Class, ICmdInvoke>();
+        
+        // lock result
+        mCmdDispatcher.put(
+            TNotfiyLockResultCmd.class,
+            new ICmdInvoke() {
+                public void invoke(TNodeCommand cmd) {executeNotfiyLockResult(cmd);} 
+            } );
+            
+        // commit result
+        mCmdDispatcher.put(
+            TNotfiyCommitResultCmd.class,
+            new ICmdInvoke() {
+                public void invoke(TNodeCommand cmd) {executeNotfiyCommitResult(cmd);} 
+            } );
+    }
+    
+    private void executeNotfiyLockResult(TNodeCommand cmd) {
+        
+        mDocumentPanel.notifyLockResult( true );
+    }
+    
+    private void executeNotfiyCommitResult(TNodeCommand cmd) {
+        
+        mDocumentPanel.notifyCommitResult( true );
     }
 }

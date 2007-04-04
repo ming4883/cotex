@@ -23,10 +23,13 @@ public class TNodeFactory {
         
         if( nodeType.equals("working") ) {
             
-            INodeModel model = new cotex.working.TWorkingNodeModel();
+            cotex.working.TWorkingNodeModel model = new cotex.working.TWorkingNodeModel();
+            cotex.working.TWorkingNodeView view = new cotex.working.TWorkingNodeView(model);
+            
+            model.setView(view);
             
             return new TNode(
-                new cotex.working.TWorkingNodeView(model),
+                view,
                 model );
         }
         

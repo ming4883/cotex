@@ -15,6 +15,6 @@ package cotex;
  */
 public interface INodeModel {
     
-    public abstract Object execute(TNodeCommand cmd);
+    public abstract void execute(TNodeCommand cmd);
     
 }
