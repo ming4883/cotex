@@ -15,6 +15,10 @@ package cotex;
  */
 public interface INodeView {
     
+    public abstract TNode getNode();
+    
+    public abstract void setNode(TNode node);
+    
     public abstract java.util.List getGuiComponents();
     
     public abstract void execute(TNodeCommand cmd);

@@ -38,24 +38,34 @@ public class TWorkingNodeView implements INodeView {
     HashMap<Class, ICmdInvoke> mCmdDispatcher;
     
     java.util.ArrayList<javax.swing.JComponent> mGuiList;
-    INodeModel mModel;
     
+    TNode mNode;
     TSessionPanel mSessionPanel;
     TDocumentPanel mDocumentPanel;
     
+    
     /** Creates a new instance of TWorkingNodeView */
-    public TWorkingNodeView(INodeModel model) {
+    public TWorkingNodeView() {
         
-        mModel = model;
+        mNode = null;
         
         mGuiList = new java.util.ArrayList<javax.swing.JComponent>();
         
-        mGuiList.add( mSessionPanel = new TSessionPanel(model) );
-        mGuiList.add( mDocumentPanel = new TDocumentPanel(model) );
+        mGuiList.add( mSessionPanel = new TSessionPanel() );
+        mGuiList.add( mDocumentPanel = new TDocumentPanel() );
         
         initDispatcher();
     }
-
+    
+    public TNode getNode() {
+        return mNode;
+    }
+    
+    public void setNode(TNode node) {
+        mNode = node;
+        mSessionPanel.setNode(node);
+        mDocumentPanel.setNode(node);
+    }
     
     public java.util.List getGuiComponents() {
         return mGuiList;
