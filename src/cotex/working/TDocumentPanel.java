@@ -47,9 +47,9 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mLockBtn.setMaximumSize(new java.awt.Dimension(80, 23));
         mLockBtn.setMinimumSize(new java.awt.Dimension(80, 23));
         mLockBtn.setPreferredSize(new java.awt.Dimension(80, 23));
-        mLockBtn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mLockBtnMouseClicked(evt);
+        mLockBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mLockBtnActionPerformed(evt);
             }
         });
 
@@ -60,9 +60,9 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mCommitBtn.setMaximumSize(new java.awt.Dimension(80, 23));
         mCommitBtn.setMinimumSize(new java.awt.Dimension(80, 23));
         mCommitBtn.setPreferredSize(new java.awt.Dimension(80, 23));
-        mCommitBtn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mCommitBtnMouseClicked(evt);
+        mCommitBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mCommitBtnActionPerformed(evt);
             }
         });
 
@@ -79,27 +79,15 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
     }// </editor-fold>//GEN-END:initComponents
 
-    private void mCommitBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mCommitBtnMouseClicked
+    private void mCommitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCommitBtnActionPerformed
 // TODO add your handling code here:
-        
         mModel.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
-        
-        mTextArea.setEditable(false);
-        mLockBtn.setEnabled(true);
-        mCommitBtn.setEnabled(false);
-        
-    }//GEN-LAST:event_mCommitBtnMouseClicked
+    }//GEN-LAST:event_mCommitBtnActionPerformed
 
-    private void mLockBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mLockBtnMouseClicked
+    private void mLockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mLockBtnActionPerformed
 // TODO add your handling code here:
-        
         mModel.execute( new TWorkingNodeModel.TLockParagraphCmd() );
-        
-        mTextArea.setEditable(true);
-        mLockBtn.setEnabled(false);
-        mCommitBtn.setEnabled(true);
-        
-    }//GEN-LAST:event_mLockBtnMouseClicked
+    }//GEN-LAST:event_mLockBtnActionPerformed
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -112,4 +100,22 @@ public class TDocumentPanel extends javax.swing.JPanel {
     
     
     private INodeModel mModel;
+    
+    public void notifyLockResult(boolean result) {
+        
+        if(result) {
+            mTextArea.setEditable(true);
+            mLockBtn.setEnabled(false);
+            mCommitBtn.setEnabled(true);
+        }
+    }
+    
+    public void notifyCommitResult(boolean result) {
+        
+        if(result) {
+            mTextArea.setEditable(false);
+            mLockBtn.setEnabled(true);
+            mCommitBtn.setEnabled(false);
+        }
+    }
 }

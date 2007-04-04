@@ -17,4 +17,6 @@ public interface INodeView {
     
     public abstract java.util.List getGuiComponents();
     
+    public abstract void execute(TNodeCommand cmd);
+    
 }
