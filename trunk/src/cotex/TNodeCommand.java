@@ -15,11 +15,11 @@ package cotex;
  */
 public abstract class TNodeCommand {
     
-    private java.util.HashMap mArgs;
+    private java.util.HashMap<String, Object> mArgs;
     
     /** Creates a new instance of TNodeCommand */
     public TNodeCommand() {
-        mArgs = new java.util.HashMap();
+        mArgs = new java.util.HashMap<String, Object>();
     }
     
     public void setArg(String key, Object value) {
