@@ -21,7 +21,7 @@ public class TConnectionFactory {
     
     public static IConnection createInstance(String typeName) throws TException {
         
-        if(typeName == "tcp")
+        if( typeName.equals("tcp") )
             return new TTcpConnection();
         
             

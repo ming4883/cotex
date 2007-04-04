@@ -15,6 +15,6 @@ package cotex;
  */
 public interface INodeView {
     
-    public abstract javax.swing.JPanel getGuiRoot();
+    public abstract java.util.List getGuiComponents();
     
 }

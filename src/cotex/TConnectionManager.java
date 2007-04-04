@@ -18,29 +18,51 @@ import java.util.HashMap;
 public class TConnectionManager {
     
     
-    private HashMap mConnections;
+    private HashMap<String, IConnection> mConnections;
     private String mTypeName;
     
     /** Creates a new instance of TConnectionManager */
     public TConnectionManager(String connectionTypeName) {
         
         mTypeName = connectionTypeName;
-        mConnections = new HashMap();
+        mConnections = new HashMap<String, IConnection>();
+        
+        TLogManager.logMessage("TConnectionManager: connection type = " + mTypeName);
         
     }
     
     public void addConnection(String name) throws TException {
         
+        if( mConnections.containsKey(name) ) {
+            throw new TException(
+                "TConnectionManager.addConnection",
+                "connection " + name + " already exists");
+        }
+        
         IConnection connection = TConnectionFactory.createInstance(mTypeName);
         mConnections.put(name, connection);
     }
     
-    public void removeConnection(String name) {
+    public void removeConnection(String name) throws TException {
+        
+        if( !mConnections.containsKey(name) ) {
+            throw new TException(
+                "TConnectionManager.removeConnection",
+                "connection " + name + " does not exist");
+        }
+        
         mConnections.remove(name);
     }
     
-    public IConnection getConnection(String name) {
-        return (IConnection)mConnections.get(name);
+    public IConnection getConnection(String name) throws TException {
+        
+        if( !mConnections.containsKey(name) ) {
+            throw new TException(
+                "TConnectionManager.removeConnection",
+                "connection " + name + " does not exist");
+        }
+        
+        return mConnections.get(name);
     }
     
     public boolean hasConnection(String name) {
