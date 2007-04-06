@@ -114,10 +114,10 @@ public class TDocumentPanel extends javax.swing.JPanel {
     
     public void setNode(TNode node) {
         mNode = node;
-        mTable.setModel((TableModel)(mNode.getModel()));
-        ((TWorkingNodeModel)mTable.getModel()).addParagraph(1,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
-        ((TWorkingNodeModel)mTable.getModel()).addParagraph(3,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
         
+        TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
+    
+        mTable.setModel( nodeModel.getData() );
     }
     
     public void notifyLockResult(boolean result) {

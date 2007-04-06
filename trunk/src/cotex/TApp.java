@@ -243,7 +243,7 @@ public class TApp extends javax.swing.JFrame {
             
             lnfTheme.setControlColor( new Color(110, 110, 110) );
             //lnfTheme.setControlColor( SystemColor.control );
-            lnfTheme.setShadingFactor( 0.125f );
+            lnfTheme.setShadingFactor( 0.25f );
             
             //TLogManager.logMessage("bg = " + lnfTheme.getInactiveInternalFrameTitleBackgroundColor().toString() );
             //TLogManager.logMessage("grad = " + lnfTheme.getInactiveInternalFrameTitleGradientColor().toString() );
