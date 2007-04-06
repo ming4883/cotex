@@ -128,7 +128,7 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
             else {// try to lock
                 
                 currentParagraph.setTryLock(true);
-                //table.getParent();
+                //mNode.execute(new TWorkingNodeModel.TLockParagraphCmd());
                 return null;
             }
         }
