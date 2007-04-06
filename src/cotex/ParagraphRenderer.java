@@ -34,16 +34,25 @@ public class ParagraphRenderer extends JTextArea implements TableCellRenderer {
         if (value == null) {
             this.setForeground(null);
             this.setText("");
+            this.setBorder(null);
             return this;
         }
         if ((row%2)==0) {
             this.setText("");
             this.setForeground(null);
+            this.setBorder(null);
             return this;
         } else {
             this.setText(((Paragraph)value).getContent());
             table.setRowHeight(row,(int)this.getMinimumSize().getHeight());
             this.setForeground(Color.blue);
+        }
+        if(((AbstractParagraph)value).getTryLock()) {
+            this.setBorder(new ParagraphtBorder("tryLock"));
+        }else if(((AbstractParagraph)value).getLock()) {
+            this.setBorder(new ParagraphtBorder("lock"));
+        }else{
+            this.setBorder(null);
         }
         return this;
     }
