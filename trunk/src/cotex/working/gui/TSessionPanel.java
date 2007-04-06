@@ -4,9 +4,10 @@
  * Created on April 4, 2007, 1:54 PM
  */
 
-package cotex.working;
+package cotex.working.gui;
 
 import cotex.*;
+import cotex.working.*;
 import javax.swing.*;
 
 

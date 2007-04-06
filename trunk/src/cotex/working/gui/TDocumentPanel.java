@@ -4,9 +4,10 @@
  * Created on April 4, 2007, 10:55 AM
  */
 
-package cotex.working;
+package cotex.working.gui;
 
 import cotex.*;
+import cotex.working.*;
 import javax.swing.table.TableModel;
 
 /**
@@ -34,6 +35,8 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mCommitBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         mTable = new javax.swing.JTable();
+        mTable.setDefaultRenderer( TParagraphBase.class, new TParagraphRenderer() );
+        mTable.setDefaultEditor( TParagraphBase.class, mParagraphEditor = new TParagraphEditor() );
 
         setLayout(new java.awt.BorderLayout());
 
@@ -70,18 +73,22 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
         add(jPanel1, java.awt.BorderLayout.EAST);
 
-        //mTable.setModel((TableModel)(mNode.getModel()));
+        mTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
         mTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
-        mTable.setAutoscrolls(true);
         mTable.setShowHorizontalLines(false);
         mTable.setShowVerticalLines(false);
         mTable.setTableHeader(null);
         mTable.setUpdateSelectionOnSort(false);
-        mTable.setDefaultRenderer(AbstractParagraph.class, new ParagraphRenderer());
-        mTable.setDefaultEditor(AbstractParagraph.class,  new ParagraphEditor());
-        //docModel.addParagraph(1,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
-        //docModel.addParagraph(3,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
- 
         jScrollPane1.setViewportView(mTable);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -111,13 +118,14 @@ public class TDocumentPanel extends javax.swing.JPanel {
     
     
     private TNode mNode = null;
+    private TParagraphEditor mParagraphEditor;
     
     public void setNode(TNode node) {
         mNode = node;
         
         TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
-    
         mTable.setModel( nodeModel.getData() );
+        mParagraphEditor.setNode(node);
     }
     
     public void notifyLockResult(boolean result) {

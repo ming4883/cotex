@@ -1,12 +1,14 @@
 /*
- * ParagraphRenderer.java
+ * TParagraphRenderer.java
  *
  * Created on 2007年3月29日, 上午 3:29
  *
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-package cotex;
+package cotex.working.gui;
+import cotex.*;
+import cotex.working.*;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.*;
@@ -16,44 +18,63 @@ import javax.swing.table.*;
  *
  * @author cyrux
  */
-public class ParagraphRenderer extends JTextArea implements TableCellRenderer {
+public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
     
     /**
-     * Creates a new instance of ParagraphRenderer
+     * Creates a new instance of TParagraphRenderer
      */
-    public ParagraphRenderer() {
+    public TParagraphRenderer() {
         super();
         this.setWrapStyleWord(true);
         //this.setAutoscrolls(true);
         this.setLineWrap(true);
     }
-    public Component getTableCellRendererComponent(JTable table, Object value,
+    
+    public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
             boolean isSelected,
             boolean hasFocus,
             int row,int column) {
+        
+        // some problem
         if (value == null) {
             this.setForeground(null);
-            this.setText("");
+            this.setText("Error! null value");
             this.setBorder(null);
             return this;
         }
-        if ((row%2)==0) {
+        
+        // set text
+        if ( value.getClass().equals( TGap.class ) ) {
+            // gap
             this.setText("");
             this.setForeground(null);
             this.setBorder(null);
             return this;
-        } else {
-            this.setText(((Paragraph)value).getContent());
+        }
+        else {
+        
+            // paragraph
+            this.setText( ((TParagraph)value).getContent() );
             table.setRowHeight(row,(int)this.getMinimumSize().getHeight());
             this.setForeground(Color.blue);
         }
-        if(((AbstractParagraph)value).getTryLock()) {
-            this.setBorder(new ParagraphtBorder("tryLock"));
-        }else if(((AbstractParagraph)value).getLock()) {
-            this.setBorder(new ParagraphtBorder("lock"));
-        }else{
-            this.setBorder(null);
+        
+        // set border
+        if( ((TParagraphBase)value).getTryLock() ) {
+            this.setBorder(new TParagraphtBorder("tryLock"));
+        
         }
+        else if( ((TParagraphBase)value).getLock() ) {
+            this.setBorder(new TParagraphtBorder("lock"));
+        
+        }
+        else{
+            this.setBorder(null);
+        
+        }
+        
         return this;
     }
     
