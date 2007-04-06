@@ -15,9 +15,18 @@ package cotex;
  */
 public abstract class AbstractParagraph {
     int id=0;
-    boolean lock=false;
+    boolean lock=false,tryLock=false;
     public boolean getLock() {
-        return this.lock;
+        return lock;
+    }
+    public void setLock(boolean lock) {
+        this.lock=lock;
+    }
+    public boolean getTryLock() {
+        return tryLock;
+    }
+    public void setTryLock(boolean tryLock) {
+        this.tryLock=tryLock;
     }
     public void setId(int id){
         this.id=id;
