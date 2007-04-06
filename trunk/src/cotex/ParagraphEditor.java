@@ -38,9 +38,11 @@ public class ParagraphEditor  extends JTextArea implements TableCellEditor {
     protected transient String originalValue;
     protected transient boolean editing;
     protected transient int id;
+    TNode mNode;
     
-    public ParagraphEditor(){
+    public ParagraphEditor(TNode mNode){
         super();
+        this.mNode=mNode;
         listeners = new Vector( );
         this.setWrapStyleWord(true);
         //this.setAutoscrolls(true);
@@ -91,21 +93,28 @@ public class ParagraphEditor  extends JTextArea implements TableCellEditor {
         if ((row%2)==0) {
             return null;
         } else {
-            this.setText(((Paragraph)value).getContent());            
-            this.id=((Paragraph)value).id;
-            this.setBorder(new DocumentBorder());
-            this.addKeyListener(new java.awt.event.KeyListener() {
-                public void keyPressed(java.awt.event.KeyEvent e) {
-                    tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
-                }
-                public void keyReleased(java.awt.event.KeyEvent e) {}
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
-                }
-            });
+            Paragraph currentParagraph = (Paragraph)value;
+            if(currentParagraph.getLock() && currentParagraph.getTryLock()) { // is already try to lock
+                this.setText(currentParagraph.getContent());
+                this.id=currentParagraph.getId();
+                this.setBorder(new ParagraphtBorder("edit"));
+                this.addKeyListener(new java.awt.event.KeyListener() {
+                    public void keyPressed(java.awt.event.KeyEvent e) {
+                        tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
+                    }
+                    public void keyReleased(java.awt.event.KeyEvent e) {}
+                    public void keyTyped(java.awt.event.KeyEvent e) {
+                        tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
+                    }
+                });
+            }else{// try to lock
+                currentParagraph.setTryLock(true);
+                table.getParent()
+                return null;
+            }
         }
         originalValue = this.getText();
-        editing = true;       
+        editing = true;
         Point p = table.getLocationOnScreen();
         Rectangle r = table.getCellRect(row, column, true);
         helper.setLocation(r.x + p.x + getWidth( ) - 50, r.y + p.y );
