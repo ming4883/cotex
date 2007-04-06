@@ -7,6 +7,7 @@
 package cotex.working;
 
 import cotex.*;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -32,7 +33,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mLockBtn = new javax.swing.JButton();
         mCommitBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        mTextArea = new javax.swing.JTextArea();
+        mTable = new javax.swing.JTable();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -69,10 +70,19 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
         add(jPanel1, java.awt.BorderLayout.EAST);
 
-        mTextArea.setColumns(20);
-        mTextArea.setEditable(false);
-        mTextArea.setRows(5);
-        jScrollPane1.setViewportView(mTextArea);
+        //mTable.setModel((TableModel)(mNode.getModel()));
+        mTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        mTable.setAutoscrolls(true);
+        mTable.setShowHorizontalLines(false);
+        mTable.setShowVerticalLines(false);
+        mTable.setTableHeader(null);
+        mTable.setUpdateSelectionOnSort(false);
+        mTable.setDefaultRenderer(AbstractParagraph.class, new ParagraphRenderer());
+        mTable.setDefaultEditor(AbstractParagraph.class,  new ParagraphEditor());
+        //docModel.addParagraph(1,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
+        //docModel.addParagraph(3,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
+ 
+        jScrollPane1.setViewportView(mTable);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -96,7 +106,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton mCommitBtn;
     private javax.swing.JButton mLockBtn;
-    private javax.swing.JTextArea mTextArea;
+    private javax.swing.JTable mTable;
     // End of variables declaration//GEN-END:variables
     
     
@@ -104,12 +114,16 @@ public class TDocumentPanel extends javax.swing.JPanel {
     
     public void setNode(TNode node) {
         mNode = node;
+        mTable.setModel((TableModel)(mNode.getModel()));
+        ((TWorkingNodeModel)mTable.getModel()).addParagraph(1,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
+        ((TWorkingNodeModel)mTable.getModel()).addParagraph(3,new Paragraph("asdasdasdhajsdgsjafd jhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfjsdgsjafdjhfkjdshfdsfhgjksdhfhdskjfhdskjfhsdhkfhsdhfkjdshfkjshdkjfhkjdshfkjhsdkjfhkjsdhfkjdshkfhdskfhsdhfkjdshkjsa"));
+        
     }
     
     public void notifyLockResult(boolean result) {
         
         if(result) {
-            mTextArea.setEditable(true);
+            //mTextArea.setEditable(true);
             mLockBtn.setEnabled(false);
             mCommitBtn.setEnabled(true);
         }
@@ -118,7 +132,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
     public void notifyCommitResult(boolean result) {
         
         if(result) {
-            mTextArea.setEditable(false);
+            //mTextArea.setEditable(false);
             mLockBtn.setEnabled(true);
             mCommitBtn.setEnabled(false);
         }

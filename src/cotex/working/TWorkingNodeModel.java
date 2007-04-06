@@ -11,13 +11,15 @@ package cotex.working;
 
 import cotex.*;
 import java.util.HashMap;
+import java.util.Vector;
+import javax.swing.table.AbstractTableModel;
 
 
 /**
  *
  * @author Ming
  */
-public class TWorkingNodeModel implements INodeModel {
+public class TWorkingNodeModel extends AbstractTableModel implements INodeModel {
     
     /** Command classes for INodeView **/
     public static class TNewSessionCmd extends TNodeCommand {
@@ -48,12 +50,16 @@ public class TWorkingNodeModel implements INodeModel {
     /** private variables **/
     HashMap<Class, ICmdInvoke> mCmdDispatcher;
     TNode mNode;
+    int nextId=0;
+    Vector<AbstractParagraph> para = new Vector< AbstractParagraph >();
     
     /** Creates a new instance of TWorkingNodeModel */
     public TWorkingNodeModel() {
         
         mNode = null;
         initDispatcher();
+        this.para.add(new Gap(nextId));
+        nextId++;
     }
     
     public TNode getNode() {
@@ -63,7 +69,7 @@ public class TWorkingNodeModel implements INodeModel {
     public void setNode(TNode node) {
         mNode = node;
     }
-
+    
     /** dispatcher for TNodeCommand **/
     public void execute(TNodeCommand cmd) {
         
@@ -75,8 +81,7 @@ public class TWorkingNodeModel implements INodeModel {
         
         try {
             Thread.sleep(time);
-        }
-        catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
         
@@ -88,52 +93,52 @@ public class TWorkingNodeModel implements INodeModel {
         
         // exit
         mCmdDispatcher.put(
-            TExitCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeExit(cmd);} 
-            } );
-            
+                TExitCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeExit(cmd);}
+        } );
+        
         // new session
         mCmdDispatcher.put(
-            TNewSessionCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeNewSession(cmd);} 
-            } );
-            
+                TNewSessionCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeNewSession(cmd);}
+        } );
+        
         // join session
         mCmdDispatcher.put(
-            TJoinSessionCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeJoinSession(cmd);} 
-            } );
-            
+                TJoinSessionCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeJoinSession(cmd);}
+        } );
+        
         // lock paragraph
         mCmdDispatcher.put(
-            TLockParagraphCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeLockParagraph(cmd);} 
-            } );
-            
+                TLockParagraphCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeLockParagraph(cmd);}
+        } );
+        
         // commit paragraph
         mCmdDispatcher.put(
-            TCommitParagraphCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeCommitParagraph(cmd);} 
-            } );
-            
+                TCommitParagraphCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeCommitParagraph(cmd);}
+        } );
+        
         // insert paragraph
         mCmdDispatcher.put(
-            TInsertParagraphCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeInsertParagraph(cmd);} 
-            } );
+                TInsertParagraphCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeInsertParagraph(cmd);}
+        } );
         
         // erase paragraph
         mCmdDispatcher.put(
-            TEraseParagraphCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeEraseParagraph(cmd);} 
-            } );
+                TEraseParagraphCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeEraseParagraph(cmd);}
+        } );
     }
     
     /** Acutally implementation **/
@@ -165,8 +170,7 @@ public class TWorkingNodeModel implements INodeModel {
             };
             
             t.start();
-        } 
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -186,8 +190,7 @@ public class TWorkingNodeModel implements INodeModel {
             };
             
             t.start();
-        } 
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -198,5 +201,37 @@ public class TWorkingNodeModel implements INodeModel {
     
     private void executeEraseParagraph(TNodeCommand cmd) {
         
+    }
+    
+    public int getRowCount( ) { return this.para.size(); }
+    public int getColumnCount( ) { return 1; }
+    public Class getColumnClass(int c) { return AbstractParagraph.class; }
+    public AbstractParagraph getValueAt(int r, int c) { return this.para.get(r); }
+    public boolean isCellEditable(int r, int c) {
+        return !this.para.get(r).getLock();
+    }
+    public void setValueAt(Object value, int r, int c) {
+        para.setElementAt((Paragraph)value,r);
+        fireTableDataChanged();
+    }
+    
+    public void addParagraph(int newIndex,AbstractParagraph paragraph){
+        paragraph.setId(nextId);
+        para.add(newIndex,paragraph);
+        nextId++;
+        para.add(newIndex+1,new Gap(nextId));
+        nextId++;
+        fireTableDataChanged();
+    }
+    public void updateParagraph(int paragraphId, String newContent){
+        Paragraph currentParagrphc;
+        for(int i=1;i<para.size();i+=2){
+            currentParagrphc=(Paragraph)para.get(i);
+            if(currentParagrphc.getId()==paragraphId) {
+                currentParagrphc.setContent(newContent);
+                fireTableDataChanged();
+                return;
+            }
+        }
     }
 }

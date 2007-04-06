@@ -82,17 +82,17 @@ public class TWorkingNodeView implements INodeView {
         
         // lock result
         mCmdDispatcher.put(
-            TNotfiyLockResultCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeNotfiyLockResult(cmd);} 
-            } );
-            
+                TNotfiyLockResultCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeNotfiyLockResult(cmd);}
+        } );
+        
         // commit result
         mCmdDispatcher.put(
-            TNotfiyCommitResultCmd.class,
-            new ICmdInvoke() {
-                public void invoke(TNodeCommand cmd) {executeNotfiyCommitResult(cmd);} 
-            } );
+                TNotfiyCommitResultCmd.class,
+                new ICmdInvoke() {
+            public void invoke(TNodeCommand cmd) {executeNotfiyCommitResult(cmd);}
+        } );
     }
     
     private void executeNotfiyLockResult(TNodeCommand cmd) {
