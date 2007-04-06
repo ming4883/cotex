@@ -55,7 +55,7 @@ public class TConnectionInfo {
                 Integer.parseInt(tokens[1]) );
         }
         catch(Exception e) {
-            throw new TException("TConnectionInfo.fromString", "Invalid input string");
+            throw new TException("TConnectionInfo.fromString", "Invalid input string"+e.getMessage());
         }
     }
     
