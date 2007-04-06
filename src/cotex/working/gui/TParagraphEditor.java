@@ -1,5 +1,5 @@
 /*
- * ParagraphEditor.java
+ * TParagraphEditor.java
  *
  * Created on 2007年3月29日, 上午 4:31
  *
@@ -7,8 +7,10 @@
  * and open the template in the editor.
  */
 
-package cotex;
+package cotex.working.gui;
 
+import cotex.*;
+import cotex.working.*;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -31,18 +33,18 @@ import javax.swing.table.TableCellEditor;
  *
  * @author cyrux
  */
-public class ParagraphEditor  extends JTextArea implements TableCellEditor {
+public class TParagraphEditor  extends JTextArea implements TableCellEditor {
     
     public OkCancel helper = new OkCancel( );
     protected transient Vector listeners;
     protected transient String originalValue;
     protected transient boolean editing;
     protected transient int id;
-    TNode mNode;
     
-    public ParagraphEditor(TNode mNode){
+    TNode mNode = null;
+    
+    public TParagraphEditor(){
         super();
-        this.mNode=mNode;
         listeners = new Vector( );
         this.setWrapStyleWord(true);
         //this.setAutoscrolls(true);
@@ -50,10 +52,14 @@ public class ParagraphEditor  extends JTextArea implements TableCellEditor {
         
     }
     
+    public void setNode(TNode node) {
+        mNode = node;
+    }
     
     public class OkCancel extends JWindow {
-        private JButton okB = new JButton(new ImageIcon(getClass().getResource("./accept.gif"),"Accept"));
-        private JButton cancelB = new JButton(new ImageIcon(getClass().getResource("./cancel.gif"),"Cancel"));
+        
+        private JButton okB = new JButton(new ImageIcon("res/accept.gif","Accept"));
+        private JButton cancelB = new JButton(new ImageIcon("res/cancel.gif","Cancel"));
         private int w = 50;
         private int h = 24;
         
@@ -79,46 +85,61 @@ public class ParagraphEditor  extends JTextArea implements TableCellEditor {
         }
     }
     
-    
-    
-    public Component getTableCellEditorComponent(JTable table, Object value,
+    public Component getTableCellEditorComponent(
+            JTable table,
+            Object value,
             boolean isSelected,
             int row, int column) {
-        final int currentRow=row;
-        final JTable tb=table;
-        final JTextArea ja= this;
+        
+        final int currentRow = row;
+        final JTable tb = table;
+        final JTextArea ja = this;
+        
         if (value == null) {
             return null;
         }
-        if ((row%2)==0) {
+        
+        if ( value.getClass().equals( TGap.class) ) {
             return null;
-        } else {
-            Paragraph currentParagraph = (Paragraph)value;
+        }
+        else {
+            
+            TParagraph currentParagraph = (TParagraph)value;
+            
             if(currentParagraph.getLock() && currentParagraph.getTryLock()) { // is already try to lock
+                
                 this.setText(currentParagraph.getContent());
                 this.id=currentParagraph.getId();
-                this.setBorder(new ParagraphtBorder("edit"));
+                this.setBorder(new TParagraphtBorder("edit"));
                 this.addKeyListener(new java.awt.event.KeyListener() {
+                    
                     public void keyPressed(java.awt.event.KeyEvent e) {
                         tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
                     }
+                    
                     public void keyReleased(java.awt.event.KeyEvent e) {}
+                    
                     public void keyTyped(java.awt.event.KeyEvent e) {
                         tb.setRowHeight(currentRow,(int)ja.getMinimumSize().getHeight());
                     }
                 });
-            }else{// try to lock
+                
+            }
+            else {// try to lock
+                
                 currentParagraph.setTryLock(true);
-                table.getParent()
+                //table.getParent();
                 return null;
             }
         }
+        
         originalValue = this.getText();
         editing = true;
         Point p = table.getLocationOnScreen();
         Rectangle r = table.getCellRect(row, column, true);
         helper.setLocation(r.x + p.x + getWidth( ) - 50, r.y + p.y );
         helper.setVisible(true);
+        
         return this;
     }
     
@@ -129,7 +150,7 @@ public class ParagraphEditor  extends JTextArea implements TableCellEditor {
         helper.setVisible(false);
     }
     
-    public Object getCellEditorValue( ) {return new Paragraph(this.id,this.getText());}
+    public Object getCellEditorValue( ) {return new TParagraph(this.id,this.getText());}
     
     public boolean isCellEditable(EventObject eo) {
         return true;

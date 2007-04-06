@@ -10,6 +10,8 @@
 package cotex.working;
 
 import cotex.*;
+import cotex.working.gui.TDocumentPanel;
+import cotex.working.gui.TSessionPanel;
 import javax.swing.JComponent;
 import java.util.HashMap;
 

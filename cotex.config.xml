@@ -13,6 +13,9 @@
     <section name="General" >
         <setting key="NodeType" value="working" />
         <setting key="ConnectionType" value="tcp" />
+        <setting key="RegistryPort" value="10001" />
+        <setting key="WorkingCmdPort" value="10002" />
+        <setting key="WorkingDataPort" value="10003" />
     </section>
     
 </config>

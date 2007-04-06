@@ -1,5 +1,5 @@
 /*
- * AbstractParagraph.java
+ * TParagraphBase.java
  *
  * Created on 2007年3月29日, 上午 2:03
  *
@@ -7,13 +7,15 @@
  * and open the template in the editor.
  */
 
-package cotex;
+package cotex.working;
+
+import cotex.*;
 
 /**
  *
  * @author cyrux
  */
-public abstract class AbstractParagraph {
+public abstract class TParagraphBase {
     int id=0;
     boolean lock=false,tryLock=false;
     public boolean getLock() {
