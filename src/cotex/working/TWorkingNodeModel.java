@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author Ming
  */
-public class TWorkingNodeModel extends AbstractTableModel implements INodeModel {
+public class TWorkingNodeModel implements INodeModel {
     
     /** Command classes for INodeView **/
     public static class TNewSessionCmd extends TNodeCommand {
@@ -50,16 +50,15 @@ public class TWorkingNodeModel extends AbstractTableModel implements INodeModel 
     /** private variables **/
     HashMap<Class, ICmdInvoke> mCmdDispatcher;
     TNode mNode;
-    int nextId=0;
-    Vector<AbstractParagraph> para = new Vector< AbstractParagraph >();
+    TWorkingNodeData mData;
     
     /** Creates a new instance of TWorkingNodeModel */
     public TWorkingNodeModel() {
         
         mNode = null;
+        mData = new TWorkingNodeData();
         initDispatcher();
-        this.para.add(new Gap(nextId));
-        nextId++;
+       
     }
     
     public TNode getNode() {
@@ -68,6 +67,10 @@ public class TWorkingNodeModel extends AbstractTableModel implements INodeModel 
     
     public void setNode(TNode node) {
         mNode = node;
+    }
+    
+    public TWorkingNodeData getData() {
+        return mData;
     }
     
     /** dispatcher for TNodeCommand **/
@@ -161,6 +164,7 @@ public class TWorkingNodeModel extends AbstractTableModel implements INodeModel 
         
         try {
             
+             // simulate the network delay
             Thread t = new Thread() {
                 public void run() {
                     sleepImpl(1000);
@@ -181,6 +185,7 @@ public class TWorkingNodeModel extends AbstractTableModel implements INodeModel 
         
         try {
             
+            // simulate the network delay
             Thread t = new Thread() {
                 public void run() {
                     sleepImpl(1000);
@@ -202,36 +207,5 @@ public class TWorkingNodeModel extends AbstractTableModel implements INodeModel 
     private void executeEraseParagraph(TNodeCommand cmd) {
         
     }
-    
-    public int getRowCount( ) { return this.para.size(); }
-    public int getColumnCount( ) { return 1; }
-    public Class getColumnClass(int c) { return AbstractParagraph.class; }
-    public AbstractParagraph getValueAt(int r, int c) { return this.para.get(r); }
-    public boolean isCellEditable(int r, int c) {
-        return !this.para.get(r).getLock();
-    }
-    public void setValueAt(Object value, int r, int c) {
-        para.setElementAt((Paragraph)value,r);
-        fireTableDataChanged();
-    }
-    
-    public void addParagraph(int newIndex,AbstractParagraph paragraph){
-        paragraph.setId(nextId);
-        para.add(newIndex,paragraph);
-        nextId++;
-        para.add(newIndex+1,new Gap(nextId));
-        nextId++;
-        fireTableDataChanged();
-    }
-    public void updateParagraph(int paragraphId, String newContent){
-        Paragraph currentParagrphc;
-        for(int i=1;i<para.size();i+=2){
-            currentParagrphc=(Paragraph)para.get(i);
-            if(currentParagrphc.getId()==paragraphId) {
-                currentParagrphc.setContent(newContent);
-                fireTableDataChanged();
-                return;
-            }
-        }
-    }
+
 }
