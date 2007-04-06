@@ -94,13 +94,13 @@ public class TDocumentPanel extends javax.swing.JPanel {
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void mCommitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCommitBtnActionPerformed
 // TODO add your handling code here:
         if(mNode != null)
             mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
     }//GEN-LAST:event_mCommitBtnActionPerformed
-
+    
     private void mLockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mLockBtnActionPerformed
 // TODO add your handling code here:
         if(mNode != null)
@@ -132,6 +132,17 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         if(result) {
             //mTextArea.setEditable(true);
+            //mTable.editCellAt(1, 0);
+            boolean success = mTable.editCellAt(1, 0);
+            if (success) {
+                // Select cell
+                boolean toggle = false;
+                boolean extend = false;
+                mTable.changeSelection(1, 0, toggle, extend);
+            } else {
+                // Cell could not be edited
+            }
+            
             mLockBtn.setEnabled(false);
             mCommitBtn.setEnabled(true);
         }
@@ -141,6 +152,10 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         if(result) {
             //mTextArea.setEditable(false);
+            if (mTable.getCellEditor() != null) {
+                mTable.getCellEditor().stopCellEditing();
+            }
+            
             mLockBtn.setEnabled(true);
             mCommitBtn.setEnabled(false);
         }
