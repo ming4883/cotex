@@ -23,7 +23,7 @@ public interface IConnection {
     
     public abstract void addListener(IConnectionListener listener);
     public abstract void removeListener(IConnectionListener listener);
-    public abstract void open(Mode mode, TConnectionInfo info);
+    public abstract void open(Mode mode, TConnectionInfo info) throws TException;
     public abstract void close();
     public abstract boolean isOpened();
     public abstract void sendObject(Object obj);
