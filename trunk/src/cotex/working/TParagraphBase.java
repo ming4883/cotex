@@ -16,24 +16,36 @@ import cotex.*;
  * @author cyrux
  */
 public abstract class TParagraphBase {
-    int id=0;
-    boolean lock=false,tryLock=false;
-    public boolean getLock() {
-        return lock;
+    
+    private TUniqueId mId;
+    private boolean mLocked;
+    
+    TParagraphBase(){
+        mId = new TUniqueId();
+        mLocked = false;
     }
-    public void setLock(boolean lock) {
-        this.lock=lock;
+    
+    public void lock() throws TException {
+        
+        if(mLocked)
+            throw new TException("TParagraphBase.lock", "ParagraphBase is already locked");
+        
+        mLocked = true;
     }
-    public boolean getTryLock() {
-        return tryLock;
+    
+    public void unlock() throws TException {
+        
+        if(!mLocked)
+            throw new TException("TParagraphBase.unlock", "ParagraphBase has not been locked");
+        
+        mLocked = false;
     }
-    public void setTryLock(boolean tryLock) {
-        this.tryLock=tryLock;
+    
+    public boolean isLocked() {
+        return mLocked;
     }
-    public void setId(int id){
-        this.id=id;
-    }
-    public int getId(){
-        return this.id;
+    
+    public TUniqueId getId(){
+        return mId;
     }
 }

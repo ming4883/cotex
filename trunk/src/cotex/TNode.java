@@ -20,20 +20,21 @@ public class TNode {
     private TConfig mConfig;
     private TConnectionManager mConnectionMgr;
     
-    
     /** Creates a new instance of TNode */
-    public TNode(INodeView view, INodeModel model, TConfig config) {
-        mView = view;
-        mModel = model;
-        
-        mView.setNode(this);
-        mModel.setNode(this);
+    public TNode(TConfig config) {
         
         mConfig = config;
-        
         mConnectionMgr = new TConnectionManager( mConfig.getSetting("General", "ConnectionType") );
         
     }
+    
+    public void setModel(INodeModel model) {
+        mModel = model;
+    }
+    
+    public void setView(INodeView view) {
+        mView = view;
+    }    
     
     public INodeView getView() {
         return mView;
@@ -43,11 +44,18 @@ public class TNode {
         return mModel;
     }
     
+    public TConnectionManager getConnectionManager() {
+        return mConnectionMgr;
+    }
+    
+    public TConfig getConfig() {
+        return mConfig;
+    }
+    
     public void execute(TNodeCommand cmd) {
         
         mView.execute(cmd);
         mModel.execute(cmd);
-        
     }
     
 }

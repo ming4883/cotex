@@ -107,6 +107,9 @@ public class TApp extends javax.swing.JFrame {
             initLookAndFeel();
             
             this.setVisible(true);
+            
+            mNode.getModel().startUp();
+            mNode.getView().startUp();
         
             TLogManager.logMessage("Application started");
         }

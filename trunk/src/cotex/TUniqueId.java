@@ -24,8 +24,9 @@ public class TUniqueId implements java.io.Serializable {
         mId = new VMID();
     }
     
-    public boolean equals(TUniqueId rhs) {
+    public boolean equals(Object obj) {
 
+        TUniqueId rhs = (TUniqueId)obj;
         return mId.equals(rhs.mId);
     }
     

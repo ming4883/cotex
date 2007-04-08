@@ -31,7 +31,7 @@ public class TConnectionManager {
         
     }
     
-    public void addConnection(String name) throws TException {
+    public IConnection addConnection(String name) throws TException {
         
         if( mConnections.containsKey(name) ) {
             throw new TException(
@@ -41,6 +41,8 @@ public class TConnectionManager {
         
         IConnection connection = TConnectionFactory.createInstance(mTypeName);
         mConnections.put(name, connection);
+        
+        return connection;
     }
     
     public void removeConnection(String name) throws TException {

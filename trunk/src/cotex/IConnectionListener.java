@@ -15,7 +15,7 @@ package cotex;
  */
 public interface IConnectionListener {
     
-    public abstract void notifyRemoteConnected(TConnectionInfo info);
-    public abstract void notifyObjectReceived(Object receivedObject);
+    public abstract void notifyRemoteConnected(IConnection connection, TConnectionInfo info);
+    public abstract void notifyObjectReceived(IConnection connection, Object receivedObject);
     
 }

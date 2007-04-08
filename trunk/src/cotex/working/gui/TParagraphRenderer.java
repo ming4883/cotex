@@ -58,10 +58,13 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
             // paragraph
             this.setText( ((TParagraph)value).getContent() );
             table.setRowHeight(row,(int)this.getMinimumSize().getHeight());
-            this.setForeground(Color.blue);
+            this.setForeground(Color.DARK_GRAY);
+            //this.setEnabled(false);
         }
         
         // set border
+        
+        /*
         if( ((TParagraphBase)value).getTryLock() ) {
             this.setBorder(new TParagraphtBorder("tryLock"));
         
@@ -74,6 +77,7 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
             this.setBorder(null);
         
         }
+        */
         
         return this;
     }
