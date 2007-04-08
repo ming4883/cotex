@@ -49,4 +49,18 @@ public class TSessionInfo implements java.io.Serializable {
         return mId.equals(rhs.mId);
     }
 
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+
+        out.defaultWriteObject();
+        out.writeObject(mId);
+        out.writeObject(mName);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) 
+        throws java.io.IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+        mId = (TUniqueId)in.readObject();
+        mName = (String)in.readObject();
+    }
 }

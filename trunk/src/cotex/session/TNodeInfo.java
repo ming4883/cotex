@@ -16,7 +16,7 @@ import java.net.InetAddress;
  *
  * @author Ming
  */
-public class TNodeInfo {
+public class TNodeInfo implements java.io.Serializable {
     
     private String mName;
     private TUniqueId mId;
@@ -43,6 +43,10 @@ public class TNodeInfo {
         return mAddr;
     }
     
+    public final TUniqueId getId() {
+        return mId;
+    }
+    
     public boolean equals(Object obj) {
         
         TNodeInfo rhs = (TNodeInfo)obj;
@@ -51,5 +55,23 @@ public class TNodeInfo {
     
     public final String toString() {
         return mName;
+    }
+    
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+
+        out.defaultWriteObject();
+        out.writeObject(mId);
+        out.writeObject(mName);
+        out.writeObject(mAddr);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) 
+        throws java.io.IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+        
+        mId = (TUniqueId)in.readObject();
+        mName = (String)in.readObject();
+        mAddr = (InetAddress)in.readObject();
     }
 }

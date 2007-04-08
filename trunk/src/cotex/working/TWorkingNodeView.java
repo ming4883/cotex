@@ -24,9 +24,15 @@ public class TWorkingNodeView implements INodeView {
     /** Commands **/
     
     public static class TNotfiyLockResultCmd extends TNodeCommand {
+        public TNotfiyLockResultCmd(boolean result) {
+            setArg("result", new Boolean(result) );
+        }
     }
     
     public static class TNotfiyCommitResultCmd extends TNodeCommand {
+        public TNotfiyCommitResultCmd(boolean result) {
+            setArg("result", new Boolean(result) );
+        }
     }
     
     /** dispatching interface **/
@@ -107,11 +113,21 @@ public class TWorkingNodeView implements INodeView {
     
     private void executeNotfiyLockResult(TNodeCommand cmd) {
         
-        mDocumentPanel.notifyLockResult( true );
+        try {
+            mDocumentPanel.notifyLockResult( ( (Boolean)cmd.getArg("result") ).booleanValue() );
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
     }
     
     private void executeNotfiyCommitResult(TNodeCommand cmd) {
         
-        mDocumentPanel.notifyCommitResult( true );
+        try {
+            mDocumentPanel.notifyCommitResult( ( (Boolean)cmd.getArg("result") ).booleanValue() );
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
     }
 }

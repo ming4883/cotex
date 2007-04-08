@@ -9,7 +9,7 @@
 
 package cotex;
 
-import net.infonode.properties.propertymap.ref.ThisPropertyMapRef;
+//import net.infonode.properties.propertymap.ref.ThisPropertyMapRef;
 
 import java.net.*;
 import java.io.*;
@@ -36,48 +36,36 @@ public class TSocketReceivingThread extends Thread {
         
         Socket sock = mConnection.getSocket(mClientName);
         
-        ObjectInputStream inputStream = null;
-        
         try {
             
-            inputStream = new ObjectInputStream( sock.getInputStream() );
-        } 
-        catch (IOException ex) {
-             TLogManager.logError("TSocketReceivingThread: failed to create ObjectInputStream; socket close");
-        }
-        
-        if(null != inputStream) {
-        
-            boolean connected = true;
+            ObjectInputStream inputStream = new ObjectInputStream( sock.getInputStream() );
 
-            while(connected) {
+            boolean active = true;
 
-                try{
+            while(active) {
 
-                    synchronized(sock) {
+                try {
+                    Object obj = inputStream.readObject();
+                    mConnection.fireObjectReceivedNotification(obj);
                     
-                        Object obj = inputStream.readObject();
-                        mConnection.fireObjectReceivedNotification(obj);
-                    }
-
+                    this.sleep(1);
                 }
-                catch(IOException e){
-                    TLogManager.logError("TSocketReceivingThread(" + mClientName +  "): IOException - "+e.toString());
-                    connected = false;
-
+                catch(ClassNotFoundException e) {
+                    TLogManager.logMessage("TSocketReceivingThread(" + mClientName + "): unknown object recieved");
                 }
-                catch(ClassNotFoundException cnfe){
-                    TLogManager.logError("TSocketReceivingThread(" + mClientName +  "): ClassNotFoundException - " + cnfe.toString());
-
+                catch(InterruptedException e) {
+                    active = false;
                 }
+                catch(IOException e) {
+                    active = false;
+                }
+                
             }
             
-            try {
-                inputStream.close();
-            }
-            catch (IOException ex) {
-                TLogManager.logError("TSocketReceivingThread: failed to close ObjectInputStream");
-            }
+            inputStream.close();
+            sock.close();
+        }
+        catch(IOException e) {
         }
         
         mConnection.removeSocketAndWorkingThread(mClientName, this);

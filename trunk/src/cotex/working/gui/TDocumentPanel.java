@@ -26,8 +26,8 @@ public class TDocumentPanel extends javax.swing.JPanel {
         initComponents();
         
         TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
-        mTable.setDefaultRenderer( TParagraphBase.class, new TParagraphRenderer() );
-        mTable.setDefaultEditor( TParagraphBase.class, new TParagraphEditor(mNode) );
+        mTable.setDefaultRenderer( TParagraph.class, new TParagraphRenderer() );
+        mTable.setDefaultEditor( TParagraph.class, new TParagraphEditor(mNode) );
         mTable.setModel( nodeModel.getData().getDocumentTableModel() );
     }
     
@@ -101,22 +101,49 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mTable.setShowVerticalLines(false);
         mTable.setTableHeader(null);
         mTable.setUpdateSelectionOnSort(false);
+        mTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                mTableMousePressed(evt);
+            }
+        });
+
         jScrollPane1.setViewportView(mTable);
 
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
     }// </editor-fold>//GEN-END:initComponents
+
+    private void mTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mTableMousePressed
+// TODO add your handling code here:
+        if(null == mNode)
+            return;
+        
+        int row = mTable.rowAtPoint( evt.getPoint() );
+        
+        TParagraph paragraph = (TParagraph)mTable.getModel().getValueAt(row, 0);
+        
+        if( paragraph.getClass().equals(TContent.class) &&
+            paragraph.getState() == TParagraph.State.UNLOCKED) {
+        
+            mPendingRow = row;
+            
+            mNode.execute( new TWorkingNodeModel.TLockParagraphCmd(paragraph) );
+        }
+        
+        //TLogManager.logMessage("mTableMousePressed");
+        
+    }//GEN-LAST:event_mTableMousePressed
     
     private void mCommitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCommitBtnActionPerformed
 // TODO add your handling code here:
-        if(mNode != null)
-            mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
+        //if(mNode != null)
+        //    mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
     }//GEN-LAST:event_mCommitBtnActionPerformed
     
     private void mLockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mLockBtnActionPerformed
 // TODO add your handling code here:
-        if(mNode != null)
-            mNode.execute( new TWorkingNodeModel.TLockParagraphCmd() );
+        //if(mNode != null)
+         //   mNode.execute( new TWorkingNodeModel.TLockParagraphCmd() );
     }//GEN-LAST:event_mLockBtnActionPerformed
     
     
@@ -128,51 +155,38 @@ public class TDocumentPanel extends javax.swing.JPanel {
     private javax.swing.JTable mTable;
     // End of variables declaration//GEN-END:variables
     
-    
+    //----------------------------------
     private TNode mNode = null;
+    private int mPendingRow = -1;
     
-    /*
-    public void setNode(TNode node) {
-        mNode = node;
-        
-        TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
-        mTable.setModel( nodeModel.getData() );
-        mParagraphEditor.setNode(node);
-    }
-     **/
-    
+    //----------------------------------
     public void notifyLockResult(boolean result) {
         
         if(result) {
-            //mTextArea.setEditable(true);
-            //mTable.editCellAt(1, 0);
-            /*
-            boolean success = mTable.editCellAt(1, 0);
-            if (success) {
-                // Select cell
-                boolean toggle = false;
-                boolean extend = false;
-                mTable.changeSelection(1, 0, toggle, extend);
-            } else {
-                // Cell could not be edited
-            }
-            */
-            mLockBtn.setEnabled(false);
-            mCommitBtn.setEnabled(true);
+            
+            //mLockBtn.setEnabled(false);
+            //mCommitBtn.setEnabled(true);
+            
+            mTable.requestFocus();
+            mTable.editCellAt(mPendingRow, 0);
+            
+            mPendingRow = -1;
         }
     }
     
+    //----------------------------------
     public void notifyCommitResult(boolean result) {
         
         if(result) {
-            //mTextArea.setEditable(false);
-            /*
-            if (mTable.getCellEditor() != null) {
-                mTable.getCellEditor().stopCellEditing();
-            }
-            */
-            mLockBtn.setEnabled(true);
-            mCommitBtn.setEnabled(false);
+            
+            //mTable.editCellAt(0, 0);
+            //mTable.e
+            //TLogManager.logMessage("notifyCommitResult");
+            //mTable.setEditingRow(-1);
+            //mTable.editCellAt(
+             //mLockBtn.setEnabled(true);
+            //mCommitBtn.setEnabled(false);
         }
+        
     }
 }

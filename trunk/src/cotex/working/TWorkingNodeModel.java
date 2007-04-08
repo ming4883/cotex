@@ -15,7 +15,7 @@ import cotex.working.msg.*;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
-
+import java.net.InetAddress;
 
 /**
  *
@@ -34,11 +34,17 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     public static class TLockParagraphCmd extends TNodeCommand {
+        public TLockParagraphCmd(TParagraph paragraph) {
+            setArg("paragraph", paragraph);
+        }
     }
     
     public static class TCommitParagraphCmd extends TNodeCommand {
+         public TCommitParagraphCmd(TParagraph paragraph) {
+            setArg("paragraph", paragraph);
+        }
     }
-    
+
     public static class TInsertParagraphCmd extends TNodeCommand {
     }
     
@@ -52,74 +58,40 @@ public class TWorkingNodeModel implements INodeModel {
         
     }
     
+    //----------------------------------
+    private final String REG_CONNECTION = "Reg";
+    private final String CMD_CONNECTION = "Cmd";
+    private final String DATA_CONNECTION = "Data";
+    
+    //----------------------------------
     /** private variables **/
-    HashMap<Class, ICmdInvoke> mCmdDispatcher;
-    TNode mNode;
-    TWorkingNodeData mData;
+    private HashMap<Class, ICmdInvoke> mCmdDispatcher;
+    private HashMap<String, Object> mStates;
+    private TNode mNode;
+    private TWorkingNodeData mData;
     
-    private final String CMD_PASSIVE = "CmdP";
-    private final String CMD_ACTIVE = "CmdA";
-    
+    private Integer mRegPort;
     private Integer mCmdPort;
+    private Integer mDataPort;
     
-    /** Creates a new instance of TWorkingNodeModel */
+    //----------------------------------
     public TWorkingNodeModel(TNode node) {
         
         mNode = node;
         mData = new TWorkingNodeData();
-        initDispatcher();
+        
+        mStates = new HashMap<String, Object>();
+        
+        _logic_initDispatcher();
         
     }
     
     //----------------------------------
     public void startUp() throws TException {
         
-        startupConnections();
+        _logic_startUpConnections();
         
-        acquireSessionsFromRegistry();
-    }
-
-    //----------------------------------
-    private void startupConnections() throws TException, NumberFormatException, TException {
-        
-        mCmdPort = Integer.parseInt( mNode.getConfig().getSetting("General", "WorkingCmdPort") );
-        
-        // passive listener
-        mNode.getConnectionManager().addConnection(CMD_PASSIVE).addListener(
-            new IConnectionListener() {
-            public void notifyRemoteConnected(IConnection conn, TConnectionInfo info) {
-                notifyCmdPassiveRemoteConnected(info);
-            }
-            
-            public void notifyObjectReceived(IConnection conn, Object obj) {
-                notifyCmdPassiveObjectReceived(obj);
-            }
-        });
-        
-        // active listener
-        mNode.getConnectionManager().addConnection(CMD_ACTIVE).addListener(
-            new IConnectionListener() {
-            public void notifyRemoteConnected(IConnection conn, TConnectionInfo info) {
-                notifyCmdActiveRemoteConnected(info);
-            }
-            
-            public void notifyObjectReceived(IConnection conn, Object obj) {
-                notifyCmdActiveObjectReceived(obj);
-            }
-        });
-        
-        try {
-        
-            getConnection(CMD_PASSIVE).open(
-                IConnection.Mode.PASSIVE, 
-                java.net.InetAddress.getLocalHost(),
-                mCmdPort );
-        }
-        catch(Exception e) {
-            throw new TException("TWorkingNodeModel.startUp", "failed to open passive cmd connection");
-        }
-        
-        TLogManager.logMessage("Start listening for cmd connection");
+        _logic_acquireSessionsFromRegistry();
     }
     
     //----------------------------------
@@ -132,7 +104,14 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     //----------------------------------
-    private void sleepImpl(int time) {
+    public void execute(TNodeCommand cmd) {
+        
+        if( mCmdDispatcher.containsKey( cmd.getClass() ) )
+            mCmdDispatcher.get( cmd.getClass() ).invoke(cmd);
+    }
+    
+    //----------------------------------
+    private void _util_sleep(int time) {
         
         try {
             Thread.sleep(time);
@@ -144,15 +123,15 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     //----------------------------------
-    private IConnection getConnection(String name) throws TException {
+    private IConnection _util_getConnection(String name) throws TException {
         return mNode.getConnectionManager().getConnection(name);
     }
     
     //----------------------------------
-    private void sendObject(String connectionName, Object obj) {
+    private void _util_sendObject(String connectionName, InetAddress addr, Object obj) {
        
         try{
-            getConnection(connectionName).sendObject( obj );
+            _util_getConnection(connectionName).sendObject( addr, obj );
         }
         catch(TException e) {
             TLogManager.logException(e);
@@ -160,35 +139,119 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     //----------------------------------
-    private void acquireSessionsFromRegistry() {
+    private void _util_sendObjectToRightNode(String connectionName, Object obj) {
+       
+        try{
+            _util_getConnection(connectionName).sendObject( mData.nodeGetRight().getAddr(), obj );
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
+    }
+    
+    //----------------------------------
+    private void _util_sendObjectToLeftNode(String connectionName, Object obj) {
+       
+        try{
+            _util_getConnection(connectionName).sendObject( mData.nodeGetLeft().getAddr(), obj );
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
+    }
+    
+    //----------------------------------
+    private String _util_getSetting(String section, String key) {
         
-        TLogManager.logMessage("Acquring sessions from registry");
+        return mNode.getConfig().getSetting(section, key);
+    }
+    
+    //----------------------------------
+    private void _logic_startUpConnections() throws NumberFormatException, TException {
+        
+        mRegPort = Integer.parseInt( _util_getSetting("General", "RegistryPort") );
+        mCmdPort = Integer.parseInt( _util_getSetting("General", "WorkingCmdPort") );
+        mDataPort = Integer.parseInt( _util_getSetting("General", "WorkingDataPort") );
+        
+        // setup listeners
+        IConnectionListener regListener = new IConnectionListener() {
+            public void notifyObjectReceived(IConnection conn, Object obj) {
+                _onRegConnectionObjectReceived(obj);
+            }
+        };
+        
+        IConnectionListener cmdListener = new IConnectionListener() {
+            public void notifyObjectReceived(IConnection conn, Object obj) {
+                _onCmdConnectionObjectReceived(obj);
+            }
+        };
+        
+        IConnectionListener dataListener = new IConnectionListener() {
+            public void notifyObjectReceived(IConnection conn, Object obj) {
+                _onDataConnectionObjectReceived(obj);
+            }
+        };
+        
+        // add and open connections
+        mNode.getConnectionManager().addConnection(REG_CONNECTION).addListener(regListener);
+        mNode.getConnectionManager().addConnection(CMD_CONNECTION).addListener(cmdListener);
+        mNode.getConnectionManager().addConnection(DATA_CONNECTION).addListener(dataListener);
+        
+        try {
+            
+            _util_getConnection(REG_CONNECTION).open(mRegPort);
+            TLogManager.logMessage("TWorkingNodeModel: reg connection openned at port " + mRegPort.toString() );
+            
+            _util_getConnection(CMD_CONNECTION).open(mCmdPort);
+            TLogManager.logMessage("TWorkingNodeModel: cmd connection openned at port " + mCmdPort.toString() );
+            
+            _util_getConnection(DATA_CONNECTION).open(mDataPort);
+            TLogManager.logMessage("TWorkingNodeModel: data connection openned at port " + mDataPort.toString());
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
+        
+    }
+    
+    //----------------------------------
+    private void _logic_acquireSessionsFromRegistry() {
+        
+        TLogManager.logMessage("TWorkingNodeModel: acquring sessions from registry");
         
         // todo: ask the registry node for sessions in step of hardcode
-        TSessionInfo session = new TSessionInfo( mNode.getConfig().getSetting("Temp", "DummySessionName" ) );
+        TSessionInfo session = new TSessionInfo( _util_getSetting("Temp", "DummySessionName" ) );
         
-        mData.addSessionInfo( session );
+        mData.sessionAdd( session );
 
     }
     
     //----------------------------------
-    private void acquireSessionWorkerList(TUniqueId sessionId) {
+    private void _logic_acquireSessionWorkerList(TUniqueId sessionId) {
     
         try {
             
-            TLogManager.logMessage("Acquring worker list from registry");
+            TLogManager.logMessage("TWorkingNodeModel: acquring worker list from registry");
         
             // todo: request the work list from the registry node
-            mData.setCurrentSession(sessionId);
+            mData.sessionSetCurrent(sessionId);
             
-            TSession session = mData.getCurrentSession();
+            TSession session = mData.sessionGetCurrent();
             
             session.AddNode( 
                 new cotex.session.TNodeInfo( 
-                    mNode.getConfig().getSetting("Temp", "DummyWorkerName"),
-                    java.net.InetAddress.getByName( mNode.getConfig().getSetting("Temp", "DummyWorkerAddr") ) ) );
+                    _util_getSetting("Temp", "WorkerName1"),
+                    java.net.InetAddress.getByName( _util_getSetting("Temp", "WorkerAddr1") ) ) );
             
-            mData.setSelfNodeInfo( session.getNodeAt(0) );
+            session.AddNode( 
+                new cotex.session.TNodeInfo( 
+                    _util_getSetting("Temp", "WorkerName2"),
+                    java.net.InetAddress.getByName( _util_getSetting("Temp", "WorkerAddr2") ) ) );
+            
+            int selfIdx = Integer.parseInt( _util_getSetting("Temp", "Self") );
+            TLogManager.logMessage("TWorkingNodeModel: self = " + Integer.toString(selfIdx) );
+            
+            mData.nodeSetSelf( session.getNodeAt( selfIdx ) );
             
         }
         catch(TException e) {
@@ -198,68 +261,63 @@ public class TWorkingNodeModel implements INodeModel {
         }
         catch(Exception e) {
             
-            TLogManager.logError("failed to acquire sessions worker list: " + e.getMessage() );
+            TLogManager.logError("TWorkingNodeModel: failed to acquire sessions worker list: " + e.getMessage() );
             
         }
     }
-    
+
     //----------------------------------
-    private void establishCmdConnection() {
+    private void _logic_acquireCurrentDocument() {
         
-        try {
-            
-            TNodeInfo rightWorker = mData.getCurrentSession().getRightNode( mData.getSelfNodeInfo() );
-            
-            getConnection(CMD_ACTIVE).open(
-                IConnection.Mode.ACTIVE, 
-                rightWorker.getAddr(),
-                mCmdPort);
+        int selfIdx = Integer.parseInt( _util_getSetting("Temp", "Self") );
+        
+        if(selfIdx == 0) {
+            mData.paragraphAdd( new TGap() );
+            mData.paragraphAdd( new TContent("This is a test paragraph 1.") );
         }
-        catch(TException e) {
-            TLogManager.logError("failed to establish cmd connection: socket error");
+        else {
+            
+            _util_sendObjectToLeftNode(
+                CMD_CONNECTION,
+                new TRequestDocumentMsg( mData.nodeGetSelf() ) );
+            
         }
-        //catch(java.net.UnknownHostException e) {
-        //    TLogManager.logError("failed to establish cmd connection: unknown host");
-        //}
 
     }
     
     //----------------------------------
-    private void notifyCmdPassiveRemoteConnected(TConnectionInfo info) {
+    private void _onRegConnectionObjectReceived(Object obj) {
+    
+        TLogManager.logMessage("TWorkingNodeModel: reg connection object received: " + obj.toString() );
         
-        TLogManager.logMessage("Cmd Passive remote connected: " + info.toString() );
-        
-        sendObject(CMD_PASSIVE, new TDummyMsg() );
     }
     
     //----------------------------------
-    private void notifyCmdPassiveObjectReceived(Object obj) {
+    private void _onCmdConnectionObjectReceived(Object obj) {
         
-        TLogManager.logMessage("Cmd Passive object received: " + obj.toString() );
+        TLogManager.logMessage("TWorkingNodeModel: cmd connection object received: " + obj.toString() );
         
-        sleepImpl(5000);
+        if(obj.getClass().equals( TLockParagraphMsg.class) )
+            _process_LockParagraphMsg( (TLockParagraphMsg)obj );
         
-        sendObject(CMD_PASSIVE, new TDummyMsg() );
+        if(obj.getClass().equals( TCommitParagraphMsg.class) )
+            _process_CommitParagraphMsg( (TCommitParagraphMsg)obj );
+        
+        if(obj.getClass().equals( TRequestDocumentMsg.class) )
+            _process_RequestDocumentMsg( (TRequestDocumentMsg)obj );
     }
     
     //----------------------------------
-    private void notifyCmdActiveRemoteConnected(TConnectionInfo info) {
+    private void _onDataConnectionObjectReceived(Object obj) {
         
-        TLogManager.logMessage("Cmd Active remote connected: " + info.toString() );
+        TLogManager.logMessage("TWorkingNodeModel: data connection object received: " + obj.toString() );
+        
+        if(obj.getClass().equals( TReplyDocumentMsg.class) )
+            _process_ReplyDocumentMsg( (TReplyDocumentMsg)obj );
     }
     
     //----------------------------------
-    private void notifyCmdActiveObjectReceived(Object obj) {
-        
-        TLogManager.logMessage("Cmd Active object received: " + obj.toString() );
-        
-        sleepImpl(5000);
-        
-        sendObject(CMD_ACTIVE, new TDummyMsg() );
-    }
-    
-    //----------------------------------
-    private void initDispatcher() {
+    private void _logic_initDispatcher() {
         
         mCmdDispatcher = new HashMap<Class, ICmdInvoke>();
         
@@ -267,84 +325,77 @@ public class TWorkingNodeModel implements INodeModel {
         mCmdDispatcher.put(
                 TExitCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeExit(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_Exit(cmd);}
         } );
         
         // new session
         mCmdDispatcher.put(
                 TNewSessionCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeNewSession(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_NewSession(cmd);}
         } );
         
         // join session
         mCmdDispatcher.put(
                 TJoinSessionCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeJoinSession(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_JoinSession(cmd);}
         } );
         
         // lock paragraph
         mCmdDispatcher.put(
                 TLockParagraphCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeLockParagraph(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_LockParagraph(cmd);}
         } );
         
         // commit paragraph
         mCmdDispatcher.put(
                 TCommitParagraphCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeCommitParagraph(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_CommitParagraph(cmd);}
         } );
         
         // insert paragraph
         mCmdDispatcher.put(
                 TInsertParagraphCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeInsertParagraph(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_InsertParagraph(cmd);}
         } );
         
         // erase paragraph
         mCmdDispatcher.put(
                 TEraseParagraphCmd.class,
                 new ICmdInvoke() {
-            public void invoke(TNodeCommand cmd) {executeEraseParagraph(cmd);}
+            public void invoke(TNodeCommand cmd) {_execute_EraseParagraph(cmd);}
         } );
     }
     
     //----------------------------------
-    public void execute(TNodeCommand cmd) {
+    private void _execute_Exit(TNodeCommand cmd) {
         
-        if( mCmdDispatcher.containsKey( cmd.getClass() ) )
-            mCmdDispatcher.get( cmd.getClass() ).invoke(cmd);
+        javax.swing.JOptionPane.showMessageDialog(null, "TWorkingNodeModel._execute_Exit Invoke");
     }
     
     //----------------------------------
-    private void executeExit(TNodeCommand cmd) {
-        
-        javax.swing.JOptionPane.showMessageDialog(null, "TWorkingNodeModel.executeExit Invoke");
-    }
-    
-    //----------------------------------
-    private void executeNewSession(TNodeCommand cmd) {
+    private void _execute_NewSession(TNodeCommand cmd) {
         
     }
     
     //----------------------------------
-    private void executeJoinSession(TNodeCommand cmd) {
+    private void _execute_JoinSession(TNodeCommand cmd) {
      
         try {
             
             TUniqueId sessionId = (TUniqueId)cmd.getArg("sessionId");
 
-            TLogManager.logMessage("connecting to text-editing session: " + sessionId.toString() + " ..." );
+            TLogManager.logMessage("TWorkingNodeModel: connecting to session: " + sessionId.toString() + " ..." );
 
-            acquireSessionWorkerList(sessionId);
+            _logic_acquireSessionWorkerList(sessionId);
             
-            establishCmdConnection();
-
-            TLogManager.logMessage("connected to text-editing session");
+            _logic_acquireCurrentDocument();
+            
+            TLogManager.logMessage("TWorkingNodeModel: session connected");
             
         }
         catch(TException e) {
@@ -353,56 +404,150 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     //----------------------------------
-    private void executeLockParagraph(TNodeCommand cmd) {
-        
-        TLogManager.logMessage("TWorkingNodeModel: locking paragraph ...");
+    private void _execute_LockParagraph(TNodeCommand cmd) {
         
         try {
             
-             // simulate the network delay
-            Thread t = new Thread() {
-                public void run() {
-                    sleepImpl(1000);
-                    mNode.execute( new TWorkingNodeView.TNotfiyLockResultCmd() );
+            TLogManager.logMessage("TWorkingNodeModel: locking paragraph ...");
+            
+            TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
+            
+            if(paragraph.getState() != TParagraph.State.UNLOCKED) {
+                mNode.execute( new TWorkingNodeView.TNotfiyLockResultCmd(false) );
+                return;
+            }
+            
+            paragraph.notifyLocking();
+            
+            mStates.put("LockingParagraph", paragraph);
+            
+            _util_sendObjectToRightNode(
+                CMD_CONNECTION,
+                new TLockParagraphMsg( mData.nodeGetSelf().getId(), paragraph.getId() ) );
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+        }
+        
+    }
+    
+    //----------------------------------
+    private void _execute_CommitParagraph(TNodeCommand cmd) {
+        
+        
+        try {
+            
+            TLogManager.logMessage("TWorkingNodeModel: committing paragraph");
+
+            TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
+            
+            if(paragraph.getState() != TParagraph.State.LOCKED) {
+                mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd(false) );
+                return;
+            }
+            
+            mStates.put("CommittingParagraph", paragraph);
+            
+            _util_sendObjectToRightNode(
+                CMD_CONNECTION,
+                new TCommitParagraphMsg( mData.nodeGetSelf().getId(), paragraph.getId() ) );
+            
+        }
+        catch(TException e) {
+            TLogManager.logException(e);
+            
+        }
+    }
+    
+    //----------------------------------
+    private void _execute_InsertParagraph(TNodeCommand cmd) {
+        
+    }
+    
+    //----------------------------------
+    private void _execute_EraseParagraph(TNodeCommand cmd) {
+        
+    }
+    
+    //----------------------------------
+    private void _process_LockParagraphMsg(TLockParagraphMsg msg) {
+        
+        if( msg.InitiateNodeId.equals( mData.nodeGetSelf().getId() ) ) {
+            
+            TParagraph paragraph = (TParagraph)mStates.get("LockingParagraph");
+            
+            if( paragraph.getId().equals( msg.ParagraphId ) ) {
+                
+                // lock success
+                try {
+                    
+                    paragraph.notifyLocked();
+
+                    mNode.execute( new TWorkingNodeView.TNotfiyLockResultCmd(true) );
+                    
+                    mStates.put("LockingParagraph", null);
+                    
                     TLogManager.logMessage("TWorkingNodeModel: lock paragraph done");
+                    
                 }
-            };
-            
-            t.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+                catch (TException e) {
+                }
+            }
         }
+        else {
+            
+            _util_sendObjectToRightNode(CMD_CONNECTION, msg);
+        }
+        
     }
     
     //----------------------------------
-    private void executeCommitParagraph(TNodeCommand cmd) {
+    private void _process_CommitParagraphMsg(TCommitParagraphMsg msg) {
         
-        TLogManager.logMessage("TWorkingNodeModel: committing paragraph");
-        
-        try {
+        if( msg.InitiateNodeId.equals( mData.nodeGetSelf().getId() ) ) {
             
-            // simulate the network delay
-            Thread t = new Thread() {
-                public void run() {
-                    sleepImpl(1000);
-                    mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd() );
+            TParagraph paragraph = (TParagraph)mStates.get("CommittingParagraph");
+            
+            if( paragraph.getId().equals( msg.ParagraphId ) ) {
+                
+                // commit success
+                try {
+                    
+                    paragraph.notifyUnlocked();
+
+                    mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd(true) );
+                    
+                    mStates.put("CommittingParagraph", null);
+                    
                     TLogManager.logMessage("TWorkingNodeModel: commit paragraph done");
+                    
                 }
-            };
+                catch (TException e) {
+                }
+            }
             
-            t.start();
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
+        else {
+            _util_sendObjectToRightNode(CMD_CONNECTION, msg);
+            
+        }
+        
     }
-    
+
     //----------------------------------
-    private void executeInsertParagraph(TNodeCommand cmd) {
+    private void _process_RequestDocumentMsg(TRequestDocumentMsg msg) {
+        
+        _util_sendObject(
+            DATA_CONNECTION,
+            msg.NodeInfo.getAddr(),
+            new TReplyDocumentMsg( mData.paragraphGetList() ) );
         
     }
     
     //----------------------------------
-    private void executeEraseParagraph(TNodeCommand cmd) {
+    private void _process_ReplyDocumentMsg(TReplyDocumentMsg msg) {
+        
+        mData.paragraphSetList( msg.ParagraphList );
         
     }
     
