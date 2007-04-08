@@ -47,18 +47,25 @@ public class TWorkingNodeView implements INodeView {
     
     
     /** Creates a new instance of TWorkingNodeView */
-    public TWorkingNodeView() {
+    public TWorkingNodeView(TNode node) {
         
-        mNode = null;
+        mNode = node;
         
         mGuiList = new java.util.ArrayList<javax.swing.JComponent>();
         
-        mGuiList.add( mSessionPanel = new TSessionPanel() );
-        mGuiList.add( mDocumentPanel = new TDocumentPanel() );
+        mGuiList.add( mSessionPanel = new TSessionPanel(node) );
+        mGuiList.add( mDocumentPanel = new TDocumentPanel(node) );
         
         initDispatcher();
     }
     
+    public void startUp() throws TException {
+    }
+    
+    public void shutDown() {
+    }
+    
+    /*
     public TNode getNode() {
         return mNode;
     }
@@ -68,6 +75,7 @@ public class TWorkingNodeView implements INodeView {
         mSessionPanel.setNode(node);
         mDocumentPanel.setNode(node);
     }
+    */
     
     public java.util.List getGuiComponents() {
         return mGuiList;

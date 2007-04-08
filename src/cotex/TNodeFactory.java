@@ -23,10 +23,12 @@ public class TNodeFactory {
         
         if( nodeType.equals("working") ) {
             
-            cotex.working.TWorkingNodeModel model = new cotex.working.TWorkingNodeModel();
-            cotex.working.TWorkingNodeView view = new cotex.working.TWorkingNodeView();
+            TNode node = new TNode(config);
             
-            return new TNode(view, model, config);
+            node.setModel( new cotex.working.TWorkingNodeModel(node) );
+            node.setView( new cotex.working.TWorkingNodeView(node) );
+            
+            return node;
         }
         
         throw new TException("TNodeFactory.createInstance", "unknown node type: " + nodeType); 

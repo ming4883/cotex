@@ -21,11 +21,5 @@ public class TGap extends TParagraphBase{
      * Creates a new instance of TGap
      */
     public TGap() {
-        this.id=0;
-        this.lock=false;
-    }
-    public TGap(int id) {
-        this.id=id;
-        this.lock=false;
     }
 }

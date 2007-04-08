@@ -16,7 +16,7 @@ import java.net.InetAddress;
  * @author Ming
  */
 public class TConnectionInfo {
-        
+    
     InetAddress mAddr;
     Integer mPort;
     
@@ -37,6 +37,10 @@ public class TConnectionInfo {
     
     public Integer getPort() {
         return mPort;
+    }
+    
+    public String toString() {
+        return mAddr.getHostAddress() + ":" + mPort.toString();
     }
     
     /** Create a new instance of TConnectionInfo by parseing a string **/

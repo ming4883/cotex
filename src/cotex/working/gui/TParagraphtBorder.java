@@ -23,22 +23,33 @@ import javax.swing.border.AbstractBorder;
  */
 public class TParagraphtBorder extends AbstractBorder {
     
-    String type="";
+    String mType = "";
+    
     /**
      * Creates a new instance of TParagraphtBorder
      */
     public TParagraphtBorder() {
-        this.type="tryLock";
+        this.mType = "tryLock";
     }
+    
     public TParagraphtBorder(String type) {
-        this.type=type;
+        this.mType = type;
     }
-    public void paintBorder(Component c, Graphics g, int x, int y,
-            int width, int height) {
+    
+    public void paintBorder(
+        Component c,
+        Graphics g,
+        int x,
+        int y,
+        int width,
+        int height) {
+        
         Insets insets = getBorderInsets(c);
-        if(type=="lock") {
+        
+        if(mType=="lock") {
             g.setColor(Color.BLUE);
-        } else {
+        }
+        else {
             g.setColor(Color.BLACK);
         }
         
@@ -48,16 +59,21 @@ public class TParagraphtBorder extends AbstractBorder {
         g.fillRect(x, y, insets.left, height);
         g.fillRect(x+width-insets.right, y, insets.right, height);
         g.fillRect(x, y+height-insets.bottom, width, insets.bottom);
-        if(type=="tryLock") {
+        
+        if(mType=="tryLock") {
             g.setColor(Color.WHITE);
-            g.drawString("Trying to lock.....",insets.left,y+height-2);
+            g.drawString("Acquiring lock ...", insets.left, y + height - 2);
         }
     }
+    
     public boolean isBorderOpaque( ) { return true;}
+    
     public Insets getBorderInsets(Component c) {
-        if(type=="tryLock") {
+        
+        if(mType=="tryLock") {
             return new Insets(3, 3, 15, 3);
         }
+        
         return new Insets(3, 3, 3, 3);
     }
     

@@ -19,8 +19,16 @@ public class TDocumentPanel extends javax.swing.JPanel {
     /**
      * Creates new form TDocumentPanel
      */
-    public TDocumentPanel() {
+    public TDocumentPanel(TNode node) {
+        
+        mNode = node;
+        
         initComponents();
+        
+        TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
+        mTable.setDefaultRenderer( TParagraphBase.class, new TParagraphRenderer() );
+        mTable.setDefaultEditor( TParagraphBase.class, new TParagraphEditor(mNode) );
+        mTable.setModel( nodeModel.getData().getDocumentTableModel() );
     }
     
     /** This method is called from within the constructor to
@@ -35,8 +43,6 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mCommitBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         mTable = new javax.swing.JTable();
-        mTable.setDefaultRenderer( TParagraphBase.class, new TParagraphRenderer() );
-        mTable.setDefaultEditor( TParagraphBase.class, mParagraphEditor = new TParagraphEditor() );
 
         setLayout(new java.awt.BorderLayout());
 
@@ -75,15 +81,21 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
         mTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null},
+                {null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Title 1", "Title 2"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         mTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         mTable.setShowHorizontalLines(false);
         mTable.setShowVerticalLines(false);
@@ -118,8 +130,8 @@ public class TDocumentPanel extends javax.swing.JPanel {
     
     
     private TNode mNode = null;
-    private TParagraphEditor mParagraphEditor;
     
+    /*
     public void setNode(TNode node) {
         mNode = node;
         
@@ -127,12 +139,14 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mTable.setModel( nodeModel.getData() );
         mParagraphEditor.setNode(node);
     }
+     **/
     
     public void notifyLockResult(boolean result) {
         
         if(result) {
             //mTextArea.setEditable(true);
             //mTable.editCellAt(1, 0);
+            /*
             boolean success = mTable.editCellAt(1, 0);
             if (success) {
                 // Select cell
@@ -142,7 +156,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
             } else {
                 // Cell could not be edited
             }
-            
+            */
             mLockBtn.setEnabled(false);
             mCommitBtn.setEnabled(true);
         }
@@ -152,10 +166,11 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         if(result) {
             //mTextArea.setEditable(false);
+            /*
             if (mTable.getCellEditor() != null) {
                 mTable.getCellEditor().stopCellEditing();
             }
-            
+            */
             mLockBtn.setEnabled(true);
             mCommitBtn.setEnabled(false);
         }

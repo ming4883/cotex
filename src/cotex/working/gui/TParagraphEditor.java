@@ -18,8 +18,10 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.util.EventObject;
-import java.util.Vector;
+import java.util.ArrayList;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -29,12 +31,119 @@ import javax.swing.JWindow;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
+import net.infonode.properties.propertymap.ref.ThisPropertyMapRef;
+
 /**
  *
  * @author cyrux
  */
-public class TParagraphEditor  extends JTextArea implements TableCellEditor {
+public class TParagraphEditor extends JTextArea implements TableCellEditor {
     
+    
+    private ArrayList<CellEditorListener> mListeners;
+    private TParagraph mEditingParagraph;
+    private TNode mNode = null;
+    
+    public TParagraphEditor(TNode node) {
+        mNode = node;
+        mListeners = new ArrayList<CellEditorListener>();
+        mEditingParagraph = null;
+        this.setLineWrap(true);
+        //this.setF
+    }
+    
+    /*
+    public void setNode(TNode node) {
+        mNode = node;
+    }
+    */
+    
+    public Component getTableCellEditorComponent(
+        JTable table,
+        Object value,
+        boolean isSelected,
+        int row,
+        int column)
+    {
+        if(value == null) {
+            return null;
+        }
+        
+        // a gap, cannot be edited
+        if( value.getClass().equals(TGap.class) ) {
+            return null;
+        }
+        
+        mEditingParagraph = (TParagraph)value;
+        this.setText( mEditingParagraph.getContent() );
+        
+        //TLogManager.logMessage("getTableCellEditorComponent");
+        
+        
+        return this;
+        
+    }
+    
+    public void addCellEditorListener(CellEditorListener listener) {
+        mListeners.add(listener);
+    }
+
+    public void removeCellEditorListener(CellEditorListener listener) {
+        mListeners.remove(listener);
+    }
+    
+    public Object getCellEditorValue() {
+        return mEditingParagraph;
+    }
+    
+    public boolean isCellEditable(EventObject evt) {
+        return true;
+    }
+    
+    public boolean shouldSelectCell(EventObject evt) {
+        return true;
+    }
+    
+    public boolean stopCellEditing() {
+        
+        //TLogManager.logMessage("stopCellEditing");
+        fireStopCellEditingEvent();
+        
+        return true;
+    }
+    
+    public void cancelCellEditing() {
+        fireCancelCellEditingEvent();
+    }
+    
+    
+    private void fireStopCellEditingEvent() {
+        
+        ChangeEvent evt = new ChangeEvent(this);
+        
+        java.util.Iterator<CellEditorListener> iter = mListeners.iterator();
+        
+        while( iter.hasNext() ) {
+            CellEditorListener listener = iter.next();
+            //listener.editingStopped(evt);
+        }
+        
+    }
+    
+    private void fireCancelCellEditingEvent() {
+        
+        ChangeEvent evt = new ChangeEvent(this);
+        
+        java.util.Iterator<CellEditorListener> iter = mListeners.iterator();
+        
+        while( iter.hasNext() ) {
+            CellEditorListener listener = iter.next();
+            //listener.editingCanceled(evt);
+        }
+        
+    }
+
+    /*
     public OkCancel helper = new OkCancel( );
     protected transient Vector listeners;
     protected transient String originalValue;
@@ -58,26 +167,27 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
     
     public class OkCancel extends JWindow {
         
-        private JButton okB = new JButton(new ImageIcon("res/accept.gif","Accept"));
-        private JButton cancelB = new JButton(new ImageIcon("res/cancel.gif","Cancel"));
+        private JButton mOkBtn = new JButton(new ImageIcon("res/accept.gif","Accept"));
+        private JButton mCancelBtn = new JButton(new ImageIcon("res/cancel.gif","Cancel"));
         private int w = 50;
         private int h = 24;
         
         public OkCancel( ) {
             setSize(w,h);
             setBackground(Color.yellow);
-            JPanel p = new JPanel(new GridLayout(0,2));
-            p.add(okB);
-            p.add(cancelB);
-            setContentPane(p);
             
-            okB.addActionListener(new ActionListener( ) {
+            JPanel panel = new JPanel(new GridLayout(0,2));
+            panel.add(mOkBtn);
+            panel.add(mCancelBtn);
+            setContentPane(panel);
+            
+            mOkBtn.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {
                     stopCellEditing( );
                 }
             });
             
-            cancelB.addActionListener(new ActionListener( ) {
+            mCancelBtn.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {
                     cancelCellEditing( );
                 }
@@ -101,8 +211,7 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
         
         if ( value.getClass().equals( TGap.class) ) {
             return null;
-        }
-        else {
+        } else {
             
             TParagraph currentParagraph = (TParagraph)value;
             
@@ -124,8 +233,7 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
                     }
                 });
                 
-            }
-            else {// try to lock
+            } else {// try to lock
                 
                 currentParagraph.setTryLock(true);
                 //mNode.execute(new TWorkingNodeModel.TLockParagraphCmd());
@@ -150,7 +258,7 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
         helper.setVisible(false);
     }
     
-    public Object getCellEditorValue( ) {return new TParagraph(this.id,this.getText());}
+    public Object getCellEditorValue() {return new TParagraph(this.id,this.getText());}
     
     public boolean isCellEditable(EventObject eo) {
         return true;
@@ -194,5 +302,5 @@ public class TParagraphEditor  extends JTextArea implements TableCellEditor {
         editing = false;
         helper.setVisible(false);
     }
-    
+    */
 }

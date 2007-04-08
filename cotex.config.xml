@@ -18,4 +18,10 @@
         <setting key="WorkingDataPort" value="10003" />
     </section>
     
+    <section name="Temp">
+        <setting key="DummyWorkerName" value="DummyWorker" />
+        <setting key="DummyWorkerAddr" value="127.0.0.1" />
+        <setting key="DummySessionName" value="Test Session" />
+    </section>
+    
 </config>

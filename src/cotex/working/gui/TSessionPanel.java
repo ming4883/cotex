@@ -18,8 +18,14 @@ import javax.swing.*;
 public class TSessionPanel extends javax.swing.JPanel {
     
     /** Creates new form TSessionPanel */
-    public TSessionPanel() {
+    public TSessionPanel(TNode node) {
+        mNode = node;
         initComponents();
+        
+        TWorkingNodeModel workingModel = (TWorkingNodeModel)mNode.getModel();
+        
+        mSessionList.setModel( workingModel.getData().getSessionListModel() );
+        mWorkerList.setModel( workingModel.getData().getWorkerListModel() );
     }
     
     /** This method is called from within the constructor to
@@ -30,52 +36,96 @@ public class TSessionPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
         jScrollPane1 = new javax.swing.JScrollPane();
-        mSessionTree = new javax.swing.JTree();
+        mSessionList = new javax.swing.JList();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        mWorkerList = new javax.swing.JList();
 
-        setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.GridLayout(2, 0));
 
         setName("Sessions");
-        mSessionTree.addMouseListener(new java.awt.event.MouseAdapter() {
+        mSessionList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        mSessionList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        mSessionList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
-                mSessionTreeMouseReleased(evt);
+                mSessionListMouseReleased(evt);
             }
         });
 
-        jScrollPane1.setViewportView(mSessionTree);
+        jScrollPane1.setViewportView(mSessionList);
 
-        add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        add(jScrollPane1);
+
+        mWorkerList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        mWorkerList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane2.setViewportView(mWorkerList);
+
+        add(jScrollPane2);
 
     }// </editor-fold>//GEN-END:initComponents
 
-    private void mSessionTreeMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mSessionTreeMouseReleased
-
+    private void mSessionListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mSessionListMouseReleased
+// TODO add your handling code here:
         if( evt.isPopupTrigger() ) {
         
-            JMenuItem menuItem;
-            JPopupMenu popup = new JPopupMenu();
+            mSessionList.setSelectedIndex( mSessionList.locationToIndex( evt.getPoint() ) );
             
-            menuItem = new JMenuItem("New");
-            //menuItem.addActionListener(this);
-            popup.add(menuItem);
-            
-            menuItem = new JMenuItem("Join");
-            //menuItem.addActionListener(this);
-            popup.add(menuItem);
-            
-            popup.show( evt.getComponent(), evt.getX(), evt.getY() );
-        
+            if( mSessionList.getSelectedValue() != null ) {
+                JMenuItem menuItem;
+                JPopupMenu popup = new JPopupMenu();
+                
+                java.awt.event.ActionListener listener = new java.awt.event.ActionListener() {
+                    
+                    public void actionPerformed(java.awt.event.ActionEvent e) {
+                        onSessionMenuAction(e);
+                    }
+                };
+
+                menuItem = new JMenuItem("New");
+                menuItem.setActionCommand("New");
+                menuItem.addActionListener(listener);
+                popup.add(menuItem);
+
+                menuItem = new JMenuItem("Join");
+                menuItem.setActionCommand("Join");
+                menuItem.addActionListener(listener);
+                popup.add(menuItem);
+
+                popup.show( evt.getComponent(), evt.getX(), evt.getY() );
+            }
         }
-    }//GEN-LAST:event_mSessionTreeMouseReleased
+    }//GEN-LAST:event_mSessionListMouseReleased
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTree mSessionTree;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JList mSessionList;
+    private javax.swing.JList mWorkerList;
     // End of variables declaration//GEN-END:variables
  
     private TNode mNode = null;
-     
+    
+    /*
     public void setNode(TNode node) {
         mNode = node;
+    }
+    */
+    
+    private void onSessionMenuAction(java.awt.event.ActionEvent evt) {
+        
+        if( evt.getActionCommand().equals("Join") ) {
+         
+            cotex.session.TSessionInfo session = (cotex.session.TSessionInfo)mSessionList.getSelectedValue();
+            
+            mNode.execute( new TWorkingNodeModel.TJoinSessionCmd( session.getId() ) );
+        }
     }
 }

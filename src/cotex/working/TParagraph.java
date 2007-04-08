@@ -16,28 +16,25 @@ import cotex.*;
  * @author cyrux
  */
 public class TParagraph extends TParagraphBase{
+    
     String mContent;
+    
     /**
      * Creates a new instance of TParagraph
      */
     public TParagraph() {
-        this.mContent="";
-    }
-    
-    public TParagraph(int id, String content) {
-        this.id = id;
-        this.mContent = content;
+        this.mContent = "";
     }
     
     public TParagraph(String content) {
         this.mContent = content;
     }
     
-    public String getContent(){
+    public String getContent() {
         return this.mContent;
     }
     
-    public void setContent(String content){
-        this.mContent=content;
+    public void setContent(String content) {
+        this.mContent = content;
     }
 }

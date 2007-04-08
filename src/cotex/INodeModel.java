@@ -15,10 +15,13 @@ package cotex;
  */
 public interface INodeModel {
     
-    public abstract TNode getNode();
+    //public abstract TNode getNode();
     
-    public abstract void setNode(TNode node);
+    //public abstract void setNode(TNode node);
+     
+    public abstract void startUp() throws TException;
+    
+    public abstract void shutDown();
     
     public abstract void execute(TNodeCommand cmd);
-    
 }
