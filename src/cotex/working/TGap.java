@@ -15,11 +15,22 @@ import cotex.*;
  *
  * @author cyrux
  */
-public class TGap extends TParagraphBase{
+public class TGap extends TParagraph implements java.io.Serializable {
     
     /**
      * Creates a new instance of TGap
      */
     public TGap() {
+    }
+    
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+
+        out.defaultWriteObject();
+    }
+
+    private void readObject(java.io.ObjectInputStream in) 
+        throws java.io.IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
     }
 }

@@ -13,15 +13,22 @@
     <section name="General" >
         <setting key="NodeType" value="working" />
         <setting key="ConnectionType" value="tcp" />
-        <setting key="RegistryPort" value="10001" />
-        <setting key="WorkingCmdPort" value="10002" />
-        <setting key="WorkingDataPort" value="10003" />
+        <setting key="RegistryPort" value="25" />
+        <setting key="WorkingCmdPort" value="22" />
+        <setting key="WorkingDataPort" value="23" />
     </section>
     
     <section name="Temp">
-        <setting key="DummyWorkerName" value="DummyWorker" />
-        <setting key="DummyWorkerAddr" value="127.0.0.1" />
-        <setting key="DummySessionName" value="Test Session" />
+        <setting key="DummySessionName" value="Dummy Session" />
+        
+        <setting key="WorkerName1" value="Worker 1" />
+		<setting key="WorkerAddr1" value="144.214.121.149" />
+        
+        <setting key="WorkerName2" value="Worker 2" />
+		<setting key="WorkerAddr2" value="144.214.37.14" />
+        
+        <setting key="Self" value="0" />
+        
     </section>
     
 </config>

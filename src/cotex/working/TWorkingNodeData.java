@@ -13,9 +13,9 @@ package cotex.working;
 import cotex.*;
 import cotex.session.*;
 
-import cotex.working.TParagraphBase;
-import cotex.working.TGap;
 import cotex.working.TParagraph;
+import cotex.working.TGap;
+import cotex.working.TContent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.table.AbstractTableModel;
@@ -27,7 +27,7 @@ import javax.swing.AbstractListModel;
  */
 public class TWorkingNodeData  {
     
-    private ArrayList<TParagraphBase> mParagraphs;
+    private ArrayList<TParagraph> mParagraphs;
     
     private ArrayList<TSessionInfo> mSessions;
     private TSession mCurrSession = null;
@@ -38,24 +38,29 @@ public class TWorkingNodeData  {
     // DocumentTableModel
     private class DocumentTableModel extends AbstractTableModel {
         
-        public Class getColumnClass(int c) {return TParagraphBase.class;}
+        public Class getColumnClass(int c) {return TParagraph.class;}
     
         public int getColumnCount() {return 1;}
 
         public int getRowCount() { return mParagraphs.size(); }
 
-        public TParagraphBase getValueAt(int r, int c) { return mParagraphs.get(r); }
+        public TParagraph getValueAt(int r, int c) { return mParagraphs.get(r); }
 
         public boolean isCellEditable(int r, int c) {
-            return !mParagraphs.get(r).isLocked();
+            
+            return true;
         }
 
         public void setValueAt(Object value, int r, int c) {
-            //para.setElementAt((TParagraph) value,r);
+            //para.setElementAt((TContent) value,r);
 
-            mParagraphs.set(r, (TParagraphBase)value);
+            mParagraphs.set(r, (TParagraph)value);
 
             fireTableDataChanged();
+        }
+        
+        public void notifyContentChanged() {
+           this.fireTableDataChanged();
         }
     }
     
@@ -119,38 +124,93 @@ public class TWorkingNodeData  {
         return mWorkerListModel;
     }
     
-  
-    /**
-     * Creates a new instance of TWorkingNodeData
-     */
+    //----------------------------------
     public TWorkingNodeData() {
         
         mSessions = new ArrayList<TSessionInfo>();
         mCurrSession = null;
         
-        mParagraphs = new ArrayList<TParagraphBase>();
-        
-        mParagraphs.add( new TGap() );
-        mParagraphs.add( new TParagraph("This is a test paragraph 1.") );
-        mParagraphs.add( new TGap() );
-        mParagraphs.add( new TParagraph("This is a test paragraph 2.") );
-        mParagraphs.add( new TGap() );
+        mParagraphs = new ArrayList<TParagraph>();
     }
     
     //----------------------------------
-    public void addSessionInfo(TSessionInfo session) {
+    // Paragraphs
+    //----------------------------------
+    public void paragraphAdd(TParagraph paragraph) {
+        
+        mParagraphs.add( paragraph );
+        
+        mDocumentTableModel.notifyContentChanged();
+    }
+    
+    //----------------------------------
+    public ArrayList<TParagraph> paragraphGetList() {
+        
+        return mParagraphs;
+    }
+    
+    //----------------------------------
+    public void paragraphSetList(ArrayList<TParagraph> paragraphList) {
+        
+        mParagraphs.clear();
+        
+        for(int i=0; i<paragraphList.size(); ++i) {
+        
+            mParagraphs.add( paragraphList.get(i) );
+        }
+        
+        mDocumentTableModel.notifyContentChanged();
+        
+    }
+    
+    //----------------------------------
+    public TParagraph paragraphGetById(TUniqueId id) throws TException {
+        
+        Iterator<TParagraph> iter = mParagraphs.iterator();
+        
+        while( iter.hasNext() ) {
+            
+            TParagraph paragraph = iter.next();
+            
+            if( paragraph.getId().equals( id ) )
+                return paragraph;
+        }
+        
+        throw new TException("TWorkingNodeData.paragraphGetById", "paragraph does not exist");
+        
+    }
+    
+    //----------------------------------
+    public void paragraphUpdateContent(TUniqueId id, String content) throws TException {
+        
+        TParagraph paragraph = paragraphGetById(id);
+        
+        if( paragraph.getClass().equals( TContent.class ) ) {
+            ( (TContent)paragraph ).setContent( content );
+        }
+        else {
+            throw new TException("TWorkingNodeData.paragraphUpdateContent", "not a content paragraph");
+        }
+        
+        mDocumentTableModel.notifyContentChanged();
+    }
+    
+    //----------------------------------
+    // Session
+    //----------------------------------
+    public void sessionAdd(TSessionInfo session) {
         mSessions.add(session);
         mSessionListModel.notifyContentChanged();
     }
     
     //----------------------------------
-    public void removeSessionInfo(TSessionInfo session) {
+    public void sessionRemove(TSessionInfo session) {
         mSessions.remove(session);
         mSessionListModel.notifyContentChanged();
     }
     
     //----------------------------------
-    public TSessionInfo getSessionInfoByName(String name) throws TException {
+    public TSessionInfo sessionGetByName(String name) throws TException {
         
         Iterator<TSessionInfo> iter = mSessions.iterator();
         
@@ -169,7 +229,7 @@ public class TWorkingNodeData  {
     }
     
     //----------------------------------
-    public TSessionInfo getSessionInfoById(TUniqueId sessionId) throws TException {
+    public TSessionInfo sessionGetById(TUniqueId sessionId) throws TException {
         
         Iterator<TSessionInfo> iter = mSessions.iterator();
         
@@ -188,25 +248,65 @@ public class TWorkingNodeData  {
     }
     
     //----------------------------------
-    public void setCurrentSession(TUniqueId sessionId) throws TException {
+    public void sessionSetCurrent(TUniqueId sessionId) throws TException {
         
-        mCurrSession = new TSession( getSessionInfoById(sessionId) );
+        mCurrSession = new TSession( sessionGetById(sessionId) );
         
         mWorkerListModel.notifyContentChanged();
     }
     
     //----------------------------------
-    public TSession getCurrentSession() {
+    public TSession sessionGetCurrent() {
         return mCurrSession;
     }
     
     //----------------------------------
-    public TNodeInfo getSelfNodeInfo() {
+    // Node
+    //----------------------------------
+    public TNodeInfo nodeGetSelf() {
         return mSelfNodeInfo;
     }
     
     //----------------------------------
-    public void setSelfNodeInfo(TNodeInfo nodeInfo) {
+    public void nodeSetSelf(TNodeInfo nodeInfo) {
         mSelfNodeInfo = nodeInfo;
     }
+    
+    //----------------------------------
+    public TNodeInfo nodeGetLeft() {
+        
+        TNodeInfo node = null;
+        
+        if(null != mSelfNodeInfo && null != mCurrSession) {
+            try {
+                node =  mCurrSession.getLeftNode( mSelfNodeInfo );
+            }
+            catch(TException e) {
+                TLogManager.logException(e);
+            }
+        }
+        
+        return node;
+        
+    }
+    
+    //----------------------------------
+    public TNodeInfo nodeGetRight() {
+        
+        TNodeInfo node = null;
+        
+        if(null != mSelfNodeInfo && null != mCurrSession) {
+            try {
+                node =  mCurrSession.getRightNode( mSelfNodeInfo );
+            }
+            catch(TException e) {
+                TLogManager.logException(e);
+            }
+        }
+        
+        return node;
+        
+    }
+    
+    //----------------------------------
 }

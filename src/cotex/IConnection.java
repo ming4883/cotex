@@ -15,18 +15,16 @@ package cotex;
  */
 public interface IConnection {
     
-    enum Mode {
-        NONE,
-        PASSIVE,
-        ACTIVE,
-    }
-    
     public abstract void addListener(IConnectionListener listener);
     public abstract void removeListener(IConnectionListener listener);
-    public abstract void open(Mode mode, TConnectionInfo info) throws TException;
-    public abstract void open(Mode mode, java.net.InetAddress addr, Integer port) throws TException;
+    
+    public abstract void open(Integer port) throws TException;
     public abstract void close();
     public abstract boolean isOpened();
-    public abstract void sendObject(Object obj) throws TException;
-    public abstract Mode getMode();
+     
+    public abstract void startSending(java.net.InetAddress addr) throws TException;
+    public abstract void send(Object obj) throws TException;
+    public abstract void stopSending(java.net.InetAddress addr) throws TException;
+    
+    public abstract void sendObject(java.net.InetAddress addr, Object obj) throws TException;
 }

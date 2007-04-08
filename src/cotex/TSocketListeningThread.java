@@ -34,28 +34,29 @@ public class TSocketListeningThread extends Thread{
         if(null == serverSock)
             return;
         
-        while(true) {
+        boolean active = true;
+        
+        while(active) {
             
             try{
                 
                 Socket clientSock = serverSock.accept();
+               
+                String key = clientSock.getRemoteSocketAddress().toString();
+                TSocketReceivingThread receiveThread = new TSocketReceivingThread(mConnection, key);
                 
-                String clientName = clientSock.getRemoteSocketAddress().toString();
-                TSocketReceivingThread receiveThread = new TSocketReceivingThread(mConnection, clientName);
-                
-                mConnection.addSocketAndWorkingThread(clientName, clientSock, receiveThread);
-                //mConnection.mSockets.put(clientName, clientSock);
-                //mConnection.mThreads.add(receiveThread);
-                
-                mConnection.fireRemoteConnectedNotification(
-                    new TConnectionInfo( clientSock.getInetAddress(), new Integer( clientSock.getPort() ) ) );
-                
+                mConnection.addSocketAndWorkingThread(key, clientSock, receiveThread);
                 receiveThread.start();
                 
+                this.sleep(1);
             }
             catch (IOException e){
                 TLogManager.logError( "TSocketListeningThread: " + e.toString() );
                 break;
+            }
+            catch (InterruptedException e) {
+                TLogManager.logMessage( "TSocketListeningThread: stop listening" );
+                active = false;
             }
         }
         

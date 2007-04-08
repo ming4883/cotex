@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.*;
 import javax.swing.table.*;
+import javax.swing.border.*;
 
 /**
  *
@@ -26,6 +27,7 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
     public TParagraphRenderer() {
         super();
         this.setWrapStyleWord(true);
+        
         //this.setAutoscrolls(true);
         this.setLineWrap(true);
     }
@@ -42,43 +44,40 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
             this.setForeground(null);
             this.setText("Error! null value");
             this.setBorder(null);
-            return this;
-        }
-        
-        // set text
-        if ( value.getClass().equals( TGap.class ) ) {
-            // gap
-            this.setText("");
-            this.setForeground(null);
-            this.setBorder(null);
-            return this;
+            
         }
         else {
-        
-            // paragraph
-            this.setText( ((TParagraph)value).getContent() );
-            table.setRowHeight(row,(int)this.getMinimumSize().getHeight());
-            this.setForeground(Color.DARK_GRAY);
-            //this.setEnabled(false);
+            
+            // set text
+            if ( value.getClass().equals( TGap.class ) ) {
+                // gap
+                this.setText("");
+                this.setForeground(null);
+                this.setBorder(null);
+                table.setRowHeight(row, (int)this.getMinimumSize().getHeight() );
+            }
+            else {
+
+                TContent paragraph = (TContent)value;
+
+                // paragraph
+                this.setText( paragraph.getContent() );
+
+                
+                this.setForeground(Color.DARK_GRAY);
+                //this.setBorder(null);
+                //this.setBorder( new TParagraphBorder( paragraph ) );
+                
+                //TitledBorder border = javax.swing.BorderFactory.createTitledBorder("Locked");
+                //border.setTitlePosition(20);
+                
+                //this.setBorder( border );
+                
+                table.setRowHeight(row, (int)this.getMinimumSize().getHeight() + 6 );
+
+            }
         }
-        
-        // set border
-        
-        /*
-        if( ((TParagraphBase)value).getTryLock() ) {
-            this.setBorder(new TParagraphtBorder("tryLock"));
-        
-        }
-        else if( ((TParagraphBase)value).getLock() ) {
-            this.setBorder(new TParagraphtBorder("lock"));
-        
-        }
-        else{
-            this.setBorder(null);
-        
-        }
-        */
-        
+       
         return this;
     }
     
