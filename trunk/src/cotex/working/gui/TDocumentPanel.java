@@ -86,7 +86,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         TParagraph paragraph = (TParagraph)mTable.getModel().getValueAt(row, 0);
         
-        if( paragraph.getClass().equals(TContent.class) &&
+        if( //paragraph.getClass().equals(TContent.class) &&
             paragraph.getState() == TParagraph.State.UNLOCKED) {
         
             mPendingRow = row;

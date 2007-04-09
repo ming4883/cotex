@@ -46,21 +46,25 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         
         private JButton mOkBtn = new JButton();
         private JButton mCancelBtn = new JButton();
+        private JButton mDeleteBtn = new JButton();
+        private JButton mInsertBtn = new JButton();
         
-        private final int WIDTH = 160;
+        private final int WIDTH = 250;
         private final int HEIGHT = 24;
+        private JPanel panel=null;
         
         public TActionPanel() {
             
             mOkBtn.setText("Commit");
-            mCancelBtn.setText("Canel");
+            mCancelBtn.setText("Cancel");
+            mDeleteBtn.setText("Delete");
+            mInsertBtn.setText("Insert");
             
             setSize(WIDTH, HEIGHT);
             setBackground(Color.yellow);
             
-            JPanel panel = new JPanel(new GridLayout(0,2));
-            panel.add(mOkBtn);
-            panel.add(mCancelBtn);
+            panel = new JPanel(new GridLayout(0,3));
+            setButtonSet("TContent");
             setContentPane(panel);
             
             mOkBtn.addActionListener(new ActionListener( ) {
@@ -77,14 +81,36 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
                     cancelCellEditing( );
                 }
             });
+            mDeleteBtn.addActionListener(new ActionListener( ) {
+                public void actionPerformed(ActionEvent ae) {
+                    cancelCellEditing( );
+                }
+            });
+            mInsertBtn.addActionListener(new ActionListener( ) {
+                public void actionPerformed(ActionEvent ae) {
+                    cancelCellEditing( );
+                }
+            });
             
             javax.swing.SwingUtilities.updateComponentTreeUI(this);
+        }
+        public void setButtonSet(String mSet){
+            panel.removeAll();
+            if(mSet=="" || mSet=="TContent"){
+                panel.add(mOkBtn);
+                panel.add(mCancelBtn);
+                panel.add(mDeleteBtn);
+            }else if (mSet=="TGap"){
+                panel.add(mInsertBtn);
+                panel.add(mCancelBtn);
+            }
+            panel.setSize(panel.getMinimumSize());
         }
     }
     
     private ArrayList<CellEditorListener> mListeners;
     private TActionPanel mActionPanel;
-    private TContent mEditingParagraph;
+    private TParagraph mEditingParagraph;
     private TNode mNode = null;
     
     private JTable mEditingTable;
@@ -145,7 +171,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             int row,
             int column) {
         
-        mEditingParagraph = (TContent)value;
+        mEditingParagraph = (TParagraph)value;
         mEditingTable = table;
         mEditingRow = row;
         
@@ -153,19 +179,22 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             return null;
         }
         
-        // a gap cannot be edited
-        if( value.getClass().equals(TGap.class) ) {
-            return null;
-        }
+        
         
         // ensure locked before editing
         if(mEditingParagraph.getState() != TParagraph.State.LOCKED) {
             return null;
         }
-        
-        this.setText( mEditingParagraph.getContent() );
+        // a gap cannot be edited
+        if( value.getClass().equals(TGap.class) ) {
+            //this.setEditable(false);
+            this.mActionPanel.setButtonSet("TGap");
+        }else{
+            this.setText( ((TContent)mEditingParagraph).getContent() );
+            this.setEditable(true);
+            this.mActionPanel.setButtonSet("TContent");
+        }
         this.setBorder( new TParagraphBorder( mEditingParagraph ) );
-        
         //mEditingTable.setRowHeight(mEditingRow, (int)getMinimumSize().getHeight() );
         
         Point p = table.getLocationOnScreen();
