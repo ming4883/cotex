@@ -26,287 +26,323 @@ import javax.swing.AbstractListModel;
  * @author Ming
  */
 public class TWorkingNodeData  {
-    
-    private ArrayList<TParagraph> mParagraphs;
-    
-    private ArrayList<TSessionInfo> mSessions;
-    private TSession mCurrSession = null;
-    
-    private TNodeInfo mSelfNodeInfo = null;
-    
-    //----------------------------------
-    // DocumentTableModel
-    private class DocumentTableModel extends AbstractTableModel {
         
-        public Class getColumnClass(int c) {return TParagraph.class;}
-    
-        public int getColumnCount() {return 1;}
-
-        public int getRowCount() { return mParagraphs.size(); }
-
-        public TParagraph getValueAt(int r, int c) { return mParagraphs.get(r); }
-
-        public boolean isCellEditable(int r, int c) {
-            
-            return true;
-        }
-
-        public void setValueAt(Object value, int r, int c) {
-            //para.setElementAt((TContent) value,r);
-
-            mParagraphs.set(r, (TParagraph)value);
-
-            fireTableDataChanged();
-        }
-        
-        public void notifyContentChanged() {
-           this.fireTableDataChanged();
-        }
-    }
-    
-    DocumentTableModel mDocumentTableModel = new DocumentTableModel();
-    
-    public DocumentTableModel getDocumentTableModel() {
-        return mDocumentTableModel;
-    }
-    
-    //----------------------------------
-    // SessionListModel
-    private class SessionListModel extends AbstractListModel {
-        
-        public Object getElementAt(int index) {
-            return mSessions.get(index);
-        }
-        
-        public int getSize() {
-            return mSessions.size();
-        }
-        
-        public void notifyContentChanged() {
-            fireContentsChanged( this, 0, getSize() );
-        }
-    }
-    
-    SessionListModel mSessionListModel = new SessionListModel();
-    
-    public SessionListModel getSessionListModel() {
-        return mSessionListModel;
-    }
-    
-    //----------------------------------
-    // WorkerListModel
-    private class WorkerListModel extends AbstractListModel {
-        
-        public Object getElementAt(int index) {
-            
-            if(null == mCurrSession)
-                return null;
-            
-            return mCurrSession.getNodeAt(index);
-        }
-        
-        public int getSize() {
-            
-            if(null == mCurrSession)
-                return 0;
-            
-            return mCurrSession.getNodeCount();
-        }
-        
-        public void notifyContentChanged() {
-            fireContentsChanged( this, 0, getSize() );
-        }
-    }
-    
-    WorkerListModel mWorkerListModel = new WorkerListModel();
-    
-    public WorkerListModel getWorkerListModel() {
-        return mWorkerListModel;
-    }
-    
-    //----------------------------------
-    public TWorkingNodeData() {
-        
-        mSessions = new ArrayList<TSessionInfo>();
-        mCurrSession = null;
-        
-        mParagraphs = new ArrayList<TParagraph>();
-    }
-    
     //----------------------------------
     // Paragraphs
     //----------------------------------
-    public void paragraphAdd(TParagraph paragraph) {
+    public class Paragraphs {
         
-        mParagraphs.add( paragraph );
+        private ArrayList<TParagraph> mParagraphs;
         
-        mDocumentTableModel.notifyContentChanged();
-    }
-    
-    //----------------------------------
-    public ArrayList<TParagraph> paragraphGetList() {
-        
-        return mParagraphs;
-    }
-    
-    //----------------------------------
-    public void paragraphSetList(ArrayList<TParagraph> paragraphList) {
-        
-        mParagraphs.clear();
-        
-        for(int i=0; i<paragraphList.size(); ++i) {
-        
-            mParagraphs.add( paragraphList.get(i) );
+        //------------------------------
+        public Paragraphs() {
+            mParagraphs = new ArrayList<TParagraph>();
         }
         
-        mDocumentTableModel.notifyContentChanged();
-        
-    }
-    
-    //----------------------------------
-    public TParagraph paragraphGetById(TUniqueId id) throws TException {
-        
-        Iterator<TParagraph> iter = mParagraphs.iterator();
-        
-        while( iter.hasNext() ) {
-            
-            TParagraph paragraph = iter.next();
-            
-            if( paragraph.getId().equals( id ) )
-                return paragraph;
+        //------------------------------
+        public void add(TParagraph paragraph) {
+
+            mParagraphs.add( paragraph );
+
+            tableModel.notifyContentChanged();
         }
-        
-        throw new TException("TWorkingNodeData.paragraphGetById", "paragraph does not exist");
-        
-    }
-    
-    //----------------------------------
-    public void paragraphUpdateContent(TUniqueId id, String content) throws TException {
-        
-        TParagraph paragraph = paragraphGetById(id);
-        
-        if( paragraph.getClass().equals( TContent.class ) ) {
-            ( (TContent)paragraph ).setContent( content );
+
+        //------------------------------
+        public ArrayList<TParagraph> getList() {
+
+            return mParagraphs;
         }
-        else {
-            throw new TException("TWorkingNodeData.paragraphUpdateContent", "not a content paragraph");
-        }
-        
-        mDocumentTableModel.notifyContentChanged();
-    }
-    
-    //----------------------------------
-    // Session
-    //----------------------------------
-    public void sessionAdd(TSessionInfo session) {
-        mSessions.add(session);
-        mSessionListModel.notifyContentChanged();
-    }
-    
-    //----------------------------------
-    public void sessionRemove(TSessionInfo session) {
-        mSessions.remove(session);
-        mSessionListModel.notifyContentChanged();
-    }
-    
-    //----------------------------------
-    public TSessionInfo sessionGetByName(String name) throws TException {
-        
-        Iterator<TSessionInfo> iter = mSessions.iterator();
-        
-        while( iter.hasNext() ) {
-            
-            TSessionInfo session = iter.next();
-            
-            if( session.getName().equals(name) )
-                return session;
-            
-        }
-        
-        throw new TException(
-            "TWorkingNodeData.getSessionByName",
-            "Session \"" + name + "\" not found");
-    }
-    
-    //----------------------------------
-    public TSessionInfo sessionGetById(TUniqueId sessionId) throws TException {
-        
-        Iterator<TSessionInfo> iter = mSessions.iterator();
-        
-        while( iter.hasNext() ) {
-            
-            TSessionInfo session = iter.next();
-            
-            if( session.getId().equals(sessionId) )
-                return session;
-            
-        }
-        
-        throw new TException(
-            "TWorkingNodeData.getSessionById",
-            "Session \"" + sessionId.toString() + "\" not found");
-    }
-    
-    //----------------------------------
-    public void sessionSetCurrent(TUniqueId sessionId) throws TException {
-        
-        mCurrSession = new TSession( sessionGetById(sessionId) );
-        
-        mWorkerListModel.notifyContentChanged();
-    }
-    
-    //----------------------------------
-    public TSession sessionGetCurrent() {
-        return mCurrSession;
-    }
-    
-    //----------------------------------
-    // Node
-    //----------------------------------
-    public TNodeInfo nodeGetSelf() {
-        return mSelfNodeInfo;
-    }
-    
-    //----------------------------------
-    public void nodeSetSelf(TNodeInfo nodeInfo) {
-        mSelfNodeInfo = nodeInfo;
-    }
-    
-    //----------------------------------
-    public TNodeInfo nodeGetLeft() {
-        
-        TNodeInfo node = null;
-        
-        if(null != mSelfNodeInfo && null != mCurrSession) {
-            try {
-                node =  mCurrSession.getLeftNode( mSelfNodeInfo );
+
+        //------------------------------
+        public void setList(ArrayList<TParagraph> paragraphList) {
+
+            mParagraphs.clear();
+
+            for(int i=0; i<paragraphList.size(); ++i) {
+
+                mParagraphs.add( paragraphList.get(i) );
             }
-            catch(TException e) {
-                TLogManager.logException(e);
+
+            tableModel.notifyContentChanged();
+
+        }
+
+        //------------------------------
+        public TParagraph getById(TUniqueId id) throws TException {
+
+            Iterator<TParagraph> iter = mParagraphs.iterator();
+
+            while( iter.hasNext() ) {
+
+                TParagraph paragraph = iter.next();
+
+                if( paragraph.getId().equals( id ) )
+                    return paragraph;
+            }
+
+            throw new TException("TWorkingNodeData.paragraphGetById", "paragraph does not exist");
+
+        }
+        
+        //------------------------------
+        public void updateContent(TUniqueId id, String content) throws TException {
+
+            TParagraph paragraph = getById(id);
+
+            if( paragraph.getClass().equals( TContent.class ) ) {
+                ( (TContent)paragraph ).setContent( content );
+            }
+            else {
+                throw new TException("TWorkingNodeData.paragraphUpdateContent", "not a content paragraph");
+            }
+
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void notifyGuiUpdate() {
+            
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        // TableModel
+        private class TableModel extends AbstractTableModel {
+            
+            public Class getColumnClass(int c) {return TParagraph.class;}
+            
+            public int getColumnCount() {return 1;}
+            
+            public int getRowCount() { return mParagraphs.size(); }
+            
+            public TParagraph getValueAt(int r, int c) { return mParagraphs.get(r); }
+            
+            public boolean isCellEditable(int r, int c) {
+                
+                TParagraph paragraph = mParagraphs.get(r);
+                
+                return 
+                    ( paragraph.getState() == TParagraph.State.LOCKED ) &&
+                    ( nodes.self().getId().equals( paragraph.getOwner() ) );
+                    
+            }
+            
+            public void setValueAt(Object value, int r, int c) {
+                
+                mParagraphs.set(r, (TParagraph)value);
+                
+                fireTableDataChanged();
+            }
+            
+            public void notifyContentChanged() {
+                this.fireTableDataChanged();
             }
         }
         
-        return node;
-        
+        public TableModel tableModel = new TableModel();
     }
     
     //----------------------------------
-    public TNodeInfo nodeGetRight() {
+    // Sessions
+    //----------------------------------
+    public class Sessions {
         
-        TNodeInfo node = null;
+        //------------------------------
+        private ArrayList<TSessionInfo> mSessions;
+        private TSession mCurrSession = null;
         
-        if(null != mSelfNodeInfo && null != mCurrSession) {
-            try {
-                node =  mCurrSession.getRightNode( mSelfNodeInfo );
+        //------------------------------
+        public Sessions() {
+            
+            mSessions = new ArrayList<TSessionInfo>();
+            mCurrSession = null;
+        }
+        
+        //------------------------------
+        public void add(TSessionInfo session) {
+            
+            mSessions.add(session);
+            listModel.notifyContentChanged();
+        }
+
+        //------------------------------
+        public void remove(TSessionInfo session) {
+            
+            mSessions.remove(session);
+            listModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public TSessionInfo getByName(String name) throws TException {
+
+            Iterator<TSessionInfo> iter = mSessions.iterator();
+
+            while( iter.hasNext() ) {
+
+                TSessionInfo session = iter.next();
+
+                if( session.getName().equals(name) )
+                    return session;
+
             }
-            catch(TException e) {
-                TLogManager.logException(e);
+
+            throw new TException(
+                "TWorkingNodeData.getSessionByName",
+                "Session \"" + name + "\" not found");
+        }
+
+        //------------------------------
+        public TSessionInfo getById(TUniqueId sessionId) throws TException {
+
+            Iterator<TSessionInfo> iter = mSessions.iterator();
+
+            while( iter.hasNext() ) {
+
+                TSessionInfo session = iter.next();
+
+                if( session.getId().equals(sessionId) )
+                    return session;
+
+            }
+
+            throw new TException(
+                "TWorkingNodeData.getSessionById",
+                "Session \"" + sessionId.toString() + "\" not found");
+        }
+
+        //------------------------------
+        public void setCurrent(TUniqueId sessionId) throws TException {
+
+            mCurrSession = new TSession( getById(sessionId) );
+
+            nodes.listModel.notifyContentChanged();
+        }
+
+        //------------------------------
+        public TSession getCurrent() {
+            return mCurrSession;
+        }
+        
+        //------------------------------
+        public boolean hasCurrent() {
+            return mCurrSession != null;
+        }
+        
+        //----------------------------------
+        // ListModel
+        private class ListModel extends AbstractListModel {
+            
+            public Object getElementAt(int index) {
+                return mSessions.get(index);
+            }
+            
+            public int getSize() {
+                return mSessions.size();
+            }
+            
+            public void notifyContentChanged() {
+                fireContentsChanged( this, 0, getSize() );
             }
         }
         
-        return node;
-        
+        public ListModel listModel = new ListModel();
     }
     
+    //----------------------------------
+    // Nodes
+    //----------------------------------
+    public class Nodes {
+    
+        private TNodeInfo mSelfNodeInfo = null;
+        
+        //------------------------------
+        public TNodeInfo self() {
+            return mSelfNodeInfo;
+        }
+
+        //------------------------------
+        public void setSelf(TNodeInfo nodeInfo) {
+            mSelfNodeInfo = nodeInfo;
+        }
+
+        //------------------------------
+        public TNodeInfo getLeft() {
+
+            TNodeInfo node = null;
+
+            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+                
+                try {
+                    
+                    node = sessions.getCurrent().getLeftNode( mSelfNodeInfo );
+                }
+                catch(TException e) {
+                    
+                    TLogManager.logException(e);
+                }
+            }
+
+            return node;
+
+        }
+
+        //------------------------------
+        public TNodeInfo getRight() {
+
+            TNodeInfo node = null;
+
+            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+                
+                try {
+                    
+                    node = sessions.getCurrent().getRightNode( mSelfNodeInfo );
+                }
+                catch(TException e) {
+                    
+                    TLogManager.logException(e);
+                }
+            }
+
+            return node;
+
+        }
+        
+        //----------------------------------
+        // ListModel
+        private class ListModel extends AbstractListModel {
+
+            public Object getElementAt(int index) {
+
+                if( !sessions.hasCurrent() )
+                    return null;
+
+                return sessions.getCurrent().getNodeAt(index);
+            }
+
+            public int getSize() {
+
+                if( !sessions.hasCurrent() )
+                    return 0;
+
+                return sessions.getCurrent().getNodeCount();
+            }
+
+            public void notifyContentChanged() {
+                fireContentsChanged( this, 0, getSize() );
+            }
+        }
+    
+        public ListModel listModel = new ListModel();
+    }
+    
+    //----------------------------------
+    public Paragraphs paragraphs                    = new Paragraphs();
+    public Sessions sessions                        = new Sessions();
+    public Nodes nodes                              = new Nodes();
+    
+    //----------------------------------
+    public TWorkingNodeData() {
+    }
+
     //----------------------------------
 }

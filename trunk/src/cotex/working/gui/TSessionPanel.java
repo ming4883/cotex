@@ -24,8 +24,8 @@ public class TSessionPanel extends javax.swing.JPanel {
         
         TWorkingNodeModel workingModel = (TWorkingNodeModel)mNode.getModel();
         
-        mSessionList.setModel( workingModel.getData().getSessionListModel() );
-        mWorkerList.setModel( workingModel.getData().getWorkerListModel() );
+        mSessionList.setModel( workingModel.getData().sessions.listModel );
+        mWorkerList.setModel( workingModel.getData().nodes.listModel );
     }
     
     /** This method is called from within the constructor to
