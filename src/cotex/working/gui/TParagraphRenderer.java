@@ -45,37 +45,39 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
             this.setText("Error! null value");
             this.setBorder(null);
             
+            return this;
+        }
+        
+        // set text
+        if ( value.getClass().equals( TGap.class ) ) {
+            
+            // gap
+            this.setText("");
+            this.setForeground(null);
+            this.setBorder(null);
+            
+            table.setRowHeight(row, (int)this.getMinimumSize().getHeight() );
         }
         else {
             
-            // set text
-            if ( value.getClass().equals( TGap.class ) ) {
-                // gap
-                this.setText("");
-                this.setForeground(null);
-                this.setBorder(null);
-                table.setRowHeight(row, (int)this.getMinimumSize().getHeight() );
+            // paragraph
+            TContent paragraph = (TContent)value;
+
+            this.setText( paragraph.getContent() );
+            this.setForeground(Color.DARK_GRAY);
+            
+            javax.swing.border.Border border = new TParagraphBorder( paragraph );
+            
+            int h = (int)getMinimumSize().getHeight() + 6;
+
+            if(null != border) {
+
+                java.awt.Insets insets = border.getBorderInsets(null);
+                h += insets.bottom - insets.top;
             }
-            else {
-
-                TContent paragraph = (TContent)value;
-
-                // paragraph
-                this.setText( paragraph.getContent() );
-
-                
-                this.setForeground(Color.DARK_GRAY);
-                //this.setBorder(null);
-                //this.setBorder( new TParagraphBorder( paragraph ) );
-                
-                //TitledBorder border = javax.swing.BorderFactory.createTitledBorder("Locked");
-                //border.setTitlePosition(20);
-                
-                //this.setBorder( border );
-                
-                table.setRowHeight(row, (int)this.getMinimumSize().getHeight() + 6 );
-
-            }
+            
+            this.setBorder( border );
+            table.setRowHeight(row, h );
         }
        
         return this;

@@ -28,7 +28,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
         TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
         mTable.setDefaultRenderer( TParagraph.class, new TParagraphRenderer() );
         mTable.setDefaultEditor( TParagraph.class, new TParagraphEditor(mNode) );
-        mTable.setModel( nodeModel.getData().getDocumentTableModel() );
+        mTable.setModel( nodeModel.getData().paragraphs.tableModel );
     }
     
     /** This method is called from within the constructor to
@@ -38,58 +38,22 @@ public class TDocumentPanel extends javax.swing.JPanel {
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        jPanel1 = new javax.swing.JPanel();
-        mLockBtn = new javax.swing.JButton();
-        mCommitBtn = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         mTable = new javax.swing.JTable();
 
         setLayout(new java.awt.BorderLayout());
 
         setName("Document");
-        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
-
-        jPanel1.setMaximumSize(new java.awt.Dimension(80, 46));
-        jPanel1.setMinimumSize(new java.awt.Dimension(80, 46));
-        jPanel1.setPreferredSize(new java.awt.Dimension(80, 100));
-        mLockBtn.setText("Lock");
-        mLockBtn.setMaximumSize(new java.awt.Dimension(80, 23));
-        mLockBtn.setMinimumSize(new java.awt.Dimension(80, 23));
-        mLockBtn.setPreferredSize(new java.awt.Dimension(80, 23));
-        mLockBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mLockBtnActionPerformed(evt);
-            }
-        });
-
-        jPanel1.add(mLockBtn);
-
-        mCommitBtn.setText("Commit");
-        mCommitBtn.setEnabled(false);
-        mCommitBtn.setMaximumSize(new java.awt.Dimension(80, 23));
-        mCommitBtn.setMinimumSize(new java.awt.Dimension(80, 23));
-        mCommitBtn.setPreferredSize(new java.awt.Dimension(80, 23));
-        mCommitBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mCommitBtnActionPerformed(evt);
-            }
-        });
-
-        jPanel1.add(mCommitBtn);
-
-        add(jPanel1, java.awt.BorderLayout.EAST);
-
         mTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null},
-                {null, null}
+                {null}
             },
             new String [] {
-                "Title 1", "Title 2"
+                "Title 1"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
+                java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -133,25 +97,10 @@ public class TDocumentPanel extends javax.swing.JPanel {
         //TLogManager.logMessage("mTableMousePressed");
         
     }//GEN-LAST:event_mTableMousePressed
-    
-    private void mCommitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mCommitBtnActionPerformed
-// TODO add your handling code here:
-        //if(mNode != null)
-        //    mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd() );
-    }//GEN-LAST:event_mCommitBtnActionPerformed
-    
-    private void mLockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mLockBtnActionPerformed
-// TODO add your handling code here:
-        //if(mNode != null)
-         //   mNode.execute( new TWorkingNodeModel.TLockParagraphCmd() );
-    }//GEN-LAST:event_mLockBtnActionPerformed
-    
+            
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JButton mCommitBtn;
-    private javax.swing.JButton mLockBtn;
     private javax.swing.JTable mTable;
     // End of variables declaration//GEN-END:variables
     
@@ -164,29 +113,20 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         if(result) {
             
-            //mLockBtn.setEnabled(false);
-            //mCommitBtn.setEnabled(true);
-            
             mTable.requestFocus();
             mTable.editCellAt(mPendingRow, 0);
             
             mPendingRow = -1;
+        }
+        else {
+            mTable.editingCanceled(null);
         }
     }
     
     //----------------------------------
     public void notifyCommitResult(boolean result) {
         
-        if(result) {
-            
-            //mTable.editCellAt(0, 0);
-            //mTable.e
-            //TLogManager.logMessage("notifyCommitResult");
-            //mTable.setEditingRow(-1);
-            //mTable.editCellAt(
-             //mLockBtn.setEnabled(true);
-            //mCommitBtn.setEnabled(false);
-        }
+        mTable.editingCanceled( null);
         
     }
 }

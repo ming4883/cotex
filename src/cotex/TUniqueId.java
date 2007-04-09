@@ -26,6 +26,9 @@ public class TUniqueId implements java.io.Serializable {
     
     public boolean equals(Object obj) {
 
+        if(null == obj)
+            return false;
+        
         TUniqueId rhs = (TUniqueId)obj;
         return mId.equals(rhs.mId);
     }

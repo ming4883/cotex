@@ -24,11 +24,13 @@ public abstract class TParagraph implements java.io.Serializable {
     };
     
     private TUniqueId mId;
+    private TUniqueId mOwnerId;
     private State mState;
     
     TParagraph(){
         mId = new TUniqueId();
         mState = State.UNLOCKED;
+        mOwnerId = null;
     }
     
     public void notifyLocking() throws TException  {
@@ -64,6 +66,17 @@ public abstract class TParagraph implements java.io.Serializable {
         mState = State.UNLOCKED;
     }
     
+    public void notifyCancelLock() throws TException  {
+        
+        if(mState != State.LOCKING) {
+            throw new TException(
+                "TParagraph.notifyCancelLock",
+                "Inconsistence paragraph state");
+        }
+        
+        mState = State.UNLOCKED;
+    }
+    
     public State getState() {
         return mState;
     }
@@ -72,10 +85,19 @@ public abstract class TParagraph implements java.io.Serializable {
         return mId;
     }
     
+    public void setOwner(TUniqueId ownerId) {
+        mOwnerId = ownerId;
+    }
+    
+    public TUniqueId getOwner() {
+        return mOwnerId;
+    }
+    
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
         out.writeObject(mId);
+        out.writeObject(mOwnerId);
         out.writeObject(mState);
     }
 
@@ -84,6 +106,7 @@ public abstract class TParagraph implements java.io.Serializable {
 
         in.defaultReadObject();
         mId = (TUniqueId)in.readObject();
+        mOwnerId = (TUniqueId)in.readObject();
         mState = (State)in.readObject();
     }
 }

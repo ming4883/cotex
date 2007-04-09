@@ -45,20 +45,23 @@ public class TParagraphBorder extends AbstractBorder {
         
         Insets insets = getBorderInsets(c);
         
-        /*
-        if( mParagraph.getState() == TParagraph.State.LOCKED ) {
+        if( mParagraph.getState() != TParagraph.State.UNLOCKED ) {
             
-            g.setColor( Color.BLACK );
+            g.setColor( Color.WHITE );
             
-            //  Draw rectangles around the component, but do not draw
-            //  in the component area itself.
             g.fillRect(x, y, width, insets.top);
             g.fillRect(x, y, insets.left, height);
             g.fillRect(x + width-insets.right, y, insets.right, height);
             g.fillRect(x, y + height-insets.bottom, width, insets.bottom);
             
+            g.setColor( Color.DARK_GRAY );
+            
+            if( mParagraph.getState() == TParagraph.State.LOCKING )
+                g.drawString( "Locking", 2, height - 5);
+            else
+                g.drawString( "Locked", 2, height - 5);
         }
-        */
+        /**/
         
         // restore current color
         g.setColor(currColor);
@@ -69,13 +72,15 @@ public class TParagraphBorder extends AbstractBorder {
         return true;
     }
     
-    /*
     public Insets getBorderInsets(Component c) {
         
         //return new Insets(3, 3, 15, 3);
-        return new Insets(3, 3, 3, 3);
+        if( mParagraph.getState() == TParagraph.State.UNLOCKED )
+            return new Insets(2, 2, 2, 2);
+        else
+            return new Insets(2, 2, 15, 2);
     }
-    */
+    /**/
     
     
 }

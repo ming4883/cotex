@@ -204,7 +204,7 @@ public class TApp extends javax.swing.JFrame {
 
                 DockingWindow layout = new SplitWindow(
                     false,
-                    0.8f,
+                    0.6f,
                     currWnd,
                     mConsoleDockingView );
 
