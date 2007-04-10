@@ -47,7 +47,8 @@ public class TParagraphBorder extends AbstractBorder {
         
         if( mParagraph.getState() != TParagraph.State.UNLOCKED ) {
             
-            g.setColor( Color.WHITE );
+            //g.setColor( new Color(160, 160, 160) );
+            g.setColor( new Color(220, 220, 220) );
             
             g.fillRect(x, y, width, insets.top);
             g.fillRect(x, y, insets.left, height);

@@ -22,6 +22,9 @@ import java.awt.event.ActionListener;
 import java.util.EventObject;
 import java.util.ArrayList;
 
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+import javax.swing.SwingUtilities;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -39,94 +42,192 @@ import net.infonode.properties.propertymap.ref.ThisPropertyMapRef;
  */
 public class TParagraphEditor extends JTextArea implements TableCellEditor {
     
-    private class TActionPanel extends JWindow {
+    //----------------------------------
+    class TActionPanel {
         
-        //private JButton mOkBtn = new JButton(new ImageIcon("res/accept.gif","Accept"));
-        //private JButton mCancelBtn = new JButton(new ImageIcon("res/cancel.gif","Cancel"));
-        
-        private JButton mOkBtn = new JButton();
-        private JButton mCancelBtn = new JButton();
-        private JButton mDeleteBtn = new JButton();
-        private JButton mInsertBtn = new JButton();
-        
-        private final int WIDTH = 250;
-        private final int HEIGHT = 24;
-        private JPanel panel=null;
-        
-        public TActionPanel() {
-            
-            mOkBtn.setText("Commit");
-            mCancelBtn.setText("Cancel");
-            mDeleteBtn.setText("Delete");
-            mInsertBtn.setText("Insert");
-            
-            setSize(WIDTH, HEIGHT);
-            setBackground(Color.yellow);
-            
-            panel = new JPanel(new GridLayout(0,3));
-            setButtonSet("TContent");
-            setContentPane(panel);
-            
-            mOkBtn.addActionListener(new ActionListener( ) {
-                public void actionPerformed(ActionEvent ae) {
-                    
-                    ( (TContent)mEditingParagraph ).setPendingContent( getText() );
-                    mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd(mEditingParagraph) );
-                    
-                    //stopCellEditing();
-                    cancelCellEditing();
+        //------------------------------
+        private JPanel mActionPanel = null;
+        private JPanel mContentActionPanel = null;
+        private JPanel mGapActionPanel = null;
+        private Popup mPopup = null;
+
+        private java.awt.event.ActionListener mActionListener;
+
+        //------------------------------
+        private void createActionPanel() {
+
+            mActionPanel = new JPanel();
+            mActionPanel.setLayout( new java.awt.BorderLayout() );
+
+            mActionListener = new java.awt.event.ActionListener( ) {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                   onAction(evt);
                 }
-            });
-            
-            mCancelBtn.addActionListener(new ActionListener( ) {
-                public void actionPerformed(ActionEvent ae) {
-                    mNode.execute( new TWorkingNodeModel.TCancelParagraphCmd(mEditingParagraph) );
-                    cancelCellEditing( );
-                }
-            });
-            
-            mDeleteBtn.addActionListener(new ActionListener( ) {
-                public void actionPerformed(ActionEvent ae) {
-                    cancelCellEditing( );
-                }
-            });
-            
-            mInsertBtn.addActionListener(new ActionListener( ) {
-                public void actionPerformed(ActionEvent ae) {
-                    cancelCellEditing( );
-                }
-            });
-            
-            javax.swing.SwingUtilities.updateComponentTreeUI(this);
+            };
+
+            createContentActionPanel();
+            createGapActionPanel();
+
         }
-        
-        public void setButtonSet(String mSet){
-            
-            panel.removeAll();
-            
-            if(mSet=="" || mSet=="TContent"){
-                panel.add(mOkBtn);
-                panel.add(mCancelBtn);
-                panel.add(mDeleteBtn);
+
+        //------------------------------
+        private void createContentActionPanel() {
+
+            mContentActionPanel = new JPanel();
+
+            java.awt.GridLayout layout = new java.awt.GridLayout();
+
+            layout.setRows(1);
+            layout.setColumns(3);
+
+            mContentActionPanel.setLayout( layout );
+
+            JButton btn;
+
+            // commit
+            btn = new JButton();
+            btn.setText("Commit");
+            btn.setActionCommand("Commit");
+            btn.addActionListener( mActionListener );
+
+            mContentActionPanel.add(btn);
+
+            // delete
+            btn = new JButton();
+            btn.setText("Delete");
+            btn.setActionCommand("Delete");
+            btn.addActionListener( mActionListener );
+
+            mContentActionPanel.add(btn);
+
+            // cancel
+            btn = new JButton();
+            btn.setText("Cancel");
+            btn.setActionCommand("Cancel");
+            btn.addActionListener( mActionListener );
+
+            mContentActionPanel.add(btn);
+
+            mContentActionPanel.setSize( mContentActionPanel.getMinimumSize() );
+
+        }
+
+        //------------------------------
+        private void createGapActionPanel() {
+
+            mGapActionPanel = new JPanel();
+
+            java.awt.GridLayout layout = new java.awt.GridLayout();
+
+            layout.setRows(1);
+            layout.setColumns(2);
+
+            mGapActionPanel.setLayout( layout );
+
+            JButton btn;
+
+            // commit
+            btn = new JButton();
+            btn.setText("Insert");
+            btn.setActionCommand("Insert");
+            btn.addActionListener( mActionListener );
+
+            mGapActionPanel.add(btn);
+
+            // cancel
+            btn = new JButton();
+            btn.setText("Cancel");
+            btn.setActionCommand("Cancel");
+            btn.addActionListener( mActionListener );
+
+            mGapActionPanel.add(btn);
+
+            mGapActionPanel.setSize( mGapActionPanel.getMinimumSize() );
+
+        }
+
+        //------------------------------
+        private void onAction(java.awt.event.ActionEvent evt) {
+
+            TLogManager.logMessage("TDocumentPanel: onAction");
+
+            if(evt.getActionCommand().equals( "Commit" ) ) {
+
+
+                ( (TContent)mEditingParagraph ).setPendingContent( getText() );
+                mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd(mEditingParagraph) );
+
             }
-            else if (mSet=="TGap"){
-                panel.add(mInsertBtn);
-                panel.add(mCancelBtn);
+
+            if(evt.getActionCommand().equals( "Delete" ) ) {
+
             }
+
+            if(evt.getActionCommand().equals( "Insert" ) ) {
+
+
+            }
+
+            if(evt.getActionCommand().equals( "Cancel" ) ) {
+
+                mNode.execute( new TWorkingNodeModel.TCancelParagraphCmd(mEditingParagraph) );
+            }
+
+            mPopup.hide();
+
+        }
+
+        //------------------------------
+        private void popup() {
+
+            if(null != mPopup)
+                mPopup.hide();
+
+            if(null == mActionPanel)
+                createActionPanel();
+
+            mActionPanel.removeAll();
+
+            JPanel subPanel;
+
+            if(mEditingParagraph.getClass().equals( TContent.class ) )
+                subPanel = mContentActionPanel;
+            else
+                subPanel = mGapActionPanel;
+
+            mActionPanel.add(subPanel);
+            mActionPanel.setSize( subPanel.getSize().width, 24 );
+
+            java.awt.Rectangle rect = mEditingTable.getCellRect(mEditingRow, 0, true);
+
+            java.awt.Point p = new java.awt.Point(rect.x, rect.y);
+            SwingUtilities.convertPointToScreen( p, mEditingTable );
             
-            panel.setSize(panel.getMinimumSize());
+            p.x += rect.width - mActionPanel.getSize().width;
+            p.y -= mActionPanel.getSize().height;
+
+            mPopup = PopupFactory.getSharedInstance().getPopup( mEditingTable.getRootPane(), mActionPanel, p.x, p.y );
+            
+            mPopup.show();
+
         }
     }
     
+    //----------------------------------
     private ArrayList<CellEditorListener> mListeners;
     private TActionPanel mActionPanel;
-    private TParagraph mEditingParagraph;
+    
     private TNode mNode = null;
     
+    private TParagraph mEditingParagraph;
     private JTable mEditingTable;
     private int mEditingRow;
     
+    //private TParagraphEditor getThis() {return this;}
+    
+    //----------------------------------
     public TParagraphEditor(TNode node) {
+        
         mNode               = node;
         mActionPanel        = new TActionPanel();
         mListeners          = new ArrayList<CellEditorListener>();
@@ -149,10 +250,9 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             }
         });
         
-        
-        //this.setF
     }
     
+    //----------------------------------
     public Component getTableCellEditorComponent(
         JTable table,
         Object value,
@@ -175,14 +275,14 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         
         // a gap cannot be edited
         if( value.getClass().equals(TGap.class) ) {
+            
             this.setText("");
             this.setEditable(false);
-            this.mActionPanel.setButtonSet("TGap");
         }
         else {
+            
             this.setText( ((TContent)mEditingParagraph).getContent() );
             this.setEditable(true);
-            this.mActionPanel.setButtonSet("TContent");
         }
         
         this.setBorder( new TParagraphBorder( mEditingParagraph ) );
@@ -193,50 +293,57 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         updateEditingTableRowHeight();
         
         // show the action panel
-        mActionPanel.setLocation(r.x + p.x + getWidth( ) - 50, r.y + p.y );
-        mActionPanel.setVisible(true);
+        mActionPanel.popup();
         
         return this;
         
     }
     
+    //----------------------------------
     public void addCellEditorListener(CellEditorListener listener) {
         mListeners.add(listener);
     }
     
+    //----------------------------------
     public void removeCellEditorListener(CellEditorListener listener) {
         mListeners.remove(listener);
     }
     
+    //----------------------------------
     public Object getCellEditorValue() {
         return mEditingParagraph;
     }
     
+    //----------------------------------
     public boolean isCellEditable(EventObject evt) {
         return true;
     }
     
+    //----------------------------------
     public boolean shouldSelectCell(EventObject evt) {
         return true;
     }
     
+    //----------------------------------
     public boolean stopCellEditing() {
         
         //TLogManager.logMessage("stopCellEditing");
         //fireStopCellEditingEvent();
         
         //mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd(mEditingParagraph) );
-        mActionPanel.setVisible(false);
+        //mActionPanel.setVisible(false);
         
         return true;
     }
     
+    //----------------------------------
     public void cancelCellEditing() {
         //fireCancelCellEditingEvent();
         
-        mActionPanel.setVisible(false);
+        //mActionPanel.setVisible(false);
     }
     
+    //----------------------------------
     private void fireStopCellEditingEvent() {
         
         ChangeEvent evt = new ChangeEvent(this);
@@ -250,6 +357,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         
     }
     
+    //----------------------------------
     private void fireCancelCellEditingEvent() {
         
         ChangeEvent evt = new ChangeEvent(this);
@@ -263,7 +371,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         
     }
     
-    
+    //----------------------------------
     private void updateEditingTableRowHeight() {
         
         int h = (int)getMinimumSize().getHeight();
