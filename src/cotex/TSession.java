@@ -7,13 +7,13 @@
  * and open the template in the editor.
  */
 
-package cotex.session;
+package cotex;
 
-import cotex.TException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.net.InetAddress;
 
 /**
  *
@@ -56,17 +56,6 @@ public class TSession {
         return mNodes.get(idx - 1);
     }
 
-    
-    public TNodeInfo getNodeAt(int index) {
-        return mNodes.get(index);
-    }
-
-    
-    public int getNodeCount() {
-        return mNodes.size();
-    }
-
-    
     public TNodeInfo getRightNode(TNodeInfo node) throws TException {
         
         int idx = indexOf(node);
@@ -79,7 +68,14 @@ public class TSession {
         
         return mNodes.get(idx + 1);
     }
+    
+    public TNodeInfo getNodeAt(int index) {
+        return mNodes.get(index);
+    }
 
+    public int getNodeCount() {
+        return mNodes.size();
+    }
     
     public int indexOf(TNodeInfo node) {
         
@@ -92,4 +88,18 @@ public class TSession {
         
     }
     
+    public TNodeInfo getNodeByAddr(InetAddress addr) throws TException {
+    
+        Iterator<TNodeInfo> iter = mNodes.iterator();
+        
+        while( iter.hasNext() ) {
+            
+            TNodeInfo info = iter.next();
+            
+            if( info.getAddr().equals(addr) ) 
+                return info;
+        }
+        
+        throw new TException("TSession.getNodeByAddr", "Node not found");
+    }
 }

@@ -10,6 +10,7 @@
 package cotex.working.msg;
 
 import cotex.*;
+import java.net.InetAddress;
 
 /**
  *
@@ -17,14 +18,14 @@ import cotex.*;
  */
 public class TLockResultMsg implements java.io.Serializable {
     
-    public TUniqueId InitiateNodeId;
+    public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     public boolean Result;
     
     /** Creates a new instance of TLockResultMsg */
-    public TLockResultMsg(TUniqueId initiateNodeId, TUniqueId paragraphId, boolean result) {
+    public TLockResultMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId, boolean result) {
         
-        InitiateNodeId = initiateNodeId;
+        InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
         Result = result;
     }
@@ -32,7 +33,7 @@ public class TLockResultMsg implements java.io.Serializable {
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
         
         out.defaultWriteObject();
-        out.writeObject(InitiateNodeId);
+        out.writeObject(InitiateNodeAddr);
         out.writeObject(ParagraphId);
         out.writeBoolean(Result);
     }
@@ -40,7 +41,7 @@ public class TLockResultMsg implements java.io.Serializable {
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         
         in.defaultReadObject();
-        InitiateNodeId = (TUniqueId)in.readObject();
+        InitiateNodeAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
         Result = in.readBoolean();
         

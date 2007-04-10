@@ -21,13 +21,12 @@
     <section name="Temp">
         <setting key="DummySessionName" value="Dummy Session" />
         
-        <setting key="WorkerName1" value="Worker 1" />
-		<setting key="WorkerAddr1" value="type_your_ip_here" />
-        
-        <setting key="WorkerName2" value="Worker 2" />
-		<setting key="WorkerAddr2" value="type_your_ip_here" />
+        <setting key="NoOfWorkers" value="1" />
         
         <setting key="Self" value="0" />
+
+        <setting key="WorkerName0" value="Worker 1" />
+	<setting key="WorkerAddr1" value="127.0.0.1" />
         
     </section>
     

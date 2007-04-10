@@ -9,7 +9,7 @@
 
 package cotex.working.msg;
 
-import cotex.session.*;
+import cotex.TNodeInfo;
 
 /**
  *

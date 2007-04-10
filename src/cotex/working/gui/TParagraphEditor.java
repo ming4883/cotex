@@ -69,7 +69,10 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             
             mOkBtn.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {
+                    
+                    ( (TContent)mEditingParagraph ).setPendingContent( getText() );
                     mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd(mEditingParagraph) );
+                    
                     //stopCellEditing();
                     cancelCellEditing();
                 }
@@ -81,11 +84,13 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
                     cancelCellEditing( );
                 }
             });
+            
             mDeleteBtn.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {
                     cancelCellEditing( );
                 }
             });
+            
             mInsertBtn.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {
                     cancelCellEditing( );
@@ -94,16 +99,21 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             
             javax.swing.SwingUtilities.updateComponentTreeUI(this);
         }
+        
         public void setButtonSet(String mSet){
+            
             panel.removeAll();
+            
             if(mSet=="" || mSet=="TContent"){
                 panel.add(mOkBtn);
                 panel.add(mCancelBtn);
                 panel.add(mDeleteBtn);
-            }else if (mSet=="TGap"){
+            }
+            else if (mSet=="TGap"){
                 panel.add(mInsertBtn);
                 panel.add(mCancelBtn);
             }
+            
             panel.setSize(panel.getMinimumSize());
         }
     }
@@ -128,35 +138,14 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             
             public void keyPressed(java.awt.event.KeyEvent e) {
                 
-                int h = (int)getMinimumSize().getHeight();
-                
-                javax.swing.border.Border border = getBorder();
-                
-                if(null != border) {
-                    
-                    java.awt.Insets insets = border.getBorderInsets(null);
-                    h += insets.bottom - insets.top;
-                }
-                
-                mEditingTable.setRowHeight(mEditingRow, h);
+                updateEditingTableRowHeight();
             }
             
             public void keyReleased(java.awt.event.KeyEvent e) {}
             
             public void keyTyped(java.awt.event.KeyEvent e) {
                 
-                int h = (int)getMinimumSize().getHeight();
-                
-                javax.swing.border.Border border = getBorder();
-                
-                if(null != border) {
-                    
-                    java.awt.Insets insets = border.getBorderInsets(null);
-                    h += insets.bottom - insets.top;
-                }
-                
-                mEditingTable.setRowHeight(mEditingRow, h);
-                
+                updateEditingTableRowHeight();
             }
         });
         
@@ -165,11 +154,11 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
     }
     
     public Component getTableCellEditorComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            int row,
-            int column) {
+        JTable table,
+        Object value,
+        boolean isSelected,
+        int row,
+        int column) {
         
         mEditingParagraph = (TParagraph)value;
         mEditingTable = table;
@@ -179,26 +168,29 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             return null;
         }
         
-        
-        
         // ensure locked before editing
         if(mEditingParagraph.getState() != TParagraph.State.LOCKED) {
             return null;
         }
+        
         // a gap cannot be edited
         if( value.getClass().equals(TGap.class) ) {
-            //this.setEditable(false);
+            this.setText("");
+            this.setEditable(false);
             this.mActionPanel.setButtonSet("TGap");
-        }else{
+        }
+        else {
             this.setText( ((TContent)mEditingParagraph).getContent() );
             this.setEditable(true);
             this.mActionPanel.setButtonSet("TContent");
         }
+        
         this.setBorder( new TParagraphBorder( mEditingParagraph ) );
-        //mEditingTable.setRowHeight(mEditingRow, (int)getMinimumSize().getHeight() );
         
         Point p = table.getLocationOnScreen();
         Rectangle r = table.getCellRect(row, column, true);
+        
+        updateEditingTableRowHeight();
         
         // show the action panel
         mActionPanel.setLocation(r.x + p.x + getWidth( ) - 50, r.y + p.y );
@@ -272,6 +264,20 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
     }
     
     
+    private void updateEditingTableRowHeight() {
+        
+        int h = (int)getMinimumSize().getHeight();
+        
+        javax.swing.border.Border border = getBorder();
+        
+        if(null != border) {
+            
+            java.awt.Insets insets = border.getBorderInsets(null);
+            h += insets.bottom - insets.top;
+        }
+        
+        mEditingTable.setRowHeight(mEditingRow, h);
+    }
     
     /*
     public OkCancel helper = new OkCancel( );

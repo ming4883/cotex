@@ -10,7 +10,7 @@
 package cotex.working.msg;
 
 import cotex.TUniqueId;
-import cotex.session.TNodeInfo;
+import java.net.InetAddress;
 
 /**
  *
@@ -18,20 +18,20 @@ import cotex.session.TNodeInfo;
  */
 public class TRequestParagraphMsg implements java.io.Serializable {
     
-    TNodeInfo NodeInfo;
-    TUniqueId ParagraphId;
+    public InetAddress RequestorAddr;
+    public TUniqueId ParagraphId;
     
     /** Creates a new instance of TRequestParagraphMsg */
-    public TRequestParagraphMsg(TNodeInfo nodeInfo, TUniqueId paragraphId) {
+    public TRequestParagraphMsg(InetAddress requestorAddr, TUniqueId paragraphId) {
         
-        NodeInfo = nodeInfo;
+        RequestorAddr = requestorAddr;
         ParagraphId = paragraphId;
     }
     
      private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
-        out.writeObject(NodeInfo);
+        out.writeObject(RequestorAddr);
         out.writeObject(ParagraphId);
         
     }
@@ -41,7 +41,7 @@ public class TRequestParagraphMsg implements java.io.Serializable {
 
         in.defaultReadObject();
         
-        NodeInfo = (TNodeInfo)in.readObject();
+        RequestorAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
         
     }

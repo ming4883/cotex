@@ -38,6 +38,10 @@ public class TUniqueId implements java.io.Serializable {
         return mId.toString();
     }
     
+    public int hashCode() {
+        return mId.hashCode();
+    }
+    
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
