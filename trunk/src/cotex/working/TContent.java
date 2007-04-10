@@ -18,30 +18,41 @@ import cotex.*;
 public class TContent extends TParagraph implements java.io.Serializable {
     
     private String mContent;
+    private String mPendingContent;
     
     /**
      * Creates a new instance of TContent
      */
     public TContent() {
-        this.mContent = "";
+        mContent = "";
+        mPendingContent = "";
     }
     
     public TContent(String content) {
-        this.mContent = content;
+        mContent = content;
     }
     
     public String getContent() {
-        return this.mContent;
+        return mContent;
     }
     
     public void setContent(String content) {
-        this.mContent = content;
+        mContent = content;
+    }
+    
+    public String getPendingContent() {
+        return mPendingContent;
+    }
+    
+    public void setPendingContent(String content) {
+        mPendingContent = content;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
         out.writeObject(mContent);
+        //out.writeObject(mPendingContent);
     }
 
     private void readObject(java.io.ObjectInputStream in) 
@@ -49,5 +60,6 @@ public class TContent extends TParagraph implements java.io.Serializable {
 
         in.defaultReadObject();
         mContent = (String)in.readObject();
+        //mPendingContent = (String)in.readObject();
     }
 }

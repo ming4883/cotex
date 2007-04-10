@@ -1,7 +1,7 @@
 /*
- * TCommitParagraphMsg.java
+ * TCancelParagraphMsg.java
  *
- * Created on April 7, 2007, 5:37 PM
+ * Created on April 7, 2007, 5:36 PM
  *
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
@@ -10,6 +10,7 @@
 package cotex.working.msg;
 
 import cotex.*;
+import java.net.InetAddress;
 
 /**
  *
@@ -17,19 +18,19 @@ import cotex.*;
  */
 public class TCancelParagraphMsg implements java.io.Serializable {
     
-    public TUniqueId InitiateNodeId;
+    public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     
-    /** Creates a new instance of TCommitParagraphMsg */
-    public TCancelParagraphMsg(TUniqueId initiateNodeId, TUniqueId paragraphId) {
-        InitiateNodeId = initiateNodeId;
+    /** Creates a new instance of TCancelParagraphMsg */
+    public TCancelParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId) {
+        InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
-        out.writeObject(InitiateNodeId);
+        out.writeObject(InitiateNodeAddr);
         out.writeObject(ParagraphId);
     }
 
@@ -37,9 +38,8 @@ public class TCancelParagraphMsg implements java.io.Serializable {
         throws java.io.IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        InitiateNodeId = (TUniqueId)in.readObject();
+        InitiateNodeAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
      }
     
 }
-

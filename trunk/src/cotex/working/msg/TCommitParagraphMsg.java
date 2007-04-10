@@ -10,6 +10,7 @@
 package cotex.working.msg;
 
 import cotex.*;
+import java.net.InetAddress;
 
 /**
  *
@@ -17,19 +18,19 @@ import cotex.*;
  */
 public class TCommitParagraphMsg implements java.io.Serializable {
     
-    public TUniqueId InitiateNodeId;
+    public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     
     /** Creates a new instance of TCommitParagraphMsg */
-    public TCommitParagraphMsg(TUniqueId initiateNodeId, TUniqueId paragraphId) {
-        InitiateNodeId = initiateNodeId;
+    public TCommitParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId) {
+        InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
-        out.writeObject(InitiateNodeId);
+        out.writeObject(InitiateNodeAddr);
         out.writeObject(ParagraphId);
     }
 
@@ -37,7 +38,7 @@ public class TCommitParagraphMsg implements java.io.Serializable {
         throws java.io.IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-        InitiateNodeId = (TUniqueId)in.readObject();
+        InitiateNodeAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
      }
     

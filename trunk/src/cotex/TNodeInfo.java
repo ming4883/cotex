@@ -7,9 +7,8 @@
  * and open the template in the editor.
  */
 
-package cotex.session;
+package cotex;
 
-import cotex.TUniqueId;
 import java.net.InetAddress;
 
 /**
@@ -19,7 +18,6 @@ import java.net.InetAddress;
 public class TNodeInfo implements java.io.Serializable {
     
     private String mName;
-    private TUniqueId mId;
     private InetAddress mAddr;
     
     /**
@@ -28,7 +26,6 @@ public class TNodeInfo implements java.io.Serializable {
     public TNodeInfo(String name, InetAddress addr) {
         mName = name;
         mAddr = addr;
-        mId = new TUniqueId();
     }
     
     public final String getName() {
@@ -43,24 +40,22 @@ public class TNodeInfo implements java.io.Serializable {
         return mAddr;
     }
     
-    public final TUniqueId getId() {
-        return mId;
-    }
-    
     public boolean equals(Object obj) {
         
+        if(null == obj)
+            return false;
+        
         TNodeInfo rhs = (TNodeInfo)obj;
-        return mId.equals(rhs.mId);
+        return mAddr.equals(rhs.mAddr);
     }
     
     public final String toString() {
-        return mName;
+        return mName + " [" + mAddr.getHostAddress() + "]";
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
-        out.writeObject(mId);
         out.writeObject(mName);
         out.writeObject(mAddr);
     }
@@ -70,7 +65,6 @@ public class TNodeInfo implements java.io.Serializable {
 
         in.defaultReadObject();
         
-        mId = (TUniqueId)in.readObject();
         mName = (String)in.readObject();
         mAddr = (InetAddress)in.readObject();
     }

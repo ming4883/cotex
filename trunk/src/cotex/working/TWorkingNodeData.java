@@ -11,13 +11,18 @@ package cotex.working;
 
 
 import cotex.*;
-import cotex.session.*;
+import cotex.TNodeInfo;
+import cotex.TSession;
+import cotex.TSessionInfo;
 
 import cotex.working.TParagraph;
 import cotex.working.TGap;
 import cotex.working.TContent;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.net.InetAddress;
+
 import javax.swing.table.AbstractTableModel;
 import javax.swing.AbstractListModel;
 
@@ -85,15 +90,63 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
-        public void updateContent(TUniqueId id, String content) throws TException {
+        public void setLocking(TUniqueId id) throws TException {
+
+            getById(id).notifyLocking();
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void setLocked(TUniqueId id, TNodeInfo owner) throws TException {
+
+            getById(id).notifyLocked();
+            getById(id).setLockOwner(owner);
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void cancelLocked(TUniqueId id) throws TException {
+
+            getById(id).notifyCancelLock();
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void commit(TUniqueId id) throws TException {
 
             TParagraph paragraph = getById(id);
 
             if( paragraph.getClass().equals( TContent.class ) ) {
-                ( (TContent)paragraph ).setContent( content );
+                
+                TContent content = (TContent)paragraph;
+                
+                content.setContent( content.getPendingContent() );
+                content.notifyUnlocked();
+                content.setLockOwner( null );
+                content.setPendingContent("");
             }
             else {
-                throw new TException("TWorkingNodeData.paragraphUpdateContent", "not a content paragraph");
+                throw new TException("TWorkingNodeData.paragraphs.commit", "not a content paragraph");
+            }
+
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void rollback(TUniqueId id) throws TException {
+
+            TParagraph paragraph = getById(id);
+
+            if( paragraph.getClass().equals( TContent.class ) ) {
+                
+                TContent content = (TContent)paragraph;
+                
+                content.notifyUnlocked();
+                content.setLockOwner( null );
+                content.setPendingContent("");
+            }
+            else {
+                throw new TException("TWorkingNodeData.paragraphs.commit", "not a content paragraph");
             }
 
             tableModel.notifyContentChanged();
@@ -123,7 +176,7 @@ public class TWorkingNodeData  {
                 
                 return 
                     ( paragraph.getState() == TParagraph.State.LOCKED ) &&
-                    ( nodes.self().getId().equals( paragraph.getOwner() ) );
+                    ( nodes.self().equals( paragraph.getLockOwner() ) );
                     
             }
             
@@ -305,6 +358,13 @@ public class TWorkingNodeData  {
 
             return node;
 
+        }
+        
+        //----------------------------------
+        public TNodeInfo getByAddr(InetAddress addr) throws TException {
+            
+            return sessions.getCurrent().getNodeByAddr(addr);
+            
         }
         
         //----------------------------------

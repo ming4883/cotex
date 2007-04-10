@@ -24,13 +24,13 @@ public abstract class TParagraph implements java.io.Serializable {
     };
     
     private TUniqueId mId;
-    private TUniqueId mOwnerId;
+    private TNodeInfo mLockOwner;
     private State mState;
     
     TParagraph(){
-        mId = new TUniqueId();
-        mState = State.UNLOCKED;
-        mOwnerId = null;
+        mId         = new TUniqueId();
+        mState      = State.UNLOCKED;
+        mLockOwner  = null;
     }
     
     public void notifyLocking() throws TException  {
@@ -85,19 +85,19 @@ public abstract class TParagraph implements java.io.Serializable {
         return mId;
     }
     
-    public void setOwner(TUniqueId ownerId) {
-        mOwnerId = ownerId;
+    public void setLockOwner(TNodeInfo owner) {
+        mLockOwner = owner;
     }
     
-    public TUniqueId getOwner() {
-        return mOwnerId;
+    public TNodeInfo getLockOwner() {
+        return mLockOwner;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();
         out.writeObject(mId);
-        out.writeObject(mOwnerId);
+        out.writeObject(mLockOwner);
         out.writeObject(mState);
     }
 
@@ -106,7 +106,7 @@ public abstract class TParagraph implements java.io.Serializable {
 
         in.defaultReadObject();
         mId = (TUniqueId)in.readObject();
-        mOwnerId = (TUniqueId)in.readObject();
+        mLockOwner = (TNodeInfo)in.readObject();
         mState = (State)in.readObject();
     }
 }

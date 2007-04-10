@@ -7,10 +7,7 @@
  * and open the template in the editor.
  */
 
-package cotex.session;
-
-import cotex.TUniqueId;
-import cotex.TException;
+package cotex;
 
 /**
  *

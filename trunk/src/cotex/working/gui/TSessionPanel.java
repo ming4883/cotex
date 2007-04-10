@@ -123,7 +123,7 @@ public class TSessionPanel extends javax.swing.JPanel {
         
         if( evt.getActionCommand().equals("Join") ) {
          
-            cotex.session.TSessionInfo session = (cotex.session.TSessionInfo)mSessionList.getSelectedValue();
+            cotex.TSessionInfo session = (cotex.TSessionInfo)mSessionList.getSelectedValue();
             
             mNode.execute( new TWorkingNodeModel.TJoinSessionCmd( session.getId() ) );
         }
