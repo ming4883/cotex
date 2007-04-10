@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : cotex.xml
+    Created on : April 4, 2007, 12:21 AM
+    Author     : Ming
+    Description:
+        Purpose of the document follows.
+-->
+
+<config>
+
+    <section name="General" >
+        <setting key="NodeType" value="working" />
+        <setting key="ConnectionType" value="tcp" />
+        <setting key="RegistryPort" value="25" />
+        <setting key="WorkingCmdPort" value="22" />
+        <setting key="WorkingDataPort" value="23" />
+    </section>
+    
+    <section name="Temp">
+        <setting key="DummySessionName" value="Dummy Session" />
+        
+        <setting key="NoOfWorkers" value="1" />
+        
+        <setting key="Self" value="0" />
+
+        <setting key="WorkerName0" value="Worker 1" />
+	<setting key="WorkerAddr0" value="127.0.0.1" />
+        
+    </section>
+    
+</config>
