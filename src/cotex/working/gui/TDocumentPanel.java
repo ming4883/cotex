@@ -9,6 +9,7 @@ package cotex.working.gui;
 import cotex.*;
 import cotex.working.*;
 import javax.swing.table.TableModel;
+import javax.swing.*;
 
 /**
  *
@@ -29,6 +30,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mTable.setDefaultRenderer( TParagraph.class, new TParagraphRenderer() );
         mTable.setDefaultEditor( TParagraph.class, new TParagraphEditor(mNode) );
         mTable.setModel( nodeModel.getData().paragraphs.tableModel );
+        
     }
     
     /** This method is called from within the constructor to
@@ -82,19 +84,20 @@ public class TDocumentPanel extends javax.swing.JPanel {
         if(null == mNode)
             return;
         
+        if(null != mPendingParagraph)
+            return;
+        
         int row = mTable.rowAtPoint( evt.getPoint() );
         
         TParagraph paragraph = (TParagraph)mTable.getModel().getValueAt(row, 0);
         
-        if( //paragraph.getClass().equals(TContent.class) &&
-            paragraph.getState() == TParagraph.State.UNLOCKED) {
+        if(paragraph.getState() == TParagraph.State.UNLOCKED) {
         
             mPendingRow = row;
+            mPendingParagraph = paragraph;
             
             mNode.execute( new TWorkingNodeModel.TLockParagraphCmd(paragraph) );
         }
-        
-        //TLogManager.logMessage("mTableMousePressed");
         
     }//GEN-LAST:event_mTableMousePressed
             
@@ -107,6 +110,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
     //----------------------------------
     private TNode mNode = null;
     private int mPendingRow = -1;
+    private TParagraph mPendingParagraph = null;
     
     //----------------------------------
     public void notifyLockResult(boolean result) {
@@ -116,10 +120,11 @@ public class TDocumentPanel extends javax.swing.JPanel {
             mTable.requestFocus();
             mTable.editCellAt(mPendingRow, 0);
             
-            mPendingRow = -1;
         }
         else {
             mTable.editingCanceled(null);
+            mPendingParagraph = null;
+            mPendingRow = -1;
         }
     }
     
@@ -127,6 +132,8 @@ public class TDocumentPanel extends javax.swing.JPanel {
     public void notifyCommitResult(boolean result) {
         
         mTable.editingCanceled( null);
+        mPendingParagraph = null;
+        mPendingRow = -1;
         
     }
 }
