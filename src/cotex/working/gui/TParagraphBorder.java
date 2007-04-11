@@ -43,7 +43,60 @@ public class TParagraphBorder extends AbstractBorder {
         
         Color currColor = g.getColor();
         
-        Insets insets = getBorderInsets(c);
+        if( mParagraph.getClass().equals(TContent.class) )
+            paintContentBorder(g, x, y, width, height);
+        else
+            paintGapBorder(g, x, y, width, height);
+        
+        // restore current color
+        g.setColor(currColor);
+        
+    }
+    
+    public boolean isBorderOpaque( ) {
+        return true;
+    }
+    
+    public Insets getBorderInsets(Component c) {
+        
+        if( mParagraph.getClass().equals(TContent.class) )
+            return getContentInsets();
+        
+        return getGapInsets();
+    }
+    
+    private void paintGapBorder(
+        Graphics g,
+        int x,
+        int y,
+        int width,
+        int height) {
+        
+        Insets insets = getGapInsets();
+        
+        if( mParagraph.getState() != TParagraph.State.UNLOCKED ) {
+            g.setColor( new Color(220, 220, 220) );
+            
+            g.fillRect(x, y, width, height);
+            
+            g.setColor( Color.DARK_GRAY );
+            
+            if( mParagraph.getState() == TParagraph.State.LOCKING )
+                g.drawString( "Locking", 2, 10);
+            else
+                g.drawString( "Locked", 2, 10);
+            
+        }
+    }
+    
+    private void paintContentBorder(
+        Graphics g,
+        int x,
+        int y,
+        int width,
+        int height) {
+        
+        Insets insets = getContentInsets();
         
         if( mParagraph.getState() != TParagraph.State.UNLOCKED ) {
             
@@ -62,24 +115,23 @@ public class TParagraphBorder extends AbstractBorder {
             else
                 g.drawString( "Locked", 2, height - 5);
         }
-        /**/
-        
-        // restore current color
-        g.setColor(currColor);
-        
     }
     
-    public boolean isBorderOpaque( ) {
-        return true;
+    private Insets getGapInsets() {
+        
+        //if( mParagraph.getState() == TParagraph.State.UNLOCKED )
+        //   return new Insets(0, 0, 0, 0);
+        
+        //return new Insets(2, 2, 10, 2);
+        return new Insets(0, 0, 0, 0);
     }
     
-    public Insets getBorderInsets(Component c) {
+    private Insets getContentInsets() {
         
-        //return new Insets(3, 3, 15, 3);
         if( mParagraph.getState() == TParagraph.State.UNLOCKED )
-            return new Insets(2, 2, 2, 2);
-        else
-            return new Insets(2, 2, 15, 2);
+            return new  Insets(2, 2, 2, 2);
+        
+        return new Insets(2, 2, 15, 2);
     }
     /**/
     
