@@ -20,7 +20,9 @@ public class TGap extends TParagraph implements java.io.Serializable {
     /**
      * Creates a new instance of TGap
      */
-    public TGap() {
+    public TGap(TNodeInfo creator) {
+        
+        super(creator);
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {

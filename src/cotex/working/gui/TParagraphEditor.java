@@ -152,8 +152,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             TLogManager.logMessage("TDocumentPanel: onAction");
 
             if(evt.getActionCommand().equals( "Commit" ) ) {
-
-
+                
                 ( (TContent)mEditingParagraph ).setPendingContent( getText() );
                 mNode.execute( new TWorkingNodeModel.TCommitParagraphCmd(mEditingParagraph) );
 

@@ -45,13 +45,50 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
-        public void add(TParagraph paragraph) {
+        public TContent createContent() throws TException  {
+            
+            TNodeInfo self = nodes.self();
+            
+            if(null == self)
+                throw new TException("TWorkingNodeData.Paragraphs.createContent", "self = null!");
+            
+            return new TContent(self);
+        }
+        
+        //------------------------------
+        public TGap createGap() throws TException {
+            
+            TNodeInfo self = nodes.self();
+            
+            if(null == self)
+                throw new TException("TWorkingNodeData.Paragraphs.createContent", "self = null!");
+            
+            return new TGap(self);
+        }
+        
+        //------------------------------
+        public void append(TParagraph paragraph) {
 
             mParagraphs.add( paragraph );
 
             tableModel.notifyContentChanged();
         }
+        
+        //------------------------------
+        public void insertAfter(int index, TParagraph paragraphToInsert) {
+            
+            mParagraphs.add(index, paragraphToInsert);
 
+            tableModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void remove(TUniqueId id) throws TException {
+            
+            int idx = indexOf( id );
+            mParagraphs.remove(idx);
+        }
+  
         //------------------------------
         public ArrayList<TParagraph> getList() {
 
@@ -70,6 +107,28 @@ public class TWorkingNodeData  {
 
             tableModel.notifyContentChanged();
 
+        }
+      
+        //------------------------------
+        public int indexOf(TUniqueId id) throws TException {
+            
+            for(int idx = 0; idx < mParagraphs.size(); ++idx) {
+                
+                if( mParagraphs.get(idx).getId().equals( id ) ) {
+                    return idx;
+                }
+            }
+            
+            throw new TException("TWorkingNodeData.Paragraphs.indexOf", "Paragraph not found");
+        }
+        
+        //------------------------------
+        public TParagraph getAt(int idx) throws TException {
+        
+            if(idx < 0 || idx >= mParagraphs.size() )
+                throw new TException("TWorkingNodeData.Paragraphs.getAt", "Index out of range");
+            
+            return mParagraphs.get(idx);
         }
 
         //------------------------------
@@ -136,17 +195,13 @@ public class TWorkingNodeData  {
         public void rollback(TUniqueId id) throws TException {
 
             TParagraph paragraph = getById(id);
+            
+            paragraph.notifyUnlocked();
+            paragraph.setLockOwner( null );
 
             if( paragraph.getClass().equals( TContent.class ) ) {
                 
-                TContent content = (TContent)paragraph;
-                
-                content.notifyUnlocked();
-                content.setLockOwner( null );
-                content.setPendingContent("");
-            }
-            else {
-                throw new TException("TWorkingNodeData.paragraphs.commit", "not a content paragraph");
+                ( (TContent)paragraph ).setPendingContent("");
             }
 
             tableModel.notifyContentChanged();

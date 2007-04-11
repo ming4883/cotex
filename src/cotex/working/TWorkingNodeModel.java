@@ -420,19 +420,34 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         public void acquireCurrentDocument() {
             
-            int selfIdx = Integer.parseInt( util.getSetting("Temp", "Self") );
+            try {
             
-            if(selfIdx == 0) {
+                int selfIdx = Integer.parseInt( util.getSetting("Temp", "Self") );
+
+                if(selfIdx == 0) {
+
+                    TContent content;
+
+                    mData.paragraphs.append( mData.paragraphs.createGap() );
+
+                    mData.paragraphs.append( content = mData.paragraphs.createContent() );
+
+                    mData.paragraphs.append( mData.paragraphs.createGap() );
+
+                    content.setContent("Testing paragraph line 1\nTesting paragraph line 2");
+
+                } else {
+
+                    connection.sendObjectToLeftNode(
+                            connection.DATA,
+                            new TRequestDocumentMsg( mData.nodes.self() ) );
+
+                }
+            
+            }
+            catch(TException e) {
                 
-                mData.paragraphs.add( new TGap() );
-                mData.paragraphs.add( new TContent("This is a test paragraph 1.") );
-                
-            } else {
-                
-                connection.sendObjectToLeftNode(
-                        connection.DATA,
-                        new TRequestDocumentMsg( mData.nodes.self() ) );
-                
+                TLogManager.logException(e);
             }
             
         }

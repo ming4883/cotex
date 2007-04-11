@@ -23,13 +23,12 @@ public class TContent extends TParagraph implements java.io.Serializable {
     /**
      * Creates a new instance of TContent
      */
-    public TContent() {
+    public TContent(TNodeInfo creator) {
+        
+        super(creator);
+        
         mContent = "";
         mPendingContent = "";
-    }
-    
-    public TContent(String content) {
-        mContent = content;
     }
     
     public String getContent() {
