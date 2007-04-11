@@ -30,7 +30,8 @@ public class TDocumentPanel extends javax.swing.JPanel {
         mTable.setDefaultRenderer( TParagraph.class, new TParagraphRenderer() );
         mTable.setDefaultEditor( TParagraph.class, new TParagraphEditor(mNode) );
         mTable.setModel( nodeModel.getData().paragraphs.tableModel );
-        
+        mTable.setColumnSelectionAllowed(true);
+        mTable.setRowSelectionAllowed(true);
     }
     
     /** This method is called from within the constructor to
@@ -81,6 +82,9 @@ public class TDocumentPanel extends javax.swing.JPanel {
 
     private void mTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mTableMousePressed
 // TODO add your handling code here:
+        
+        evt.consume();
+        
         if(null == mNode)
             return;
         
@@ -117,23 +121,45 @@ public class TDocumentPanel extends javax.swing.JPanel {
         
         if(result) {
             
-            mTable.requestFocus();
-            mTable.editCellAt(mPendingRow, 0);
+            // lock success enter edit mode
+            javax.swing.SwingUtilities.invokeLater (
+                new Runnable () {
+                
+                public void run () {
+                   
+                    mTable.requestFocus ();
+                    mTable.editCellAt (mPendingRow, 0);
+                    mTable.changeSelection(mPendingRow, 0, false, false);
+                }
+            } );
             
-        }
-        else {
-            mTable.editingCanceled(null);
-            mPendingParagraph = null;
-            mPendingRow = -1;
+        } else {
+            
+            // lock failed cancel edit mode
+            javax.swing.SwingUtilities.invokeLater (
+                new Runnable () {
+                
+                public void run () {
+                    mTable.editingCanceled (null);
+                    mPendingParagraph = null;
+                    mPendingRow = -1;
+                }
+            } );
         }
     }
     
     //----------------------------------
     public void notifyCommitResult(boolean result) {
         
-        mTable.editingCanceled( null);
-        mPendingParagraph = null;
-        mPendingRow = -1;
+        javax.swing.SwingUtilities.invokeLater (
+            new Runnable () {
+            
+            public void run () {
+                mTable.editingCanceled (null);
+                mPendingParagraph = null;
+                mPendingRow = -1;
+            }
+        } );
         
     }
 }

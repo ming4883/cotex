@@ -293,7 +293,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
         
         // show the action panel
         mActionPanel.popup();
-        
+               
         return this;
         
     }

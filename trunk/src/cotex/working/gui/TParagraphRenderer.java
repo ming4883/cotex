@@ -48,38 +48,39 @@ public class TParagraphRenderer extends JTextArea implements TableCellRenderer {
             return this;
         }
         
+        int extend = 0;
+        
         // set text
         if ( value.getClass().equals( TGap.class ) ) {
             
             // gap
             this.setText("");
             this.setForeground(null);
-            this.setBorder(null);
-            
-            table.setRowHeight(row, (int)this.getMinimumSize().getHeight() );
         }
         else {
             
             // paragraph
             TContent paragraph = (TContent)value;
-
+            
             this.setText( paragraph.getContent() );
             this.setForeground(Color.DARK_GRAY);
             
-            javax.swing.border.Border border = new TParagraphBorder( paragraph );
-            
-            int h = (int)getMinimumSize().getHeight() + 6;
-
-            if(null != border) {
-
-                java.awt.Insets insets = border.getBorderInsets(null);
-                h += insets.bottom - insets.top;
-            }
-            
-            this.setBorder( border );
-            table.setRowHeight(row, h );
+            extend = 3;
         }
-       
+        
+        javax.swing.border.Border border = new TParagraphBorder( (TParagraph)value );
+            
+        int h = (int)getMinimumSize().getHeight() + extend;
+
+        if(null != border) {
+
+            java.awt.Insets insets = border.getBorderInsets(null);
+            h += insets.bottom - insets.top;
+        }
+
+        this.setBorder( border );
+        table.setRowHeight(row, h );
+        
         return this;
     }
     
