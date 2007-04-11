@@ -25,12 +25,14 @@ public abstract class TParagraph implements java.io.Serializable {
     
     private TUniqueId mId;
     private TNodeInfo mLockOwner;
+    private TNodeInfo mCreator;
     private State mState;
     
-    TParagraph(){
+    TParagraph(TNodeInfo creator){
         mId         = new TUniqueId();
         mState      = State.UNLOCKED;
         mLockOwner  = null;
+        mCreator    = creator;
     }
     
     public void notifyLocking() throws TException  {
