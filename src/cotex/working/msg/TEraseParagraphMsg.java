@@ -1,5 +1,5 @@
 /*
- * TInsertParagraphMsg.java
+ * TEraseParagraphMsg.java
  *
  * Created on April 7, 2007, 5:37 PM
  *
@@ -10,27 +10,21 @@
 package cotex.working.msg;
 
 import cotex.*;
-import cotex.working.TContent;
-import cotex.working.TGap;
 import java.net.InetAddress;
 
 /**
  *
  * @author Ming
  */
-public class TInsertParagraphMsg implements java.io.Serializable {
+public class TEraseParagraphMsg implements java.io.Serializable {
     
     public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
-    public TContent NewParagraph;
-    public TGap NewGap;
     
-    /** Creates a new instance of TInsertParagraphMsg */
-    public TInsertParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId,TContent newParagraph,TGap newGap) {
+    /** Creates a new instance of TEraseParagraphMsg */
+    public TEraseParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId) {
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
-        NewParagraph = newParagraph;
-        NewGap = newGap;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -38,8 +32,6 @@ public class TInsertParagraphMsg implements java.io.Serializable {
         out.defaultWriteObject();
         out.writeObject(InitiateNodeAddr);
         out.writeObject(ParagraphId);
-        out.writeObject(NewParagraph);
-        out.writeObject(NewGap);
     }
     
     private void readObject(java.io.ObjectInputStream in)
@@ -48,8 +40,6 @@ public class TInsertParagraphMsg implements java.io.Serializable {
         in.defaultReadObject();
         InitiateNodeAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
-        NewParagraph = (TContent)in.readObject();
-        NewGap = (TGap)in.readObject();
     }
     
 }

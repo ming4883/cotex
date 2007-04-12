@@ -56,6 +56,9 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     public static class TEraseParagraphCmd extends TNodeCommand {
+        public TEraseParagraphCmd(TParagraph paragraph) {
+            setArg("paragraph", paragraph);
+        }
     }
     
     public static class TCancelParagraphCmd extends TNodeCommand {
@@ -238,7 +241,7 @@ public class TWorkingNodeModel implements INodeModel {
         private void _onInsertParagraph(TNodeCommand cmd) {
             try {
                 
-                TLogManager.logMessage("TWorkingNodeModel: committing paragraph");
+                TLogManager.logMessage("TWorkingNodeModel: inserting paragraph");
                 
                 TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
                 TContent newParagraph = (TContent)cmd.getArg("newParagraph");
@@ -248,8 +251,6 @@ public class TWorkingNodeModel implements INodeModel {
                     mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd(false) );
                     return;
                 }
-                
-                //mStates.put("CommittingParagraph", paragraph);
                 
                 // init commit check list
                 protocol.mNodeCommitCheckList = new TNodeCheckList( mData.sessions.getCurrent() );
@@ -267,7 +268,29 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         private void _onEraseParagraph(TNodeCommand cmd) {
-            
+            try {
+                
+                TLogManager.logMessage("TWorkingNodeModel: deleting paragraph");
+                
+                TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
+                
+                if(paragraph.getState() != TParagraph.State.LOCKED) {
+                    mNode.execute( new TWorkingNodeView.TNotfiyCommitResultCmd(false) );
+                    return;
+                }
+                
+                // init commit check list
+                protocol.mNodeCommitCheckList = new TNodeCheckList( mData.sessions.getCurrent() );
+                protocol.mNodeCommitCheckList.set( mData.nodes.self().getAddr() );
+                
+                connection.sendObjectToRightNode(
+                        connection.CMD,
+                        new TEraseParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId() ) );
+                
+            } catch(TException e) {
+                TLogManager.logException(e);
+                
+            }
         }
         
         //------------------------------
@@ -508,8 +531,12 @@ public class TWorkingNodeModel implements INodeModel {
             
             if(obj.getClass().equals( TCancelParagraphMsg.class) )
                 _processCancelParagraphMsg( (TCancelParagraphMsg)obj );
+            
             if(obj.getClass().equals( TInsertParagraphMsg.class) )
                 _processInsertParagraphMsg( (TInsertParagraphMsg)obj );
+            
+            if(obj.getClass().equals( TEraseParagraphMsg.class) )
+                _processEraseParagraphMsg( (TEraseParagraphMsg)obj );
         }
         
         //------------------------------
@@ -766,6 +793,24 @@ public class TWorkingNodeModel implements INodeModel {
             }
         }
         
+        //------------------------------
+        private void _processEraseParagraphMsg(TEraseParagraphMsg msg) {
+            
+            try {
+                int prevGapIndex = mData.paragraphs.indexOf(msg.ParagraphId)-1;
+                TParagraph prevGap = mData.paragraphs.getAt(prevGapIndex);
+                mData.paragraphs.remove(prevGap.getId());
+                mData.paragraphs.remove(msg.ParagraphId);
+                if( util.isSelf( msg.InitiateNodeAddr ) )
+                    _notifyViewCancelLockResult();
+                else
+                    _forwardEraseMsg(msg);
+                TLogManager.logMessage("TWorkingNodeModel: paragraph deleted");
+            } catch (TException e) {
+                
+                TLogManager.logException(e);
+            }
+        }
         
         //------------------------------
         private void _sendNegativeLockResultMsg(final TLockParagraphMsg msg) {
@@ -853,6 +898,12 @@ public class TWorkingNodeModel implements INodeModel {
             // correct locking state, _forward the message
             connection.sendObjectToRightNode(connection.CMD, msg);
         }
+        //------------------------------
+        private void _forwardEraseMsg(final TEraseParagraphMsg msg) {
+            
+            // correct locking state, _forward the message
+            connection.sendObjectToRightNode(connection.CMD, msg);
+        }
         
         //------------------------------
         private void _sendPositiveCommitResultMsg(final TCommitParagraphMsg msg) {
@@ -901,6 +952,7 @@ public class TWorkingNodeModel implements INodeModel {
             // message from others, _forward to left node
             connection.sendObjectToLeftNode(connection.CMD, msg);
         }
+        
         
         //------------------------------
         private void _notifyViewCancelLockResult() {

@@ -159,7 +159,7 @@ public class TParagraphEditor extends JTextArea implements TableCellEditor {
             }
             
             if(evt.getActionCommand().equals( "Delete" ) ) {
-                
+                mNode.execute( new TWorkingNodeModel.TEraseParagraphCmd(mEditingParagraph) );
             }
             
             if(evt.getActionCommand().equals( "Insert" ) ) {
