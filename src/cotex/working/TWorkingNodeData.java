@@ -31,7 +31,7 @@ import javax.swing.AbstractListModel;
  * @author Ming
  */
 public class TWorkingNodeData  {
-        
+    
     //----------------------------------
     // Paragraphs
     //----------------------------------
@@ -68,17 +68,17 @@ public class TWorkingNodeData  {
         
         //------------------------------
         public void append(TParagraph paragraph) {
-
+            
             mParagraphs.add( paragraph );
-
+            
             tableModel.notifyContentChanged();
         }
         
         //------------------------------
-        public void insertAfter(int index, TParagraph paragraphToInsert) {
+        public void insertBefore(int index, TParagraph paragraphToInsert) {
             
             mParagraphs.add(index, paragraphToInsert);
-
+            
             tableModel.notifyContentChanged();
         }
         
@@ -88,27 +88,27 @@ public class TWorkingNodeData  {
             int idx = indexOf( id );
             mParagraphs.remove(idx);
         }
-  
+        
         //------------------------------
         public ArrayList<TParagraph> getList() {
-
+            
             return mParagraphs;
         }
-
+        
         //------------------------------
         public void setList(ArrayList<TParagraph> paragraphList) {
-
+            
             mParagraphs.clear();
-
+            
             for(int i=0; i<paragraphList.size(); ++i) {
-
+                
                 mParagraphs.add( paragraphList.get(i) );
             }
-
+            
             tableModel.notifyContentChanged();
-
+            
         }
-      
+        
         //------------------------------
         public int indexOf(TUniqueId id) throws TException {
             
@@ -124,40 +124,40 @@ public class TWorkingNodeData  {
         
         //------------------------------
         public TParagraph getAt(int idx) throws TException {
-        
+            
             if(idx < 0 || idx >= mParagraphs.size() )
                 throw new TException("TWorkingNodeData.Paragraphs.getAt", "Index out of range");
             
             return mParagraphs.get(idx);
         }
-
+        
         //------------------------------
         public TParagraph getById(TUniqueId id) throws TException {
-
+            
             Iterator<TParagraph> iter = mParagraphs.iterator();
-
+            
             while( iter.hasNext() ) {
-
+                
                 TParagraph paragraph = iter.next();
-
+                
                 if( paragraph.getId().equals( id ) )
                     return paragraph;
             }
-
+            
             throw new TException("TWorkingNodeData.paragraphGetById", "paragraph does not exist");
-
+            
         }
         
         //------------------------------
         public void setLocking(TUniqueId id) throws TException {
-
+            
             getById(id).notifyLocking();
             tableModel.notifyContentChanged();
         }
         
         //------------------------------
         public void setLocked(TUniqueId id, TNodeInfo owner) throws TException {
-
+            
             getById(id).notifyLocked();
             getById(id).setLockOwner(owner);
             tableModel.notifyContentChanged();
@@ -165,16 +165,16 @@ public class TWorkingNodeData  {
         
         //------------------------------
         public void cancelLocked(TUniqueId id) throws TException {
-
+            
             getById(id).notifyCancelLock();
             tableModel.notifyContentChanged();
         }
         
         //------------------------------
         public void commit(TUniqueId id) throws TException {
-
+            
             TParagraph paragraph = getById(id);
-
+            
             if( paragraph.getClass().equals( TContent.class ) ) {
                 
                 TContent content = (TContent)paragraph;
@@ -183,27 +183,26 @@ public class TWorkingNodeData  {
                 content.notifyUnlocked();
                 content.setLockOwner( null );
                 content.setPendingContent("");
-            }
-            else {
+            } else {
                 throw new TException("TWorkingNodeData.paragraphs.commit", "not a content paragraph");
             }
-
+            
             tableModel.notifyContentChanged();
         }
         
         //------------------------------
         public void rollback(TUniqueId id) throws TException {
-
+            
             TParagraph paragraph = getById(id);
             
             paragraph.notifyUnlocked();
             paragraph.setLockOwner( null );
-
+            
             if( paragraph.getClass().equals( TContent.class ) ) {
                 
                 ( (TContent)paragraph ).setPendingContent("");
             }
-
+            
             tableModel.notifyContentChanged();
         }
         
@@ -229,10 +228,10 @@ public class TWorkingNodeData  {
                 
                 TParagraph paragraph = mParagraphs.get(r);
                 
-                return 
-                    ( paragraph.getState() == TParagraph.State.LOCKED ) &&
-                    ( nodes.self().equals( paragraph.getLockOwner() ) );
-                    
+                return
+                        ( paragraph.getState() == TParagraph.State.LOCKED ) &&
+                        ( nodes.self().equals( paragraph.getLockOwner() ) );
+                
             }
             
             public void setValueAt(Object value, int r, int c) {
@@ -272,7 +271,7 @@ public class TWorkingNodeData  {
             mSessions.add(session);
             listModel.notifyContentChanged();
         }
-
+        
         //------------------------------
         public void remove(TSessionInfo session) {
             
@@ -282,50 +281,50 @@ public class TWorkingNodeData  {
         
         //------------------------------
         public TSessionInfo getByName(String name) throws TException {
-
+            
             Iterator<TSessionInfo> iter = mSessions.iterator();
-
+            
             while( iter.hasNext() ) {
-
+                
                 TSessionInfo session = iter.next();
-
+                
                 if( session.getName().equals(name) )
                     return session;
-
+                
             }
-
+            
             throw new TException(
-                "TWorkingNodeData.getSessionByName",
-                "Session \"" + name + "\" not found");
+                    "TWorkingNodeData.getSessionByName",
+                    "Session \"" + name + "\" not found");
         }
-
+        
         //------------------------------
         public TSessionInfo getById(TUniqueId sessionId) throws TException {
-
+            
             Iterator<TSessionInfo> iter = mSessions.iterator();
-
+            
             while( iter.hasNext() ) {
-
+                
                 TSessionInfo session = iter.next();
-
+                
                 if( session.getId().equals(sessionId) )
                     return session;
-
+                
             }
-
+            
             throw new TException(
-                "TWorkingNodeData.getSessionById",
-                "Session \"" + sessionId.toString() + "\" not found");
+                    "TWorkingNodeData.getSessionById",
+                    "Session \"" + sessionId.toString() + "\" not found");
         }
-
+        
         //------------------------------
         public void setCurrent(TUniqueId sessionId) throws TException {
-
+            
             mCurrSession = new TSession( getById(sessionId) );
-
+            
             nodes.listModel.notifyContentChanged();
         }
-
+        
         //------------------------------
         public TSession getCurrent() {
             return mCurrSession;
@@ -360,59 +359,57 @@ public class TWorkingNodeData  {
     // Nodes
     //----------------------------------
     public class Nodes {
-    
+        
         private TNodeInfo mSelfNodeInfo = null;
         
         //------------------------------
         public TNodeInfo self() {
             return mSelfNodeInfo;
         }
-
+        
         //------------------------------
         public void setSelf(TNodeInfo nodeInfo) {
             mSelfNodeInfo = nodeInfo;
         }
-
+        
         //------------------------------
         public TNodeInfo getLeft() {
-
+            
             TNodeInfo node = null;
-
+            
             if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
                 
                 try {
                     
                     node = sessions.getCurrent().getLeftNode( mSelfNodeInfo );
-                }
-                catch(TException e) {
+                } catch(TException e) {
                     
                     TLogManager.logException(e);
                 }
             }
-
+            
             return node;
-
+            
         }
-
+        
         //------------------------------
         public TNodeInfo getRight() {
-
+            
             TNodeInfo node = null;
-
+            
             if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
                 
                 try {
                     
                     node = sessions.getCurrent().getRightNode( mSelfNodeInfo );
-                }
-                catch(TException e) {
+                } catch(TException e) {
                     
                     TLogManager.logException(e);
                 }
             }
-
+            
             return node;
-
+            
         }
         
         //----------------------------------
@@ -425,28 +422,28 @@ public class TWorkingNodeData  {
         //----------------------------------
         // ListModel
         private class ListModel extends AbstractListModel {
-
+            
             public Object getElementAt(int index) {
-
+                
                 if( !sessions.hasCurrent() )
                     return null;
-
+                
                 return sessions.getCurrent().getNodeAt(index);
             }
-
+            
             public int getSize() {
-
+                
                 if( !sessions.hasCurrent() )
                     return 0;
-
+                
                 return sessions.getCurrent().getNodeCount();
             }
-
+            
             public void notifyContentChanged() {
                 fireContentsChanged( this, 0, getSize() );
             }
         }
-    
+        
         public ListModel listModel = new ListModel();
     }
     
@@ -458,6 +455,6 @@ public class TWorkingNodeData  {
     //----------------------------------
     public TWorkingNodeData() {
     }
-
+    
     //----------------------------------
 }
