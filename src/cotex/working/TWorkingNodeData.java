@@ -78,8 +78,6 @@ public class TWorkingNodeData  {
         public void insertBefore(int index, TParagraph paragraphToInsert) {
             
             mParagraphs.add(index, paragraphToInsert);
-            
-            tableModel.notifyContentChanged();
         }
         
         //------------------------------
@@ -149,29 +147,32 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
-        public void setLocking(TUniqueId id) throws TException {
+        public synchronized void setLocking(TUniqueId id) throws TException {
             
             getById(id).notifyLocking();
             tableModel.notifyContentChanged();
+            
         }
         
         //------------------------------
-        public void setLocked(TUniqueId id, TNodeInfo owner) throws TException {
+        public synchronized void setLocked(TUniqueId id, TNodeInfo owner) throws TException {
             
             getById(id).notifyLocked();
             getById(id).setLockOwner(owner);
             tableModel.notifyContentChanged();
+            
         }
         
         //------------------------------
-        public void cancelLocked(TUniqueId id) throws TException {
+        public synchronized void cancelLocked(TUniqueId id) throws TException {
             
             getById(id).notifyCancelLock();
             tableModel.notifyContentChanged();
+            
         }
         
         //------------------------------
-        public void commit(TUniqueId id) throws TException {
+        public synchronized void commit(TUniqueId id) throws TException {
             
             TParagraph paragraph = getById(id);
             
@@ -188,10 +189,11 @@ public class TWorkingNodeData  {
             }
             
             tableModel.notifyContentChanged();
+            
         }
         
         //------------------------------
-        public void rollback(TUniqueId id) throws TException {
+        public synchronized void rollback(TUniqueId id) throws TException {
             
             TParagraph paragraph = getById(id);
             
@@ -204,6 +206,35 @@ public class TWorkingNodeData  {
             }
             
             tableModel.notifyContentChanged();
+            
+        }
+        
+        //------------------------------
+        public synchronized void Erase(TUniqueId id) throws TException {
+            
+            synchronized(mParagraphs.getClass()){
+                int prevGapIndex = indexOf(id)-1;
+                TParagraph prevGap = getAt(prevGapIndex);
+                remove(prevGap.getId());
+                remove(id);
+            }
+            tableModel.notifyContentChanged();
+            
+        }
+        //------------------------------
+        public synchronized void Insert(TUniqueId id,TContent newParagraph,TGap newGap) throws TException {
+            synchronized(mParagraphs.getClass()){
+                int Index=indexOf(id);
+                insertBefore(Index,newParagraph);
+                insertBefore(Index,newGap);
+                TParagraph paragraph = getById(id);
+                
+                paragraph.notifyUnlocked();
+                paragraph.setLockOwner( null );
+            }
+            
+            tableModel.notifyContentChanged();
+            
         }
         
         //------------------------------
@@ -220,9 +251,9 @@ public class TWorkingNodeData  {
             
             public int getColumnCount() {return 1;}
             
-            public int getRowCount() { return mParagraphs.size(); }
+            public int getRowCount() {  return mParagraphs.size(); }
             
-            public TParagraph getValueAt(int r, int c) { return mParagraphs.get(r); }
+            public TParagraph getValueAt(int r, int c) {  return mParagraphs.get(r); }
             
             public boolean isCellEditable(int r, int c) {
                 
@@ -249,9 +280,9 @@ public class TWorkingNodeData  {
         public TableModel tableModel = new TableModel();
     }
     
-    //----------------------------------
-    // Sessions
-    //----------------------------------
+//----------------------------------
+// Sessions
+//----------------------------------
     public class Sessions {
         
         //------------------------------
@@ -355,9 +386,9 @@ public class TWorkingNodeData  {
         public ListModel listModel = new ListModel();
     }
     
-    //----------------------------------
-    // Nodes
-    //----------------------------------
+//----------------------------------
+// Nodes
+//----------------------------------
     public class Nodes {
         
         private TNodeInfo mSelfNodeInfo = null;
@@ -447,14 +478,14 @@ public class TWorkingNodeData  {
         public ListModel listModel = new ListModel();
     }
     
-    //----------------------------------
+//----------------------------------
     public Paragraphs paragraphs                    = new Paragraphs();
     public Sessions sessions                        = new Sessions();
     public Nodes nodes                              = new Nodes();
     
-    //----------------------------------
+//----------------------------------
     public TWorkingNodeData() {
     }
     
-    //----------------------------------
+//----------------------------------
 }

@@ -763,7 +763,6 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processReplyParagraphMsg(TReplyParagraphMsg msg) {
             
             try {
-                
                 TParagraph paragraph = mData.paragraphs.getById(msg.ParagraphId);
                 ( (TContent)paragraph ).setPendingContent( msg.Content );
             } catch(TException e) {
@@ -777,10 +776,7 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processInsertParagraphMsg(TInsertParagraphMsg msg) {
             
             try {
-                int Index=mData.paragraphs.indexOf(msg.ParagraphId);
-                mData.paragraphs.insertBefore(Index,msg.NewParagraph);
-                mData.paragraphs.insertBefore(Index,msg.NewGap);
-                mData.paragraphs.rollback( msg.ParagraphId );
+                mData.paragraphs.Insert( msg.ParagraphId ,msg.NewParagraph, msg.NewGap);
                 
                 if( util.isSelf( msg.InitiateNodeAddr ) )
                     _notifyViewCancelLockResult();
@@ -797,10 +793,7 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processEraseParagraphMsg(TEraseParagraphMsg msg) {
             
             try {
-                int prevGapIndex = mData.paragraphs.indexOf(msg.ParagraphId)-1;
-                TParagraph prevGap = mData.paragraphs.getAt(prevGapIndex);
-                mData.paragraphs.remove(prevGap.getId());
-                mData.paragraphs.remove(msg.ParagraphId);
+                mData.paragraphs.Erase( msg.ParagraphId );
                 if( util.isSelf( msg.InitiateNodeAddr ) )
                     _notifyViewCancelLockResult();
                 else
