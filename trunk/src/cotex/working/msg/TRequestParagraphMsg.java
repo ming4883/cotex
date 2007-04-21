@@ -20,10 +20,11 @@ public class TRequestParagraphMsg implements java.io.Serializable {
     
     public InetAddress RequestorAddr;
     public TUniqueId ParagraphId;
+    public int DataPort;
     
     /** Creates a new instance of TRequestParagraphMsg */
-    public TRequestParagraphMsg(InetAddress requestorAddr, TUniqueId paragraphId) {
-        
+    public TRequestParagraphMsg(InetAddress requestorAddr, int port, TUniqueId paragraphId) {
+        DataPort = port;
         RequestorAddr = requestorAddr;
         ParagraphId = paragraphId;
     }
@@ -33,7 +34,7 @@ public class TRequestParagraphMsg implements java.io.Serializable {
         out.defaultWriteObject();
         out.writeObject(RequestorAddr);
         out.writeObject(ParagraphId);
-        
+        out.writeInt(DataPort);
     }
 
     private void readObject(java.io.ObjectInputStream in) 
@@ -43,7 +44,7 @@ public class TRequestParagraphMsg implements java.io.Serializable {
         
         RequestorAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
-        
+        DataPort = in.readInt();
     }
     
 }
