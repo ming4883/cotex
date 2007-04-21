@@ -229,7 +229,7 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 connection.sendObjectToRightNode(
                         connection.CMD,
-                        new TCommitParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId() ) );
+                        new TCommitParagraphMsg( mData.nodes.self().getAddr(), mData.nodes.self().getPortByType(connection.DATA), paragraph.getId() ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -380,10 +380,10 @@ public class TWorkingNodeModel implements INodeModel {
         }
         
         //------------------------------
-        public void sendObject(String connectionName, InetAddress addr, Object obj) {
+        public void sendObject(String connectionName, InetAddress addr, int port, Object obj) {
             
             try{
-                get(connectionName).sendObject( addr, obj );
+                get(connectionName).sendObject( addr, port, obj );
             } catch(TException e) {
                 TLogManager.logException(e);
             }
@@ -393,7 +393,7 @@ public class TWorkingNodeModel implements INodeModel {
         public void sendObjectToRightNode(String connectionName, Object obj) {
             
             try{
-                get(connectionName).sendObject( mData.nodes.getRight().getAddr(), obj );
+                get(connectionName).sendObject( mData.nodes.getRight().getAddr(), mData.nodes.getRight().getPortByType(connectionName), obj );
                 
             } catch(TException e) {
                 
@@ -405,7 +405,7 @@ public class TWorkingNodeModel implements INodeModel {
         public void sendObjectToLeftNode(String connectionName, Object obj) {
             
             try{
-                get(connectionName).sendObject( mData.nodes.getLeft().getAddr(), obj );
+                get(connectionName).sendObject( mData.nodes.getLeft().getAddr(), mData.nodes.getLeft().getPortByType(connectionName), obj );
                 
             } catch(TException e) {
                 
@@ -446,13 +446,12 @@ public class TWorkingNodeModel implements INodeModel {
                 TSession session = mData.sessions.getCurrent();
                 
                 int workerCnt = Integer.parseInt( util.getSetting("Temp", "NoOfWorkers") );
-                
                 for(int i=0; i<workerCnt; ++i) {
                     
                     session.AddNode(
                             new cotex.TNodeInfo(
                             util.getSetting("Temp", "WorkerName" + Integer.toString(i) ),
-                            InetAddress.getByName( util.getSetting("Temp", "WorkerAddr" + Integer.toString(i) ) ) ) );
+                            InetAddress.getByName( util.getSetting("Temp", "WorkerAddr" + Integer.toString(i) ) ), connection.mCmdPort, connection.mRegPort, connection.mDataPort ) );
                 }
                 
                 int selfIdx = Integer.parseInt( util.getSetting("Temp", "Self") );
@@ -731,6 +730,7 @@ public class TWorkingNodeModel implements INodeModel {
             connection.sendObject(
                     connection.DATA,
                     msg.NodeInfo.getAddr(),
+                    msg.NodeInfo.getPortByType(connection.DATA),
                     new TReplyDocumentMsg( mData.paragraphs.getList() ) );
             
         }
@@ -750,6 +750,7 @@ public class TWorkingNodeModel implements INodeModel {
                 connection.sendObject(
                         connection.DATA,
                         msg.RequestorAddr,
+                        msg.DataPort,
                         new TReplyParagraphMsg( msg.ParagraphId, ( (TContent)paragraph ).getPendingContent() ) );
                 
                 mNodeCommitCheckList.set( msg.RequestorAddr );
@@ -875,7 +876,8 @@ public class TWorkingNodeModel implements INodeModel {
             connection.sendObject(
                     connection.DATA,
                     msg.InitiateNodeAddr,
-                    new TRequestParagraphMsg( mData.nodes.self().getAddr(), msg.ParagraphId ) );
+                    msg.DataPort,
+                    new TRequestParagraphMsg( mData.nodes.self().getAddr(), mData.nodes.self().getPortByType(connection.DATA), msg.ParagraphId ) );
         }
         
         //------------------------------

@@ -21,10 +21,10 @@ public interface IConnection {
     public abstract void open(Integer port) throws TException;
     public abstract void close();
     public abstract boolean isOpened();
-     
-    public abstract void startSending(java.net.InetAddress addr) throws TException;
+    
+    public abstract void startSending(java.net.InetAddress addr, int port) throws TException;
     public abstract void send(Object obj) throws TException;
     public abstract void stopSending(java.net.InetAddress addr) throws TException;
     
-    public abstract void sendObject(java.net.InetAddress addr, Object obj) throws TException;
+    public abstract void sendObject(java.net.InetAddress addr, int port, Object obj) throws TException;
 }

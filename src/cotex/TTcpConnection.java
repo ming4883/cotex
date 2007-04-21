@@ -58,8 +58,7 @@ public class TTcpConnection implements IConnection {
             mListenSock = new ServerSocket(mPort);
             mListenThread = new TSocketListeningThread(this);
             mListenThread.start();
-        }
-        catch(IOException e){
+        } catch(IOException e){
             throw new TException("TTcpConnection.open", "ServerSocket cannot be initialized");
         }
     }
@@ -69,11 +68,11 @@ public class TTcpConnection implements IConnection {
         
         TLogManager.logMessage("TTcpConnection: closing connection...");
         
-        // stop all receiving threads    
+        // stop all receiving threads
         for (int i=0; i<mThreads.size(); ++i) {
-
+            
             Thread thread = mThreads.get(i);
-
+            
             if(thread != null)
                 thread.interrupt();
         }
@@ -88,7 +87,7 @@ public class TTcpConnection implements IConnection {
         mReceiveSocks.clear();
         mListenSock = null;
         mPort = null;
-    
+        
         TLogManager.logMessage("TTcpConnection: connection closed");
     }
     
@@ -98,7 +97,7 @@ public class TTcpConnection implements IConnection {
     }
     
     //----------------------------------
-    public synchronized void startSending(java.net.InetAddress addr) throws TException {
+    public synchronized void startSending(java.net.InetAddress addr, int port) throws TException {
         
         if( !isOpened() ) {
             throw new TException("TTcpConnection.startSending", "connection is not openned");
@@ -109,16 +108,15 @@ public class TTcpConnection implements IConnection {
         }
         
         try {
-            mSendSock = new Socket(addr, mPort);
+            mSendSock = new Socket(addr, port);
             mSendOStream = new ObjectOutputStream( mSendSock.getOutputStream() );
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             
             mSendSock = null;
             mSendOStream = null;
             
             throw new TException("TTcpConnection.startSending", "failed to open socket for address " + addr.getHostAddress() );
-        }    
+        }
     }
     
     //----------------------------------
@@ -131,12 +129,11 @@ public class TTcpConnection implements IConnection {
         try {
             mSendOStream.writeObject(obj);
             mSendOStream.flush();
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             
             throw new TException("TTcpConnection.send", "failed to send object: " + e.getMessage() );
         }
-
+        
     }
     
     //----------------------------------
@@ -150,36 +147,34 @@ public class TTcpConnection implements IConnection {
             
             mSendOStream.close();
             mSendOStream = null;
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             
             throw new TException("TTcpConnection.stopSending", "failed to close ostream " + e.getMessage() );
-        }    
+        }
         
         try {
             
             mSendSock.close();
             mSendSock = null;
-        }
-        catch(IOException e) {
+        } catch(IOException e) {
             
             throw new TException("TTcpConnection.stopSending", "failed to close socket " + e.getMessage() );
         }
     }
     
     //----------------------------------
-    public synchronized void sendObject(InetAddress addr, Object obj) throws TException {
+    public synchronized void sendObject(InetAddress addr, int port, Object obj) throws TException {
         
-        startSending(addr);
+        startSending(addr,port);
         send(obj);
         stopSending(addr);
     }
     
     //----------------------------------
     public synchronized void addSocketAndWorkingThread(
-        String key,
-        Socket socket,
-        Thread thread) {
+            String key,
+            Socket socket,
+            Thread thread) {
         
         mReceiveSocks.put(key, socket);
         mThreads.add(thread);
@@ -187,8 +182,8 @@ public class TTcpConnection implements IConnection {
     
     //----------------------------------
     public synchronized void removeSocketAndWorkingThread(
-        String key,
-        Thread thread) {
+            String key,
+            Thread thread) {
         
         mReceiveSocks.remove(key);
         mThreads.remove(thread);

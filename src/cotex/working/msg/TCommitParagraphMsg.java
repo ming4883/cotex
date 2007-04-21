@@ -20,11 +20,13 @@ public class TCommitParagraphMsg implements java.io.Serializable {
     
     public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
+    public int DataPort;
     
     /** Creates a new instance of TCommitParagraphMsg */
-    public TCommitParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId) {
+    public TCommitParagraphMsg(InetAddress initiateNodeAddr, int port, TUniqueId paragraphId) {
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
+        DataPort = port;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -32,6 +34,7 @@ public class TCommitParagraphMsg implements java.io.Serializable {
         out.defaultWriteObject();
         out.writeObject(InitiateNodeAddr);
         out.writeObject(ParagraphId);
+        out.writeInt(DataPort);
     }
 
     private void readObject(java.io.ObjectInputStream in) 
@@ -40,6 +43,7 @@ public class TCommitParagraphMsg implements java.io.Serializable {
         in.defaultReadObject();
         InitiateNodeAddr = (InetAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
+        DataPort = in.readInt();
      }
     
 }
