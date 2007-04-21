@@ -14,9 +14,8 @@ import cotex.TSession;
 import cotex.TSessionInfo;
 import cotex.working.msg.*;
 import java.util.HashMap;
-import java.util.Vector;
-import javax.swing.table.AbstractTableModel;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 
 /**
  *
@@ -330,9 +329,26 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         public void startUp() throws NumberFormatException, TException {
             
-            mRegPort = Integer.parseInt( util.getSetting("General", "RegistryPort") );
-            mCmdPort = Integer.parseInt( util.getSetting("General", "WorkingCmdPort") );
-            mDataPort = Integer.parseInt( util.getSetting("General", "WorkingDataPort") );
+            int currentPort=11000;
+            int flag=0;
+            while(flag<3) {
+                try {
+                    ServerSocket checkSocket = new ServerSocket(currentPort);
+                    if(flag==0){
+                        mRegPort = currentPort;
+                    }else if(flag==1){
+                        mCmdPort = currentPort;
+                    }else if(flag==2){
+                        mDataPort = currentPort;
+                    }
+                    flag++;
+                    currentPort++;
+                    checkSocket.close();
+                } catch (java.io.IOException ex) {
+                    currentPort++;
+                }
+            }
+            
             
             // setup listeners
             IConnectionListener regListener = new IConnectionListener() {
@@ -415,8 +431,8 @@ public class TWorkingNodeModel implements INodeModel {
         
     }
     
-    //----------------------------------
-    // Protocol
+//----------------------------------
+// Protocol
     private class Protocol {
         
         private TNodeCheckList mNodeCommitCheckList = null;
@@ -961,8 +977,8 @@ public class TWorkingNodeModel implements INodeModel {
         
     }
     
-    //----------------------------------
-    // Util
+//----------------------------------
+// Util
     private class Util {
         
         //------------------------------
@@ -992,8 +1008,8 @@ public class TWorkingNodeModel implements INodeModel {
         
     }
     
-    //----------------------------------
-    // Inner classes
+//----------------------------------
+// Inner classes
     private Cmd cmd                 = new Cmd();
     private Connection connection   = new Connection();
     private Util util               = new Util();
@@ -1002,14 +1018,14 @@ public class TWorkingNodeModel implements INodeModel {
     private TNode mNode;
     private TWorkingNodeData mData;
     
-    //----------------------------------
+//----------------------------------
     public TWorkingNodeModel(TNode node) {
         
         mNode = node;
         mData = new TWorkingNodeData();
     }
     
-    //----------------------------------
+//----------------------------------
     public void startUp() throws TException {
         
         connection.startUp();
@@ -1017,21 +1033,21 @@ public class TWorkingNodeModel implements INodeModel {
         protocol.acquireSessionsFromRegistry();
     }
     
-    //----------------------------------
+//----------------------------------
     public void shutDown() {
     }
     
-    //-------------------------------------------
+//-------------------------------------------
     public TWorkingNodeData getData() {
         return mData;
     }
     
-    //----------------------------------
+//----------------------------------
     public void execute(TNodeCommand cmd) {
         
         this.cmd.execute(cmd);
     }
     
-    //----------------------------------
+//----------------------------------
     
 }
