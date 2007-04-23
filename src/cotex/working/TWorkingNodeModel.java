@@ -445,6 +445,7 @@ public class TWorkingNodeModel implements INodeModel {
             // todo: ask the registry node for sessions in step of hardcode
             TSessionInfo session = new TSessionInfo( util.getSetting("Temp", "DummySessionName" ) );
             
+            
             mData.sessions.add( session );
             
         }

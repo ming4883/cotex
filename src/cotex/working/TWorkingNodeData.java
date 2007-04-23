@@ -304,6 +304,12 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
+        public void setList(ArrayList<TSessionInfo> sessions) {            
+            mSessions=sessions;
+            listModel.notifyContentChanged();
+        }
+        
+        //------------------------------
         public void remove(TSessionInfo session) {
             
             mSessions.remove(session);
