@@ -407,16 +407,15 @@ public class TWorkingNodeData  {
     //----------------------------------
     public class Nodes {
         
-        private TNodeInfo mSelfNodeInfo = null;
-        
         //------------------------------
         public TNodeInfo self() {
-            return mSelfNodeInfo;
+            return TNodeInfo.self;
         }
         
         //------------------------------
         public void setSelf(TNodeInfo nodeInfo) {
-            mSelfNodeInfo = nodeInfo;
+            TNodeInfo.self = nodeInfo;
+            
         }
         
         //------------------------------
@@ -424,10 +423,10 @@ public class TWorkingNodeData  {
             
             TNodeInfo node = null;
             
-            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+            if(null != TNodeInfo.self && sessions.hasCurrent() ) {
                 try {
                     
-                    node = sessions.getCurrent().getLeftNode( mSelfNodeInfo );
+                    node = sessions.getCurrent().getLeftNode( TNodeInfo.self );
                 } catch(TException e) {
                     
                     TLogManager.logException(e);
@@ -454,11 +453,11 @@ public class TWorkingNodeData  {
             
             TNodeInfo node = null;
             
-            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+            if(null != TNodeInfo.self && sessions.hasCurrent() ) {
                 
                 try {
                     
-                    node = sessions.getCurrent().getRightNode( mSelfNodeInfo );
+                    node = sessions.getCurrent().getRightNode( TNodeInfo.self );
                 } catch(TException e) {
                     
                     TLogManager.logException(e);

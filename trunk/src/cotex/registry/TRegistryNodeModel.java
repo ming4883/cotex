@@ -22,7 +22,7 @@ import java.util.Iterator;
 public class TRegistryNodeModel implements INodeModel {
     
     //----------------------------------
-    private class Data {
+    public class Data {
         
         private java.util.ArrayList<TSession> mSessions;
         public TreeModel treeModel;
@@ -38,6 +38,8 @@ public class TRegistryNodeModel implements INodeModel {
             TSession session = new TSession( new TSessionInfo(sessionName) );
             
             mSessions.add(session);
+            
+            treeModel.notifyContentChanged();
             
             return session.getInfo().getId();
             
@@ -96,27 +98,67 @@ public class TRegistryNodeModel implements INodeModel {
                 mListeners.remove(listener);
             }
             
-            public Object getChild(Object parant, int index) {
+            public Object getChild(Object parent, int index) {
+                
+                if(parent == this) {
+                 
+                    return mSessions.get(index);
+                }
+                
+                if( parent.getClass().equals( TSession.class ) ) {
+                    
+                    return ( (TSession)parent ).getNodeAt(index);
+                }
                 
                 return null;
             }
             
             public int getChildCount(Object parent) {
                 
-                return -1;
+                if(parent == this) {
+                 
+                    return mSessions.size();
+                }
+                
+                if( parent.getClass().equals( TSession.class ) ) {
+                    
+                    return ( (TSession)parent ).getNodeCount();
+                }
+                
+                return 0;
             }
             
             public int getIndexOfChild(Object parent, Object child) {
+                
+                if(parent == this) {
+                 
+                    return mSessions.indexOf(child);
+                }
+                
+                if( parent.getClass().equals( TSession.class ) ) {
+                    
+                    return ((TSession)parent).indexOf( (TNodeInfo)child );
+                }
                 
                 return -1;
             }
             
             public Object getRoot() {
                 
-                return null;
+                return this;
             }
             
             public boolean isLeaf(Object node) {
+                
+                if(node == this) {
+                 
+                    return false;
+                }
+                
+                if( node.getClass().equals( TSession.class ) ) {
+                    
+                    return false;
+                }
                 
                 return true;
             }
@@ -124,6 +166,28 @@ public class TRegistryNodeModel implements INodeModel {
             public void valueForPathChanged(
                 javax.swing.tree.TreePath path,
                 Object newValue) {
+            }
+            
+            public String toString() {
+             
+                return "Sessions";
+            }
+            
+            public void notifyContentChanged() {
+             
+                try{
+                Iterator<javax.swing.event.TreeModelListener> iter = mListeners.iterator();
+                
+                javax.swing.event.TreeModelEvent evt = 
+                    new javax.swing.event.TreeModelEvent(this, new javax.swing.tree.TreePath(this));
+                //javax.swing.event.TreeModelEvent evt = null;
+                while( iter.hasNext() )
+                    iter.next().treeStructureChanged(evt);
+                
+                }catch(Exception e) {
+                 
+                    TLogManager.logError("Error notifying tree model content changed");
+                }
             }
         }
         
@@ -332,6 +396,8 @@ public class TRegistryNodeModel implements INodeModel {
                 
                 session2Join.addNode(msg.workerInfo);
                 
+                data.treeModel.notifyContentChanged();
+                
                 _sendReply( outStream, new TReplyJoinSessionMsg( true, session2Join.getList() ) );
                 
             } else {
@@ -345,7 +411,7 @@ public class TRegistryNodeModel implements INodeModel {
     }
     
     //----------------------------------
-    private Data data = new Data();
+    public Data data = new Data();
     private Protocol protocol = new Protocol();
     
     private TNode mNode = null;

@@ -32,6 +32,11 @@ public class TSession {
         mNodes = new ArrayList<TNodeInfo>();
     }
     
+    public String toString() {
+     
+        return mInfo.getName();
+    }
+    
     public final TSessionInfo getInfo() {
         return mInfo;
     }

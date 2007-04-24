@@ -66,6 +66,9 @@ public class TWorkingNodeView implements INodeView {
     }
     
     public void startUp() throws TException {
+        
+        TNodeInfo.DisplayAddress = false;
+        
     }
     
     public void shutDown() {
