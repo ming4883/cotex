@@ -39,14 +39,17 @@ public class TWorkingNodeData  {
     public class Paragraphs {
         
         private ArrayList<TParagraph> mParagraphs;
+        ArrayList<TUniqueId> mGrantedParagraphs;
         
         //------------------------------
         public Paragraphs() {
             mParagraphs = new ArrayList<TParagraph>();
+            mGrantedParagraphs = new ArrayList<TUniqueId>();
         }
         
         public void clear(){
             mParagraphs.clear();
+            mGrantedParagraphs.clear();
         }
         //------------------------------
         public TContent createContent() throws TException  {
@@ -247,6 +250,16 @@ public class TWorkingNodeData  {
             tableModel.notifyContentChanged();
         }
         
+        
+        public void addGrantedParagraph(TUniqueId paragraphId){
+            if(!isParagraphGranted(paragraphId))
+                mGrantedParagraphs.add(paragraphId);
+        }
+        
+        public boolean isParagraphGranted(TUniqueId paragraphId){
+            return mGrantedParagraphs.contains(paragraphId);
+        }
+        
         //------------------------------
         // TableModel
         private class TableModel extends AbstractTableModel {
@@ -265,7 +278,8 @@ public class TWorkingNodeData  {
                 
                 return
                         ( paragraph.getState() == TParagraph.State.LOCKED ) &&
-                        ( nodes.self().equals( paragraph.getLockOwner() ) );
+                        ( nodes.self().equals( paragraph.getLockOwner() ) &&
+                        (isParagraphGranted(paragraph.getId()) || paragraph.getCreator()==nodes.self()));
                 
             }
             
@@ -310,12 +324,12 @@ public class TWorkingNodeData  {
         //------------------------------
         public void setList(ArrayList<TSessionInfo> sessions) {
             mSessions = sessions;
-            listModel.notifyContentChanged();            
+            listModel.notifyContentChanged();
         }
         
         public void setNodeList(ArrayList<TNodeInfo> nodeInfos) {
             getCurrent().setList(nodeInfos);
-            listModel.notifyContentChanged();            
+            listModel.notifyContentChanged();
             nodes.listModel.notifyContentChanged();
         }
         
@@ -477,14 +491,14 @@ public class TWorkingNodeData  {
         
         //----------------------------------
         public void setListToCurrentSession(ArrayList<TNodeInfo> list) {
-        
+            
             sessions.getCurrent().setList(list);
             listModel.notifyContentChanged();
         }
         
         //----------------------------------
         public void addToCurrentSession(TNodeInfo nodeInfo) {
-         
+            
             sessions.getCurrent().addNode(nodeInfo);
             listModel.notifyContentChanged();
         }
@@ -518,9 +532,64 @@ public class TWorkingNodeData  {
     }
     
     //----------------------------------
+    // AccessRightList
+    //----------------------------------
+    public class AccessRightList {
+        
+        //------------------------------
+        private ArrayList<TAccessRightQuery> mAccessRights;
+        
+        //------------------------------
+        public AccessRightList() {
+            mAccessRights = new ArrayList<TAccessRightQuery>();
+        }
+        
+        //------------------------------
+        public void add(TAccessRightQuery query) {
+            
+            mAccessRights.add(query);
+            listModel.notifyContentChanged();
+        }
+        
+        
+        //------------------------------
+        public void remove(TAccessRightQuery query) {
+            
+            mAccessRights.remove(query);
+            listModel.notifyContentChanged();
+        }
+        
+        //------------------------------
+        public void clear() {
+            mAccessRights.clear();
+            listModel.notifyContentChanged();
+        }
+        
+        //----------------------------------
+        // ListModel
+        private class ListModel extends AbstractListModel {
+            
+            public Object getElementAt(int index) {
+                return mAccessRights.get(index);
+            }
+            
+            public int getSize() {
+                return mAccessRights.size();
+            }
+            
+            public void notifyContentChanged() {
+                fireContentsChanged( this, 0, getSize() );
+            }
+        }
+        
+        public ListModel listModel = new ListModel();
+    }
+    
+    //----------------------------------
     public Paragraphs paragraphs                    = new Paragraphs();
     public Sessions sessions                        = new Sessions();
     public Nodes nodes                              = new Nodes();
+    public AccessRightList accessRightList        = new AccessRightList();
     
     //----------------------------------
     public TWorkingNodeData() {

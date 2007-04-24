@@ -26,6 +26,7 @@ public class TSessionPanel extends javax.swing.JPanel {
         
         mSessionList.setModel( workingModel.getData().sessions.listModel );
         mWorkerList.setModel( workingModel.getData().nodes.listModel );
+        mGrantAccessList.setModel( workingModel.getData().accessRightList.listModel);
     }
     
     /** This method is called from within the constructor to
@@ -39,8 +40,10 @@ public class TSessionPanel extends javax.swing.JPanel {
         mSessionList = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
         mWorkerList = new javax.swing.JList();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        mGrantAccessList = new javax.swing.JList();
 
-        setLayout(new java.awt.GridLayout(2, 0));
+        setLayout(new java.awt.GridLayout(3, 0, 0, 2));
 
         setName("Sessions");
         mSessionList.setModel(new javax.swing.AbstractListModel() {
@@ -69,7 +72,52 @@ public class TSessionPanel extends javax.swing.JPanel {
 
         add(jScrollPane2);
 
+        mGrantAccessList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        mGrantAccessList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                mGrantAccessListMouseReleased(evt);
+            }
+        });
+
+        jScrollPane3.setViewportView(mGrantAccessList);
+
+        add(jScrollPane3);
+
     }// </editor-fold>//GEN-END:initComponents
+    
+    private void mGrantAccessListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mGrantAccessListMouseReleased
+// TODO add your handling code here:
+        if( evt.isPopupTrigger() ) {
+            
+            JMenuItem menuItem;
+            JPopupMenu popup = new JPopupMenu();
+            
+            mGrantAccessList.setSelectedIndex( mGrantAccessList.locationToIndex( evt.getPoint() ) );
+            java.awt.event.ActionListener listener = new java.awt.event.ActionListener() {
+                
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    onGrantAccessMenuAction(e);
+                }
+            };
+            
+            if( mGrantAccessList.getSelectedValue() != null ) {
+                
+                menuItem = new JMenuItem("Approve");
+                menuItem.setActionCommand("Approve");
+                menuItem.addActionListener(listener);
+                popup.add(menuItem);
+                menuItem = new JMenuItem("Disapprove");
+                menuItem.setActionCommand("Disapprove");
+                menuItem.addActionListener(listener);
+                popup.add(menuItem);
+            }
+            popup.show( evt.getComponent(), evt.getX(), evt.getY() );
+        }
+    }//GEN-LAST:event_mGrantAccessListMouseReleased
     
     private void mSessionListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mSessionListMouseReleased
 // TODO add your handling code here:
@@ -85,6 +133,12 @@ public class TSessionPanel extends javax.swing.JPanel {
                     onSessionMenuAction(e);
                 }
             };
+            
+            menuItem = new JMenuItem("Refresh Session List");
+            menuItem.setActionCommand("Refresh");
+            menuItem.addActionListener(listener);
+            popup.add(menuItem);
+            
             menuItem = new JMenuItem("New");
             menuItem.setActionCommand("New");
             menuItem.addActionListener(listener);
@@ -94,7 +148,7 @@ public class TSessionPanel extends javax.swing.JPanel {
                 menuItem = new JMenuItem("Join");
                 menuItem.setActionCommand("Join");
                 menuItem.addActionListener(listener);
-                popup.add(menuItem);                
+                popup.add(menuItem);
                 
             }
             popup.show( evt.getComponent(), evt.getX(), evt.getY() );
@@ -105,6 +159,8 @@ public class TSessionPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JList mGrantAccessList;
     private javax.swing.JList mSessionList;
     private javax.swing.JList mWorkerList;
     // End of variables declaration//GEN-END:variables
@@ -116,7 +172,15 @@ public class TSessionPanel extends javax.swing.JPanel {
         mNode = node;
     }
      */
-    
+    private void onGrantAccessMenuAction(java.awt.event.ActionEvent evt){
+        if( evt.getActionCommand().equals("Approve") ) {
+            TAccessRightQuery query = (TAccessRightQuery)mGrantAccessList.getSelectedValue();
+            mNode.execute( new TWorkingNodeModel.TReplyGrantAccessRightCmd( query,"true" ) );
+        } else if( evt.getActionCommand().equals("Disapprove") ) {
+            TAccessRightQuery query = (TAccessRightQuery)mGrantAccessList.getSelectedValue();
+            mNode.execute( new TWorkingNodeModel.TReplyGrantAccessRightCmd(query,"false") );
+        }
+    }
     private void onSessionMenuAction(java.awt.event.ActionEvent evt) {
         
         if( evt.getActionCommand().equals("Join") ) {
@@ -126,10 +190,13 @@ public class TSessionPanel extends javax.swing.JPanel {
             
         } else if( evt.getActionCommand().equals("New") ) {
             
-            String newSessionName = 
-                JOptionPane.showInputDialog("Please input the name of the new session:");
+            String newSessionName =
+                    JOptionPane.showInputDialog("Please input the name of the new session:");
             
             mNode.execute( new TWorkingNodeModel.TNewSessionCmd(newSessionName) );
+        }else if( evt.getActionCommand().equals("Refresh") ) {
+            
+            mNode.execute( new TWorkingNodeModel.TRefreshSessionListCmd() );
         }
     }
 }

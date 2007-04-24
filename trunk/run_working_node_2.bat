@@ -1,3 +1,3 @@
 @echo off
 
-.\dist\cotex.jar working Sam
+start .\dist\cotex.jar working Sam

@@ -95,6 +95,10 @@ public abstract class TParagraph implements java.io.Serializable {
         return mLockOwner;
     }
     
+    public TNodeInfo getCreator() {
+        return mCreator;
+    }    
+    
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 
         out.defaultWriteObject();

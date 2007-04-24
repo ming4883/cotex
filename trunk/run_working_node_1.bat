@@ -1,3 +1,3 @@
 @echo off
 
-.\dist\cotex.jar working Peter
+start .\dist\cotex.jar working Peter

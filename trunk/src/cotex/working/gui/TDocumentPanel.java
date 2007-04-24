@@ -8,7 +8,6 @@ package cotex.working.gui;
 
 import cotex.*;
 import cotex.working.*;
-import javax.swing.table.TableModel;
 import javax.swing.*;
 
 /**
@@ -17,15 +16,114 @@ import javax.swing.*;
  */
 public class TDocumentPanel extends javax.swing.JPanel {
     
+    //----------------------------------
+    class TActionPanel {
+        
+        //------------------------------
+        private JPanel mAccessRightPanel = null;
+        private JPanel mRightActionPanel = null;
+        private Popup mPopup = null;
+        
+        private java.awt.event.ActionListener mActionListener;
+        
+        //------------------------------
+        private void createActionPanel() {
+            
+            mAccessRightPanel = new JPanel();
+            mAccessRightPanel.setLayout( new java.awt.BorderLayout() );
+            
+            mActionListener = new java.awt.event.ActionListener( ) {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    onAction(evt);
+                }
+            };
+            
+            createRightActionPanel();
+            mAccessRightPanel.add(mRightActionPanel);
+            mAccessRightPanel.setSize( mRightActionPanel.getSize().width, 24 );
+        }
+        
+        //------------------------------
+        private void createRightActionPanel() {
+            
+            mRightActionPanel = new JPanel();
+            
+            java.awt.GridLayout layout = new java.awt.GridLayout();
+            
+            layout.setRows(1);
+            layout.setColumns(2);
+            
+            mRightActionPanel.setLayout( layout );
+            
+            JButton btn;
+            
+            // commit
+            btn = new JButton();
+            btn.setText("Grant Access");
+            btn.setActionCommand("GrantAccess");
+            btn.addActionListener( mActionListener );
+            
+            mRightActionPanel.add(btn);
+            
+            // cancel
+            btn = new JButton();
+            btn.setText("Cancel");
+            btn.setActionCommand("Cancel");
+            btn.addActionListener( mActionListener );
+            
+            mRightActionPanel.add(btn);
+            
+            mRightActionPanel.setSize( mRightActionPanel.getMinimumSize() );
+            
+        }
+        
+        //------------------------------
+        private void onAction(java.awt.event.ActionEvent evt) {
+            
+            TLogManager.logMessage("TDocumentPanel: onAction");
+            
+            if(evt.getActionCommand().equals( "GrantAccess" ) ) {
+                mNode.execute( new TWorkingNodeModel.TGrantAccessRightCmd(mPendingParagraph) );
+            }
+            if(evt.getActionCommand().equals( "Cancel" ) ) {
+            }
+            mPendingParagraph = null;
+            mPendingRow = -1;
+            mPopup.hide();
+            
+        }
+        
+        //------------------------------
+        private void popup() {
+            
+            if(null != mPopup)
+                mPopup.hide();
+            if(null == mAccessRightPanel)
+                createActionPanel();
+            java.awt.Rectangle rect = mTable.getCellRect(mPendingRow, 0, true);
+            
+            java.awt.Point p = new java.awt.Point(rect.x, rect.y);
+            SwingUtilities.convertPointToScreen( p, mTable );
+            
+            p.x += rect.width - mAccessRightPanel.getSize().width;
+            p.y -= mAccessRightPanel.getSize().height;
+            
+            mPopup = PopupFactory.getSharedInstance().getPopup( mTable.getRootPane(), mAccessRightPanel, p.x, p.y );
+            
+            mPopup.show();
+            
+        }
+    }
+    
+    
     /**
      * Creates new form TDocumentPanel
      */
     public TDocumentPanel(TNode node) {
         
         mNode = node;
-        
         initComponents();
-        
+        mAccessRightPanel        = new TActionPanel();
         TWorkingNodeModel nodeModel = (TWorkingNodeModel)mNode.getModel();
         mTable.setDefaultRenderer( TParagraph.class, new TParagraphRenderer() );
         mTable.setDefaultEditor( TParagraph.class, new TParagraphEditor(mNode) );
@@ -79,7 +177,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
         add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void mTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mTableMousePressed
 // TODO add your handling code here:
         
@@ -94,17 +192,22 @@ public class TDocumentPanel extends javax.swing.JPanel {
         int row = mTable.rowAtPoint( evt.getPoint() );
         
         TParagraph paragraph = (TParagraph)mTable.getModel().getValueAt(row, 0);
-        
-        if(paragraph.getState() == TParagraph.State.UNLOCKED) {
-        
+        TWorkingNodeModel mModel = (TWorkingNodeModel)mNode.getModel();
+        TWorkingNodeData.Paragraphs paragraphs = mModel.getData().paragraphs;
+        if(!paragraphs.isParagraphGranted(paragraph.getId()) &&
+                !paragraph.getCreator().equals(mModel.getData().nodes.self()) &&
+                mTable.getModel().getValueAt(row, 0).getClass().equals(TContent.class)){
             mPendingRow = row;
             mPendingParagraph = paragraph;
-            
+            mAccessRightPanel.popup();
+        }else if(paragraph.getState() == TParagraph.State.UNLOCKED) {
+            mPendingRow = row;
+            mPendingParagraph = paragraph;
             mNode.execute( new TWorkingNodeModel.TLockParagraphCmd(paragraph) );
         }
         
     }//GEN-LAST:event_mTableMousePressed
-            
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -115,6 +218,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
     private TNode mNode = null;
     private int mPendingRow = -1;
     private TParagraph mPendingParagraph = null;
+    private TActionPanel mAccessRightPanel;
     
     //----------------------------------
     public void notifyLockResult(boolean result) {
@@ -122,13 +226,13 @@ public class TDocumentPanel extends javax.swing.JPanel {
         if(result) {
             
             // lock success enter edit mode
-            javax.swing.SwingUtilities.invokeLater (
-                new Runnable () {
+            javax.swing.SwingUtilities.invokeLater(
+                    new Runnable() {
                 
-                public void run () {
-                   
-                    mTable.requestFocus ();
-                    mTable.editCellAt (mPendingRow, 0);
+                public void run() {
+                    
+                    mTable.requestFocus();
+                    mTable.editCellAt(mPendingRow, 0);
                     mTable.changeSelection(mPendingRow, 0, false, false);
                 }
             } );
@@ -136,11 +240,11 @@ public class TDocumentPanel extends javax.swing.JPanel {
         } else {
             
             // lock failed cancel edit mode
-            javax.swing.SwingUtilities.invokeLater (
-                new Runnable () {
+            javax.swing.SwingUtilities.invokeLater(
+                    new Runnable() {
                 
-                public void run () {
-                    mTable.editingCanceled (null);
+                public void run() {
+                    mTable.editingCanceled(null);
                     mPendingParagraph = null;
                     mPendingRow = -1;
                 }
@@ -151,11 +255,11 @@ public class TDocumentPanel extends javax.swing.JPanel {
     //----------------------------------
     public void notifyCommitResult(boolean result) {
         
-        javax.swing.SwingUtilities.invokeLater (
-            new Runnable () {
+        javax.swing.SwingUtilities.invokeLater(
+                new Runnable() {
             
-            public void run () {
-                mTable.editingCanceled (null);
+            public void run() {
+                mTable.editingCanceled(null);
                 mPendingParagraph = null;
                 mPendingRow = -1;
             }
