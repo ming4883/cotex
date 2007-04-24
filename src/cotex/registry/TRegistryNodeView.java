@@ -24,7 +24,7 @@ public class TRegistryNodeView implements INodeView {
     //----------------------------------
     public TRegistryNodeView(TNode node) {
         
-        mSessionPanel = new TSessionPanel();
+        mSessionPanel = new TSessionPanel(node);
         
         mGuiList = new java.util.ArrayList<javax.swing.JComponent>();
         

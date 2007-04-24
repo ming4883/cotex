@@ -6,15 +6,42 @@
 
 package cotex.registry;
 
+import cotex.*;
+
 /**
  *
  * @author  Ming
  */
 public class TSessionPanel extends javax.swing.JPanel {
     
+    private TNode mNode;
+    
     /** Creates new form TSessionPanel */
-    public TSessionPanel() {
+    public TSessionPanel(TNode node) {
+        
         initComponents();
+        
+        mNode = node;
+        
+        mSessionTree.setModel( ((TRegistryNodeModel)mNode.getModel()).data.treeModel);
+        
+        javax.swing.event.TreeModelListener listener = 
+            new javax.swing.event.TreeModelListener() {
+            
+            public void treeNodesChanged(javax.swing.event.TreeModelEvent e) {
+                expandTreeNodes();}
+            
+            public void treeNodesInserted(javax.swing.event.TreeModelEvent e) {
+                expandTreeNodes();}
+            
+            public void treeNodesRemoved(javax.swing.event.TreeModelEvent e) {
+                expandTreeNodes();}
+            
+            public void treeStructureChanged(javax.swing.event.TreeModelEvent e) {
+                expandTreeNodes();}
+        };
+        
+        mSessionTree.getModel().addTreeModelListener(listener);
     }
     
     /** This method is called from within the constructor to
@@ -42,4 +69,39 @@ public class TSessionPanel extends javax.swing.JPanel {
     private javax.swing.JTree mSessionTree;
     // End of variables declaration//GEN-END:variables
     
+    private void expandTreeNodes() {
+        
+        //expandAll(
+        //    mSessionTree,
+        //    new javax.swing.tree.TreePath( mSessionTree.getModel().getRoot() ),
+        //    true);
+        
+    }
+    
+    private void expandAll(javax.swing.JTree tree, javax.swing.tree.TreePath parent, boolean expand) {
+        
+        // Traverse children
+        javax.swing.tree.TreeNode node = (javax.swing.tree.TreeNode)parent.getLastPathComponent();
+        
+        if (node.getChildCount() >= 0) {
+            
+            for (java.util.Enumeration e = node.children(); e.hasMoreElements(); ) {
+                
+                javax.swing.tree.TreeNode n = (javax.swing.tree.TreeNode)e.nextElement();
+                javax.swing.tree.TreePath path = parent.pathByAddingChild(n);
+                expandAll(tree, path, expand);
+            }
+        }
+    
+        // Expansion or collapse must be done bottom-up
+        if (expand) {
+            
+            tree.expandPath(parent);
+            
+        } else {
+            
+            tree.collapsePath(parent);
+            
+        }
+    }
 }

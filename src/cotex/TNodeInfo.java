@@ -24,6 +24,9 @@ public class TNodeInfo implements java.io.Serializable {
     private int mCmdPort;
     private int mDataPort;
     
+    static public TNodeInfo self = null;
+    static public boolean DisplayAddress = true;
+    
     /**
      * Creates a new instance of TNodeInfo
      */
@@ -78,7 +81,16 @@ public class TNodeInfo implements java.io.Serializable {
     }
     
     public final String toString() {
-        return mName + " [" + mAddr.getHostAddress() + ":" + Integer.toString(mCmdPort) + "]";
+        
+        String str = mName;
+        
+        if(DisplayAddress)
+            str = str + " [" + mAddr.getHostAddress() + ":" + Integer.toString(mCmdPort) + "]";
+        
+        if( this.equals(self) )
+            str = str + " [self]";
+            
+        return str;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {

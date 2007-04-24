@@ -119,7 +119,7 @@ public class TApp extends javax.swing.JFrame {
             } else {
                 
                 mNode = TNodeFactory.createWorkingInstance( mConfig );
-                setTitle("Cotex - Worker Node[" + mConfig.getSetting("Working", "Username") + "]");
+                setTitle("Cotex - Worker Node [" + mConfig.getSetting("Working", "Username") + "]");
             }
             
             initGui();
