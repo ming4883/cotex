@@ -1,5 +1,5 @@
 /*
- * TLockResultMsg.java
+ * TCommitResultMsg.java
  *
  * Created on April 9, 2007, 12:08 PM
  *
@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package cotex.working.msg;
+package cotex.msg;
 
 import cotex.*;
 import java.net.InetAddress;
@@ -16,14 +16,14 @@ import java.net.InetAddress;
  *
  * @author Ming
  */
-public class TLockResultMsg implements java.io.Serializable {
+public class TCommitResultMsg implements java.io.Serializable {
     
     public InetAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     public boolean Result;
     
     /** Creates a new instance of TLockResultMsg */
-    public TLockResultMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId, boolean result) {
+    public TCommitResultMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId, boolean result) {
         
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;

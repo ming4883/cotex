@@ -20,33 +20,26 @@ public class TNodeInfo implements java.io.Serializable {
     private String mName;
     private InetAddress mAddr;
     private int mCmdPort;
-    private int mRegPort;
     private int mDataPort;
-    
-    public final String REG = "Reg";
-    public final String CMD = "Cmd";
-    public final String DATA = "Data";
     
     /**
      * Creates a new instance of TNodeInfo
      */
-    public TNodeInfo(String name, InetAddress addr, int cmdPort, int regPort, int dataPort) {
+    public TNodeInfo(String name, InetAddress addr, int cmdPort, int dataPort) {
         mName = name;
         mAddr = addr;
         mCmdPort = cmdPort;
-        mRegPort = regPort;
         mDataPort = dataPort;
     }
     
-    public final int getPortByType(String type) {
-        if(type==CMD)
-            return mCmdPort;
-        else if(type==REG)
-            return mRegPort;
-        else if(type==DATA)
-            return mDataPort;
-        
-        return 0;
+    public final int getCmdPort() {
+     
+        return mCmdPort;
+    }
+    
+    public final int getDataPort() {
+     
+        return mDataPort;
     }
     
     public final String getName() {
@@ -67,7 +60,11 @@ public class TNodeInfo implements java.io.Serializable {
             return false;
         
         TNodeInfo rhs = (TNodeInfo)obj;
-        return mAddr.equals(rhs.mAddr) && mCmdPort==rhs.mCmdPort && mDataPort==rhs.mDataPort && mRegPort==rhs.mRegPort && mName.equals(rhs.mName);
+        
+        return 
+            ( mAddr.equals(rhs.mAddr) ) && 
+            ( mCmdPort==rhs.mCmdPort ) && 
+            ( mDataPort==rhs.mDataPort );
     }
     
     public final String toString() {
@@ -80,7 +77,6 @@ public class TNodeInfo implements java.io.Serializable {
         out.writeObject(mName);
         out.writeObject(mAddr);
         out.writeInt(mCmdPort);
-        out.writeInt(mRegPort);
         out.writeInt(mDataPort);
     }
     
@@ -92,7 +88,6 @@ public class TNodeInfo implements java.io.Serializable {
         mName = (String)in.readObject();
         mAddr = (InetAddress)in.readObject();
         mCmdPort = (int)in.readInt();
-        mRegPort = (int)in.readInt();
         mDataPort = (int)in.readInt();
     }
 }

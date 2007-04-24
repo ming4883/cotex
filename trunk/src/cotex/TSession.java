@@ -26,6 +26,8 @@ public class TSession {
     
     /** Creates a new instance of TSession */
     public TSession(TSessionInfo info) {
+        
+        mInfo = info;
         mNodes = new ArrayList<TNodeInfo>();
     }
     
@@ -33,14 +35,19 @@ public class TSession {
         return mInfo;
     }
     
-    public void AddNode(TNodeInfo node) {
+    public void addNode(TNodeInfo node) {
         mNodes.add(node);
     }
     
-    public void RemoveNode(TNodeInfo node) {
+    public void removeNode(TNodeInfo node) {
         
         mNodes.remove(node);
         
+    }
+    
+    public ArrayList<TNodeInfo> getList() {
+     
+        return mNodes;
     }
     
     public void setList(ArrayList<TNodeInfo> Nodes) {

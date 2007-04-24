@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package cotex.working.msg;
+package cotex.msg;
 
 import cotex.TNodeInfo;
 import java.util.ArrayList;
@@ -18,28 +18,46 @@ import java.util.ArrayList;
  */
 public class TReplyJoinSessionMsg implements java.io.Serializable {
     
+    public boolean result;
     public ArrayList<TNodeInfo> existingNodes;
     
     /** Creates a new instance of TReplyJoinSessionMsg */
-    public TReplyJoinSessionMsg(ArrayList<TNodeInfo> ExistingNodes) {
+    public TReplyJoinSessionMsg(boolean Result, ArrayList<TNodeInfo> ExistingNodes) {
+        
+        result = Result;
         existingNodes = ExistingNodes;
     }
+    
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-        out.defaultWriteObject();
-        out.writeInt( existingNodes.size() );
         
-        for(int i=0; i<existingNodes.size(); ++i)
-            out.writeObject( existingNodes.get(i) );
+        out.defaultWriteObject();
+        
+        out.writeBoolean(result);
+        
+        if(result) {
+        
+            out.writeInt( existingNodes.size() );
+
+            for(int i=0; i<existingNodes.size(); ++i)
+                out.writeObject( existingNodes.get(i) );
+            
+        }
     }
     
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        
         in.defaultReadObject();
         
-        int size = in.readInt();
+        result = in.readBoolean();
         
-        existingNodes = new ArrayList<TNodeInfo>();
+         if(result) { 
+            
+            int size = in.readInt();
         
-        for(int i=0; i<size; ++i)
-            existingNodes.add( (TNodeInfo)in.readObject() );
+            existingNodes = new ArrayList<TNodeInfo>();
+
+            for(int i=0; i<size; ++i)
+                existingNodes.add( (TNodeInfo)in.readObject() );
+        }
     }
 }

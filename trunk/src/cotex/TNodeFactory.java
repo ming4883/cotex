@@ -15,22 +15,32 @@ package cotex;
  */
 public class TNodeFactory {
     
-    /** Creates a new instance of TNodeFactory */
+    //----------------------------------
     private TNodeFactory() {
     }
     
-    static public TNode createInstance(String nodeType, TConfig config) throws TException {
+    //----------------------------------
+    static public TNode createWorkingInstance(TConfig config) throws TException {
         
-        if( nodeType.equals("working") ) {
-            
-            TNode node = new TNode(config);
-            
-            node.setModel( new cotex.working.TWorkingNodeModel(node) );
-            node.setView( new cotex.working.TWorkingNodeView(node) );
-            
-            return node;
-        }
+        TNode node = new TNode(config);
         
-        throw new TException("TNodeFactory.createInstance", "unknown node type: " + nodeType); 
+        node.setModel( new cotex.working.TWorkingNodeModel(node) );
+        node.setView( new cotex.working.TWorkingNodeView(node) );
+        
+        return node;
+        
     }
+    
+    //----------------------------------
+    static public TNode createRegistryInstance(TConfig config) throws TException {
+        
+        TNode node = new TNode(config);
+        
+        node.setModel( new cotex.registry.TRegistryNodeModel(node) );
+        node.setView( new cotex.registry.TRegistryNodeView(node) );
+        
+        return node;   
+    }
+    
+    //----------------------------------
 }

@@ -51,12 +51,13 @@ public class TApp extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-
+        
         mNode.execute( new TExitCmd() );
+        mNode.shutDown();
     }//GEN-LAST:event_formWindowClosing
-
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
@@ -92,14 +93,35 @@ public class TApp extends javax.swing.JFrame {
         }
     };
     
-    public void run() {
+    public void run(String[] args) {
+        
         try {
+            
             initLoggers();
-
+            
             mConfig = new TConfig("cotex.config.xml");
             
-            mNode = TNodeFactory.createInstance( mConfig.getSetting("General", "NodeType"), mConfig );
-
+            // create node by command line arg
+            boolean isRegistryNode = false;
+            
+            if(args.length > 0)
+                isRegistryNode = args[0].equals("registry");
+            
+            if(isRegistryNode) {
+                
+                mNode = TNodeFactory.createRegistryInstance( mConfig );
+                setTitle("Cotex - Registry");
+                
+            } else {
+                
+                mNode = TNodeFactory.createWorkingInstance( mConfig );
+                setTitle("Cotex - Worker");
+            }
+            
+            // override the username if suppiled from command line
+            if(args.length > 1)
+                mConfig.setSetting("Working", "Username", args[1]);
+            
             initGui();
             
             initLayout();
@@ -108,12 +130,11 @@ public class TApp extends javax.swing.JFrame {
             
             this.setVisible(true);
             
-            mNode.getModel().startUp();
-            mNode.getView().startUp();
-        
+            mNode.startUp();
+            
             TLogManager.logMessage("Application started");
-        }
-        catch(TException e) {
+            
+        } catch(TException e) {
             
             javax.swing.JOptionPane.showMessageDialog(
                 null,
@@ -121,15 +142,14 @@ public class TApp extends javax.swing.JFrame {
             
             System.exit(1);
             
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             
             javax.swing.JOptionPane.showMessageDialog(
                 null,
                 "Failed to startup Cotex\n Unknown exception\n" + e.getStackTrace() );
             
             System.exit(1);
-        } 
+        }
     }
     
     private void initLoggers() {
@@ -139,10 +159,9 @@ public class TApp extends javax.swing.JFrame {
         TLogManager.addLogger(mConsole);
         
     }
-
+    
     private void initGui() {
         
-        this.setTitle("Cotex");
         this.setResizable(true);
         this.setSize(800, 600);
         
@@ -155,7 +174,7 @@ public class TApp extends javax.swing.JFrame {
         mDockingViews = new java.util.ArrayList<View>();
         
         while( iter.hasNext() ) {
-         
+            
             javax.swing.JComponent comp = (javax.swing.JComponent)iter.next();
             
             View dockingView = new View(comp.getName(), DEFAULT_ICON, comp);
@@ -180,7 +199,7 @@ public class TApp extends javax.swing.JFrame {
         // add to main frame
         this.getContentPane().add(mDockingRootWindow, java.awt.BorderLayout.CENTER);
     }
-
+    
     private void initLayout() {
         
         // init layout
@@ -189,54 +208,53 @@ public class TApp extends javax.swing.JFrame {
         while(retry) {
             
             try {
-
-               DockingWindow currWnd = mDockingViews.get(0);
-
-               for(int i=1; i<mDockingViews.size(); ++i) {
-
+                
+                DockingWindow currWnd = mDockingViews.get(0);
+                
+                for(int i=1; i<mDockingViews.size(); ++i) {
+                    
                     currWnd = new SplitWindow(
                         true,
                         0.3f,
                         currWnd,
                         mDockingViews.get(i) );
-
+                    
                 }
-
+                
                 DockingWindow layout = new SplitWindow(
                     false,
                     0.6f,
                     currWnd,
                     mConsoleDockingView );
-
+                
                 mDockingRootWindow.setWindow(layout);
                 
                 retry = false;
                 
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 //TLogManager.logError( e.toString() );
                 retry = true;
             }
         }
     }
-
+    
     private void initLookAndFeel() {
         
         try {
-        
+            
             // apply docking theme
             DockingWindowsTheme dockingTheme = new ShapedGradientDockingTheme();
             //DockingWindowsTheme dockingTheme = new ClassicDockingTheme();
-
+            
             mDockingRootWindow.getRootWindowProperties().addSuperObject( dockingTheme.getRootWindowProperties() );
-
+            
             // enable title bar style
             RootWindowProperties titleBarStyleProperties =
                 PropertiesUtil.createTitleBarStyleRootWindowProperties();
-
+            
             mDockingRootWindow.getRootWindowProperties().addSuperObject(
                 titleBarStyleProperties);
-
+            
             ///*
             InfoNodeLookAndFeelTheme lnfTheme = InfoNodeLookAndFeelThemes.getDarkBlueGreenTheme();
             
@@ -265,10 +283,9 @@ public class TApp extends javax.swing.JFrame {
             
             javax.swing.SwingUtilities.updateComponentTreeUI(this);
             
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             
-            TLogManager.logError("TApp: initLookAndFeel failed, reason: " + e.toString() ); 
+            TLogManager.logError("TApp: initLookAndFeel failed, reason: " + e.toString() );
             
         }
     }
