@@ -1,35 +1,39 @@
 /*
- * TNewSessionMsg.java
+ * TNotifyAddNodeMsg.java
  *
- * Created on 2007年4月24日, 上午 2:33
+ * Created on April 24, 2007, 4:40 PM
  *
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
 
-package cotex.working.msg;
+package cotex.msg;
+
+import cotex.*;
 
 /**
  *
- * @author cyrux
+ * @author Ming
  */
-public class TNewSessionMsg implements java.io.Serializable {
+public class TNotifyAddNodeMsg implements java.io.Serializable {
     
-    public String sessionName;
+    public TNodeInfo nodeInfo;
     
-    /** Creates a new instance of TNewSessionMsg */
-    public TNewSessionMsg(String SessionName) {
-        sessionName = SessionName;
+    /** Creates a new instance of TJoinSessionMsg */
+    public TNotifyAddNodeMsg(TNodeInfo NodeInfo) {
+        nodeInfo = NodeInfo;
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+        
         out.defaultWriteObject();
-        out.writeUTF(sessionName);
+        out.writeObject(nodeInfo);
     }
     
     private void readObject(java.io.ObjectInputStream in)
     throws java.io.IOException, ClassNotFoundException {
+        
         in.defaultReadObject();
-        sessionName = in.readUTF();
+        nodeInfo = (TNodeInfo)in.readObject();
     }
 }

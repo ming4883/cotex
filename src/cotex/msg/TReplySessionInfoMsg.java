@@ -7,7 +7,7 @@
  * and open the template in the editor.
  */
 
-package cotex.working.msg;
+package cotex.msg;
 
 import cotex.TSessionInfo;
 import java.util.ArrayList;

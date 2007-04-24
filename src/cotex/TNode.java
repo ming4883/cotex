@@ -15,12 +15,13 @@ package cotex;
  */
 public class TNode {
     
+    //----------------------------------
     private INodeView mView;
     private INodeModel mModel;
     private TConfig mConfig;
     private TConnectionManager mConnectionMgr;
     
-    /** Creates a new instance of TNode */
+    //----------------------------------
     public TNode(TConfig config) {
         
         mConfig = config;
@@ -28,34 +29,55 @@ public class TNode {
         
     }
     
+    //----------------------------------
     public void setModel(INodeModel model) {
         mModel = model;
     }
     
+    //----------------------------------
     public void setView(INodeView view) {
         mView = view;
     }    
     
+    //----------------------------------
     public INodeView getView() {
         return mView;
     }
     
+    //----------------------------------
     public INodeModel getModel() {
         return mModel;
     }
     
+    //----------------------------------
     public TConnectionManager getConnectionManager() {
         return mConnectionMgr;
     }
     
+    //----------------------------------
     public TConfig getConfig() {
         return mConfig;
     }
     
+    //----------------------------------
     public void execute(TNodeCommand cmd) {
         
         mView.execute(cmd);
         mModel.execute(cmd);
+    }
+    
+    //----------------------------------
+    public void startUp() throws TException {
+     
+        mModel.startUp();
+        mView.startUp();
+    }
+    
+    //----------------------------------
+    public void shutDown() {
+     
+        mView.shutDown();
+        mModel.shutDown();
     }
     
 }

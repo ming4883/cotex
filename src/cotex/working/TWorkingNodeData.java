@@ -283,9 +283,9 @@ public class TWorkingNodeData  {
         public TableModel tableModel = new TableModel();
     }
     
-//----------------------------------
-// Sessions
-//----------------------------------
+    //----------------------------------
+    // Sessions
+    //----------------------------------
     public class Sessions {
         
         //------------------------------
@@ -308,7 +308,7 @@ public class TWorkingNodeData  {
         
         //------------------------------
         public void setList(ArrayList<TSessionInfo> sessions) {
-            mSessions=sessions;
+            mSessions = sessions;
             listModel.notifyContentChanged();            
         }
         
@@ -401,9 +401,9 @@ public class TWorkingNodeData  {
         public ListModel listModel = new ListModel();
     }
     
-//----------------------------------
-// Nodes
-//----------------------------------
+    //----------------------------------
+    // Nodes
+    //----------------------------------
     public class Nodes {
         
         private TNodeInfo mSelfNodeInfo = null;
@@ -436,13 +436,17 @@ public class TWorkingNodeData  {
             return node;
             
         }
-        public int getNodeCount(){
-            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+        
+        //------------------------------
+        public int getNodeCount() {
+            
+            if( sessions.hasCurrent() ) {
+                
                 return sessions.getCurrent().getNodeCount();
             }
+            
             return 0;
         }
-        
         
         //------------------------------
         public TNodeInfo getRight() {
@@ -469,6 +473,20 @@ public class TWorkingNodeData  {
             
             return sessions.getCurrent().getNodeByAddr(addr);
             
+        }
+        
+        //----------------------------------
+        public void setListToCurrentSession(ArrayList<TNodeInfo> list) {
+        
+            sessions.getCurrent().setList(list);
+            listModel.notifyContentChanged();
+        }
+        
+        //----------------------------------
+        public void addToCurrentSession(TNodeInfo nodeInfo) {
+         
+            sessions.getCurrent().addNode(nodeInfo);
+            listModel.notifyContentChanged();
         }
         
         //----------------------------------
@@ -499,14 +517,14 @@ public class TWorkingNodeData  {
         public ListModel listModel = new ListModel();
     }
     
-//----------------------------------
+    //----------------------------------
     public Paragraphs paragraphs                    = new Paragraphs();
     public Sessions sessions                        = new Sessions();
     public Nodes nodes                              = new Nodes();
     
-//----------------------------------
+    //----------------------------------
     public TWorkingNodeData() {
     }
     
-//----------------------------------
+    //----------------------------------
 }

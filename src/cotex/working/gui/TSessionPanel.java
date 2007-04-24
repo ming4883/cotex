@@ -126,8 +126,10 @@ public class TSessionPanel extends javax.swing.JPanel {
             
         } else if( evt.getActionCommand().equals("New") ) {
             
-            cotex.TSessionInfo session = (cotex.TSessionInfo)mSessionList.getSelectedValue();
-            mNode.execute( new TWorkingNodeModel.TNewSessionCmd() );
+            String newSessionName = 
+                JOptionPane.showInputDialog("Please input the name of the new session:");
+            
+            mNode.execute( new TWorkingNodeModel.TNewSessionCmd(newSessionName) );
         }
     }
 }
