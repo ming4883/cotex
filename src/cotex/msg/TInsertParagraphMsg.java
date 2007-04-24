@@ -12,7 +12,7 @@ package cotex.msg;
 import cotex.*;
 import cotex.working.TContent;
 import cotex.working.TGap;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -20,13 +20,13 @@ import java.net.InetAddress;
  */
 public class TInsertParagraphMsg implements java.io.Serializable {
     
-    public InetAddress InitiateNodeAddr;
+    public InetSocketAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     public TContent NewParagraph;
     public TGap NewGap;
     
     /** Creates a new instance of TInsertParagraphMsg */
-    public TInsertParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId,TContent newParagraph,TGap newGap) {
+    public TInsertParagraphMsg(InetSocketAddress initiateNodeAddr, TUniqueId paragraphId,TContent newParagraph,TGap newGap) {
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
         NewParagraph = newParagraph;
@@ -46,7 +46,7 @@ public class TInsertParagraphMsg implements java.io.Serializable {
     throws java.io.IOException, ClassNotFoundException {
         
         in.defaultReadObject();
-        InitiateNodeAddr = (InetAddress)in.readObject();
+        InitiateNodeAddr = (InetSocketAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
         NewParagraph = (TContent)in.readObject();
         NewGap = (TGap)in.readObject();

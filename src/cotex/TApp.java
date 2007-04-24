@@ -101,6 +101,10 @@ public class TApp extends javax.swing.JFrame {
             
             mConfig = new TConfig("cotex.config.xml");
             
+            // override the username if suppiled from command line
+            if(args.length > 1)
+                mConfig.setSetting("Working", "Username", args[1]);
+            
             // create node by command line arg
             boolean isRegistryNode = false;
             
@@ -110,17 +114,13 @@ public class TApp extends javax.swing.JFrame {
             if(isRegistryNode) {
                 
                 mNode = TNodeFactory.createRegistryInstance( mConfig );
-                setTitle("Cotex - Registry");
+                setTitle("Cotex - Registry Node");
                 
             } else {
                 
                 mNode = TNodeFactory.createWorkingInstance( mConfig );
-                setTitle("Cotex - Worker");
+                setTitle("Cotex - Worker Node[" + mConfig.getSetting("Working", "Username") + "]");
             }
-            
-            // override the username if suppiled from command line
-            if(args.length > 1)
-                mConfig.setSetting("Working", "Username", args[1]);
             
             initGui();
             

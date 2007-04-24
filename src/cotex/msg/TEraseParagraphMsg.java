@@ -10,7 +10,7 @@
 package cotex.msg;
 
 import cotex.*;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -18,11 +18,11 @@ import java.net.InetAddress;
  */
 public class TEraseParagraphMsg implements java.io.Serializable {
     
-    public InetAddress InitiateNodeAddr;
+    public InetSocketAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     
     /** Creates a new instance of TEraseParagraphMsg */
-    public TEraseParagraphMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId) {
+    public TEraseParagraphMsg(InetSocketAddress initiateNodeAddr, TUniqueId paragraphId) {
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
     }
@@ -38,7 +38,7 @@ public class TEraseParagraphMsg implements java.io.Serializable {
     throws java.io.IOException, ClassNotFoundException {
         
         in.defaultReadObject();
-        InitiateNodeAddr = (InetAddress)in.readObject();
+        InitiateNodeAddr = (InetSocketAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
     }
     

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -98,7 +99,7 @@ public class TSession {
         
     }
     
-    public TNodeInfo getNodeByAddr(InetAddress addr) throws TException {
+    public TNodeInfo getNodeBySocketAddr(InetSocketAddress addr) throws TException {
         
         Iterator<TNodeInfo> iter = mNodes.iterator();
         
@@ -106,7 +107,7 @@ public class TSession {
             
             TNodeInfo info = iter.next();
             
-            if( info.getAddr().equals(addr) )
+            if( info.getSocketAddr().equals(addr) )
                 return info;
         }
         

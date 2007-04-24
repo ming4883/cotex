@@ -10,6 +10,7 @@
 package cotex;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -19,6 +20,7 @@ public class TNodeInfo implements java.io.Serializable {
     
     private String mName;
     private InetAddress mAddr;
+    private InetSocketAddress mSockAddr;
     private int mCmdPort;
     private int mDataPort;
     
@@ -26,10 +28,13 @@ public class TNodeInfo implements java.io.Serializable {
      * Creates a new instance of TNodeInfo
      */
     public TNodeInfo(String name, InetAddress addr, int cmdPort, int dataPort) {
+        
         mName = name;
         mAddr = addr;
         mCmdPort = cmdPort;
         mDataPort = dataPort;
+        
+        updateSocketAddress();
     }
     
     public final int getCmdPort() {
@@ -54,6 +59,11 @@ public class TNodeInfo implements java.io.Serializable {
         return mAddr;
     }
     
+    public final InetSocketAddress getSocketAddr() {
+     
+        return mSockAddr;
+    }
+    
     public boolean equals(Object obj) {
         
         if(null == obj)
@@ -68,7 +78,7 @@ public class TNodeInfo implements java.io.Serializable {
     }
     
     public final String toString() {
-        return mName + " [" + mAddr.getHostAddress() + "]";
+        return mName + " [" + mAddr.getHostAddress() + ":" + Integer.toString(mCmdPort) + "]";
     }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
@@ -89,5 +99,12 @@ public class TNodeInfo implements java.io.Serializable {
         mAddr = (InetAddress)in.readObject();
         mCmdPort = (int)in.readInt();
         mDataPort = (int)in.readInt();
+        
+        updateSocketAddress();
+    }
+    
+    private void updateSocketAddress() {
+     
+        mSockAddr = new InetSocketAddress(mAddr, mCmdPort);
     }
 }
