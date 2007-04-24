@@ -22,6 +22,7 @@ import cotex.working.TContent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import javax.swing.table.AbstractTableModel;
 import javax.swing.AbstractListModel;
@@ -469,9 +470,9 @@ public class TWorkingNodeData  {
         }
         
         //----------------------------------
-        public TNodeInfo getByAddr(InetAddress addr) throws TException {
+        public TNodeInfo getBySocketAddr(InetSocketAddress addr) throws TException {
             
-            return sessions.getCurrent().getNodeByAddr(addr);
+            return sessions.getCurrent().getNodeBySocketAddr(addr);
             
         }
         

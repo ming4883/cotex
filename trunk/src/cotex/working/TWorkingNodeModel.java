@@ -19,6 +19,7 @@ import java.io.ObjectOutputStream;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -251,8 +252,8 @@ public class TWorkingNodeModel implements INodeModel {
                 //mStates.put("LockingParagraph", paragraph);
                 
                 connection.sendObjectToRightNode(
-                        connection.CMD,
-                        new TLockParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId() ) );
+                    connection.CMD,
+                    new TLockParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 
@@ -283,7 +284,7 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 connection.sendObjectToRightNode(
                         connection.CMD,
-                        new TCommitParagraphMsg( mData.nodes.self().getAddr(), mData.nodes.self().getDataPort(), paragraph.getId() ) );
+                        new TCommitParagraphMsg( mData.nodes.self().getSocketAddr(), mData.nodes.self().getDataPort(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -312,7 +313,7 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 connection.sendObjectToRightNode(
                         connection.CMD,
-                        new TInsertParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId(), newParagraph, newGap ) );
+                        new TInsertParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId(), newParagraph, newGap ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -339,7 +340,7 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 connection.sendObjectToRightNode(
                         connection.CMD,
-                        new TEraseParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId() ) );
+                        new TEraseParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -358,7 +359,7 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 connection.sendObjectToLeftNode(
                         connection.CMD,
-                        new TCancelParagraphMsg( mData.nodes.self().getAddr(), paragraph.getId() ));
+                        new TCancelParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ));
                 
             } catch(TException e) {
                 
@@ -493,9 +494,15 @@ public class TWorkingNodeModel implements INodeModel {
         public void sendObject(String connectionName, InetAddress addr, int port, Object obj) {
             
             try{
+                
                 get(connectionName).sendObject( addr, port, obj );
+                TLogManager.logMessage(
+                    "TWorkingNodeModel: sending message to " + addr.getHostAddress() + ":" + Integer.toString(port) + ";" + obj.toString() );
+                
             } catch(TException e) {
+            
                 TLogManager.logException(e);
+            
             }
         }
         
@@ -523,6 +530,9 @@ public class TWorkingNodeModel implements INodeModel {
                     getNodePort(nodeInfo, connectionName),
                     obj );
                 
+                TLogManager.logMessage(
+                    "TWorkingNodeModel: sending message to right node = " + nodeInfo.toString() + ";" + obj.toString() );
+                
             } catch(TException e) {
                 
                 TLogManager.logException(e);
@@ -539,6 +549,9 @@ public class TWorkingNodeModel implements INodeModel {
                     nodeInfo.getAddr(),
                     getNodePort(nodeInfo, connectionName),
                     obj );
+                
+                TLogManager.logMessage(
+                    "TWorkingNodeModel: sending message to left node = " + nodeInfo.toString() + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -585,8 +598,8 @@ public class TWorkingNodeModel implements INodeModel {
         }
     }
     
-//----------------------------------
-// Protocol
+    //----------------------------------
+    // Protocol
     private class Protocol {
         
         private TNodeCheckList mNodeCommitCheckList = null;
@@ -732,7 +745,7 @@ public class TWorkingNodeModel implements INodeModel {
                     
                     mData.paragraphs.setLocked(
                             msg.ParagraphId,
-                            mData.nodes.getByAddr(msg.InitiateNodeAddr) );
+                            mData.nodes.getBySocketAddr(msg.InitiateNodeAddr) );
                     
                     if( util.isSelf( msg.InitiateNodeAddr ) )
                         _notifyViewLockPositiveResult();
@@ -1024,7 +1037,7 @@ public class TWorkingNodeModel implements INodeModel {
             // requet paragraph content from initiator
             connection.sendObject(
                     connection.DATA,
-                    msg.InitiateNodeAddr,
+                    msg.InitiateNodeAddr.getAddress(),
                     msg.DataPort,
                     new TRequestParagraphMsg( mData.nodes.self().getAddr(), mData.nodes.self().getDataPort(), msg.ParagraphId ) );
         }
@@ -1132,9 +1145,9 @@ public class TWorkingNodeModel implements INodeModel {
         }
         
         //------------------------------
-        public boolean isSelf(InetAddress addr) {
+        public boolean isSelf(InetSocketAddress addr) {
             
-            return addr.equals( mData.nodes.self().getAddr() );
+            return addr.equals( mData.nodes.self().getSocketAddr() );
         }
         
         //------------------------------

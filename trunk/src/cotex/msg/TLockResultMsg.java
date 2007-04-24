@@ -10,7 +10,7 @@
 package cotex.msg;
 
 import cotex.*;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -18,12 +18,12 @@ import java.net.InetAddress;
  */
 public class TLockResultMsg implements java.io.Serializable {
     
-    public InetAddress InitiateNodeAddr;
+    public InetSocketAddress InitiateNodeAddr;
     public TUniqueId ParagraphId;
     public boolean Result;
     
     /** Creates a new instance of TLockResultMsg */
-    public TLockResultMsg(InetAddress initiateNodeAddr, TUniqueId paragraphId, boolean result) {
+    public TLockResultMsg(InetSocketAddress initiateNodeAddr, TUniqueId paragraphId, boolean result) {
         
         InitiateNodeAddr = initiateNodeAddr;
         ParagraphId = paragraphId;
@@ -41,7 +41,7 @@ public class TLockResultMsg implements java.io.Serializable {
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
         
         in.defaultReadObject();
-        InitiateNodeAddr = (InetAddress)in.readObject();
+        InitiateNodeAddr = (InetSocketAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
         Result = in.readBoolean();
         
