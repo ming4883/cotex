@@ -10,19 +10,14 @@
 package cotex.working;
 
 import cotex.*;
-import cotex.TSession;
-import cotex.TSessionInfo;
 import cotex.msg.*;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 /**
  *
@@ -75,7 +70,21 @@ public class TWorkingNodeModel implements INodeModel {
             setArg("paragraph", paragraph);
         }
     }
-    
+    public static class TGrantAccessRightCmd extends TNodeCommand {
+        public TGrantAccessRightCmd(TParagraph paragraph) {
+            setArg("paragraph", paragraph);
+        }
+    }
+    public static class TRefreshSessionListCmd extends TNodeCommand{
+        public TRefreshSessionListCmd(){
+        }
+    }
+    public static class TReplyGrantAccessRightCmd extends TNodeCommand {
+        public TReplyGrantAccessRightCmd(TAccessRightQuery query, String result) {
+            setArg("query", query);
+            setArg("result",result);
+        }
+    }
     //----------------------------------
     // Cmd
     private interface ICmdInvoke {
@@ -145,6 +154,26 @@ public class TWorkingNodeModel implements INodeModel {
                     new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onCancelParagraph(cmd);}
             } );
+            
+            // grant paragraph access right
+            mCmdDispatcher.put(
+                    TGrantAccessRightCmd.class,
+                    new ICmdInvoke() {
+                public void invoke(TNodeCommand cmd) {_onGrantAccessRight(cmd);}
+            } );
+            // reply grant paragraph access right
+            mCmdDispatcher.put(
+                    TReplyGrantAccessRightCmd.class,
+                    new ICmdInvoke() {
+                public void invoke(TNodeCommand cmd) {_onReplyGrantAccessRight(cmd);}
+            } );
+            
+            // refresh session list
+            mCmdDispatcher.put(
+                    TRefreshSessionListCmd.class,
+                    new ICmdInvoke() {
+                public void invoke(TNodeCommand cmd) {_onRefreshSessionList();}
+            } );
         }
         
         //------------------------------
@@ -166,9 +195,9 @@ public class TWorkingNodeModel implements INodeModel {
             try {
                 
                 String newSessionName = (String)cmd.getArg("sessionName");
-
+                
                 TLogManager.logMessage("TWorkingNodeModel: creating session: " + newSessionName );
-
+                
                 Object reply = connection.sendRequestToRegistry( new TNewSessionMsg(newSessionName) );
                 
                 if(reply != null && reply.getClass().equals(TReplyNewSessionMsg.class) ) {
@@ -183,7 +212,7 @@ public class TWorkingNodeModel implements INodeModel {
                 }
                 
             } catch(TException e) {
-             
+                
                 TLogManager.logException(e);
             }
             
@@ -215,9 +244,9 @@ public class TWorkingNodeModel implements INodeModel {
                         protocol.acquireCurrentDocument();
                         
                         TLogManager.logMessage("TWorkingNodeModel: session connected");
-                    
+                        
                     } else {
-                    
+                        
                         TLogManager.logMessage("TWorkingNodeModel: failed to join session " + sessionName);
                         
                     }
@@ -252,8 +281,8 @@ public class TWorkingNodeModel implements INodeModel {
                 //mStates.put("LockingParagraph", paragraph);
                 
                 connection.sendObjectToRightNode(
-                    connection.CMD,
-                    new TLockParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
+                        connection.CMD,
+                        new TLockParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 
@@ -368,6 +397,49 @@ public class TWorkingNodeModel implements INodeModel {
             
         }
         
+        //------------------------------
+        private void _onGrantAccessRight(TNodeCommand cmd) {
+            try {
+                
+                TLogManager.logMessage("TWorkingNodeModel: granting paragraph access right");
+                
+                TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
+                connection.sendObject(
+                        connection.CMD,
+                        paragraph.getCreator().getAddr(),
+                        paragraph.getCreator().getCmdPort(),
+                        new TRequestParagraphRight(paragraph.getId(), mData.nodes.self()) );
+                
+            } catch(TException e) {
+                TLogManager.logException(e);
+            }
+        }
+        //------------------------------
+        private void _onReplyGrantAccessRight(TNodeCommand cmd) {
+            try {
+                
+                TLogManager.logMessage("TWorkingNodeModel: replying grant paragraph access right");
+                
+                TAccessRightQuery query = (TAccessRightQuery)cmd.getArg("query");
+                TNodeInfo requester = query.getRequester();
+                boolean result = Boolean.valueOf((String)(cmd.getArg("result")));
+                
+                connection.sendObject(
+                        connection.CMD,
+                        requester.getAddr(),
+                        requester.getCmdPort(),
+                        new TReplyParagraphRight(query.getParagraphId(),result) );
+                mData.accessRightList.remove(query);
+            } catch(TException e) {
+                TLogManager.logException(e);
+            }
+        }
+        //------------------------------
+        private void _onRefreshSessionList() {
+            TLogManager.logMessage("TWorkingNodeModel: refreshing session list" );
+            protocol.acquireSessionsFromRegistry();
+        }
+        
     }
     
     //----------------------------------
@@ -416,9 +488,9 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 get(DATA).open(mDataPort);
                 TLogManager.logMessage("TWorkingNodeModel: data connection openned at port " + mDataPort.toString());
-            
+                
             } catch(TException e) {
-            
+                
                 TLogManager.logException(e);
             }
             
@@ -428,10 +500,10 @@ public class TWorkingNodeModel implements INodeModel {
         private void _getRegInfo() {
             
             try {
-            
+                
                 mRegPort = Integer.parseInt( util.getSetting("General", "RegistryPort") );
                 mRegAddress = InetAddress.getByName( util.getSetting("Working", "RegistryAddress") );
-            
+                
             } catch(Exception e) {
                 
                 TLogManager.logError("Cannot acquire registry info from config file");
@@ -442,7 +514,7 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         private void _getAvailableCmdPort() {
             
-            int currentPort = Integer.parseInt( util.getSetting("Working", "StartingPort") );   
+            int currentPort = Integer.parseInt( util.getSetting("Working", "StartingPort") );
             
             while(true) {
                 
@@ -464,8 +536,8 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         private void _getAvailableDataPort() {
-         
-            int currentPort = mCmdPort.intValue() + 1;   
+            
+            int currentPort = mCmdPort.intValue() + 1;
             
             while(true) {
                 
@@ -497,18 +569,18 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 get(connectionName).sendObject( addr, port, obj );
                 TLogManager.logMessage(
-                    "TWorkingNodeModel: sending message to " + addr.getHostAddress() + ":" + Integer.toString(port) + ";" + obj.toString() );
+                        "TWorkingNodeModel: sending message to " + addr.getHostAddress() + ":" + Integer.toString(port) + ";" + obj.toString() );
                 
             } catch(TException e) {
-            
+                
                 TLogManager.logException(e);
-            
+                
             }
         }
         
         //------------------------------
         public int getNodePort(TNodeInfo nodeInfo, String connectionName) {
-         
+            
             if( connectionName.equals(DATA) )
                 return nodeInfo.getDataPort();
             
@@ -526,12 +598,12 @@ public class TWorkingNodeModel implements INodeModel {
                 TNodeInfo nodeInfo = mData.nodes.getRight();
                 
                 get(connectionName).sendObject(
-                    nodeInfo.getAddr(),
-                    getNodePort(nodeInfo, connectionName),
-                    obj );
+                        nodeInfo.getAddr(),
+                        getNodePort(nodeInfo, connectionName),
+                        obj );
                 
                 TLogManager.logMessage(
-                    "TWorkingNodeModel: sending message to right node = " + nodeInfo.toString() + ";" + obj.toString() );
+                        "TWorkingNodeModel: sending message to right node = " + nodeInfo.toString() + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -546,12 +618,12 @@ public class TWorkingNodeModel implements INodeModel {
                 TNodeInfo nodeInfo = mData.nodes.getLeft();
                 
                 get(connectionName).sendObject(
-                    nodeInfo.getAddr(),
-                    getNodePort(nodeInfo, connectionName),
-                    obj );
+                        nodeInfo.getAddr(),
+                        getNodePort(nodeInfo, connectionName),
+                        obj );
                 
                 TLogManager.logMessage(
-                    "TWorkingNodeModel: sending message to left node = " + nodeInfo.toString() + ";" + obj.toString() );
+                        "TWorkingNodeModel: sending message to left node = " + nodeInfo.toString() + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -561,11 +633,11 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         public Object sendRequestToRegistry(Object request) {
-         
+            
             Object reply = null;
             
             try{
-            
+                
                 Socket sessionSock = new Socket(mRegAddress, mRegPort);
                 
                 ObjectOutputStream outStream = new ObjectOutputStream( sessionSock.getOutputStream() );
@@ -583,13 +655,11 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 sessionSock.close();
                 
-            }
-            catch(java.io.IOException e) {
-            
+            } catch(java.io.IOException e) {
+                
                 //TLogManager.logError("Send request to registry failed, request: " + request.toString() );
-            }
-            catch(ClassNotFoundException e) {
-             
+            } catch(ClassNotFoundException e) {
+                
                 TLogManager.logError("Unknown reply from registry.");
             }
             
@@ -646,8 +716,8 @@ public class TWorkingNodeModel implements INodeModel {
                 } else {
                     
                     connection.sendObjectToLeftNode(
-                        connection.DATA,
-                        new TRequestDocumentMsg( mData.nodes.self() ) );
+                            connection.DATA,
+                            new TRequestDocumentMsg( mData.nodes.self() ) );
                 }
                 
             } catch(TException e) {
@@ -685,6 +755,12 @@ public class TWorkingNodeModel implements INodeModel {
             
             if(obj.getClass().equals( TEraseParagraphMsg.class) )
                 _processEraseParagraphMsg( (TEraseParagraphMsg)obj );
+            
+            if(obj.getClass().equals( TRequestParagraphRight.class) )
+                _processRequestParagraphRightMsg( (TRequestParagraphRight)obj );
+            if(obj.getClass().equals( TReplyParagraphRight.class) )
+                _processReplyParagraphRightMsg( (TReplyParagraphRight)obj );
+            
         }
         
         //------------------------------
@@ -877,10 +953,10 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processRequestDocumentMsg(TRequestDocumentMsg msg) {
             
             connection.sendObject(
-                connection.DATA,
-                msg.NodeInfo.getAddr(),
-                msg.NodeInfo.getDataPort(),
-                new TReplyDocumentMsg( mData.paragraphs.getList() ) );
+                    connection.DATA,
+                    msg.NodeInfo.getAddr(),
+                    msg.NodeInfo.getDataPort(),
+                    new TReplyDocumentMsg( mData.paragraphs.getList() ) );
             
         }
         
@@ -965,6 +1041,22 @@ public class TWorkingNodeModel implements INodeModel {
             } catch (TException e) {
                 
                 TLogManager.logException(e);
+            }
+        }
+        
+        //------------------------------
+        private void _processRequestParagraphRightMsg(TRequestParagraphRight msg) {
+            mData.accessRightList.add(new TAccessRightQuery(msg.RequestNodeInfo,msg.ParagraphId));
+            TLogManager.logMessage("TWorkingNodeModel: new TAccessRightQuery added");
+        }
+        
+        //------------------------------
+        private void _processReplyParagraphRightMsg(TReplyParagraphRight msg) {
+            if(true == msg.Result){
+                mData.paragraphs.addGrantedParagraph(msg.ParagraphId);
+                TLogManager.logMessage("TWorkingNodeModel: paragraph access right added");
+            }else{
+                TLogManager.logMessage("TWorkingNodeModel: grant paragraph access right reject");
             }
         }
         
@@ -1175,19 +1267,19 @@ public class TWorkingNodeModel implements INodeModel {
     public void startUp() throws TException {
         
         connection.startUp();
- 
+        
         try {
             
             TNodeInfo selfNodeInfo = new TNodeInfo(
-
-                util.getSetting("Working", "Username"),
-                InetAddress.getLocalHost(),
-                connection.mCmdPort,
-                connection.mDataPort
-                );
-
+                    
+                    util.getSetting("Working", "Username"),
+                    InetAddress.getLocalHost(),
+                    connection.mCmdPort,
+                    connection.mDataPort
+                    );
+            
             mData.nodes.setSelf( selfNodeInfo );
-        
+            
         } catch(java.net.UnknownHostException e) {
             
         }

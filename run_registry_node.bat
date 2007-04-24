@@ -1,3 +1,3 @@
 @echo off
 
-.\dist\cotex.jar registry
+start .\dist\cotex.jar registry
