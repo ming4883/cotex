@@ -26,7 +26,7 @@ public class TSession {
     
     /** Creates a new instance of TSession */
     public TSession(TSessionInfo info) {
-         mNodes = new ArrayList<TNodeInfo>();
+        mNodes = new ArrayList<TNodeInfo>();
     }
     
     public final TSessionInfo getInfo() {
@@ -43,10 +43,13 @@ public class TSession {
         
     }
     
+    public void setList(ArrayList<TNodeInfo> Nodes) {
+        mNodes=Nodes;
+    }
+    
     public TNodeInfo getLeftNode(TNodeInfo node) throws TException {
         
         int idx = indexOf(node);
-        
         if (idx == -1)
             throw new TException("TSession.getLeftWorker", "Worker not exist.");
         
@@ -55,7 +58,7 @@ public class TSession {
         
         return mNodes.get(idx - 1);
     }
-
+    
     public TNodeInfo getRightNode(TNodeInfo node) throws TException {
         
         int idx = indexOf(node);
@@ -72,7 +75,7 @@ public class TSession {
     public TNodeInfo getNodeAt(int index) {
         return mNodes.get(index);
     }
-
+    
     public int getNodeCount() {
         return mNodes.size();
     }
@@ -89,14 +92,14 @@ public class TSession {
     }
     
     public TNodeInfo getNodeByAddr(InetAddress addr) throws TException {
-    
+        
         Iterator<TNodeInfo> iter = mNodes.iterator();
         
         while( iter.hasNext() ) {
             
             TNodeInfo info = iter.next();
             
-            if( info.getAddr().equals(addr) ) 
+            if( info.getAddr().equals(addr) )
                 return info;
         }
         

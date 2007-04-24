@@ -13,9 +13,16 @@ import cotex.*;
 import cotex.TSession;
 import cotex.TSessionInfo;
 import cotex.working.msg.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -26,6 +33,8 @@ public class TWorkingNodeModel implements INodeModel {
     //----------------------------------
     // Node Commands
     public static class TNewSessionCmd extends TNodeCommand {
+        public TNewSessionCmd() {
+        }
     }
     
     public static class TJoinSessionCmd extends TNodeCommand {
@@ -153,6 +162,22 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         private void _onNewSession(TNodeCommand cmd) {
             
+            String newSessionName = JOptionPane.showInputDialog("Please input the name of the new session:");
+            TLogManager.logMessage("TWorkingNodeModel: creating session: " + newSessionName );
+            
+            TUniqueId sessionId = protocol.sendNewSessionMessageToRegistry(newSessionName);
+            
+            if(sessionId!=null){
+                protocol.acquireSessionsFromRegistry();
+                
+                TLogManager.logMessage("TWorkingNodeModel: connecting to session: " + sessionId.toString() + " ..." );
+                
+                protocol.acquireSessionWorkerList(sessionId);
+                
+                protocol.acquireCurrentDocument();
+                
+                TLogManager.logMessage("TWorkingNodeModel: session connected");
+            }
         }
         
         //------------------------------
@@ -348,7 +373,14 @@ public class TWorkingNodeModel implements INodeModel {
                     currentPort++;
                 }
             }
-            
+            String selfName="";
+            while( selfName=="")
+                selfName= javax.swing.JOptionPane.showInputDialog("Please input your name: ");
+            try {
+                selfNodeInfo = new TNodeInfo(selfName, InetAddress.getLocalHost(),  mCmdPort,  mRegPort,  mDataPort);
+            } catch (UnknownHostException e) {
+                TLogManager.logError("Can not get the local InetAddress");
+            }
             
             // setup listeners
             IConnectionListener regListener = new IConnectionListener() {
@@ -437,17 +469,109 @@ public class TWorkingNodeModel implements INodeModel {
         
         private TNodeCheckList mNodeCommitCheckList = null;
         
+        
+        public ArrayList<TSessionInfo> sendGetSessionInfoMessageToRegistry(){
+            try {
+                
+                Socket sessionSock = new Socket(
+                        InetAddress.getByName(util.getSetting("Reg", "regServerAddr")),
+                        Integer.parseInt(util.getSetting("Reg", "listenPort")));
+                ObjectOutputStream mSendOStream = new ObjectOutputStream( sessionSock.getOutputStream() );
+                ObjectInputStream inputStream = new ObjectInputStream( sessionSock.getInputStream() );
+                mSendOStream.writeObject(new TRequestSessionInfoMsg());
+                mSendOStream.flush();
+                Object obj = inputStream.readObject();
+                inputStream.close();
+                mSendOStream.close();
+                sessionSock.close();
+                return ((TReplySessionInfoMsg)obj).sessionInfo;
+            } catch (NumberFormatException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (UnknownHostException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (IOException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (ClassNotFoundException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            }
+        }
+        
+        
+        public TUniqueId sendNewSessionMessageToRegistry(String newSessionName){
+            try {
+                
+                Socket sessionSock = new Socket(
+                        InetAddress.getByName(util.getSetting("Reg", "regServerAddr")),
+                        Integer.parseInt(util.getSetting("Reg", "listenPort")));
+                ObjectOutputStream mSendOStream = new ObjectOutputStream( sessionSock.getOutputStream() );
+                ObjectInputStream inputStream = new ObjectInputStream( sessionSock.getInputStream() );
+                mSendOStream.writeObject(new TNewSessionMsg(newSessionName));
+                mSendOStream.flush();
+                Object obj = inputStream.readObject();
+                inputStream.close();
+                mSendOStream.close();
+                sessionSock.close();
+                return ((TReplyNewSessionMsg)obj).sessionId;
+            } catch (NumberFormatException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire nodes list: " + e.getMessage() );
+                return null;
+            } catch (UnknownHostException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire nodes list: " + e.getMessage() );
+                return null;
+            } catch (IOException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire nodes list: " + e.getMessage() );
+                return null;
+            } catch (ClassNotFoundException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire nodes list: " + e.getMessage() );
+                return null;
+            }
+        }
+        
+        public ArrayList<TNodeInfo> sendJoinSessionMessageToRegistry(TUniqueId sessionId){
+            try {
+                
+                Socket sessionSock = new Socket(
+                        InetAddress.getByName(util.getSetting("Reg", "regServerAddr")),
+                        Integer.parseInt(util.getSetting("Reg", "listenPort")));
+                ObjectOutputStream mSendOStream = new ObjectOutputStream( sessionSock.getOutputStream() );
+                ObjectInputStream inputStream = new ObjectInputStream( sessionSock.getInputStream() );
+                mSendOStream.writeObject(new TJoinSessionMsg(sessionId,selfNodeInfo));
+                mSendOStream.flush();
+                Object obj = inputStream.readObject();
+                inputStream.close();
+                mSendOStream.close();
+                sessionSock.close();
+                return ((TReplyJoinSessionMsg)obj).existingNodes;
+            } catch (NumberFormatException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (UnknownHostException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (IOException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            } catch (ClassNotFoundException e) {
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions  list: " + e.getMessage() );
+                return null;
+            }
+        }
+        
         //------------------------------
         public void acquireSessionsFromRegistry() {
             
-            TLogManager.logMessage("TWorkingNodeModel: acquring sessions from registry");
+            TLogManager.logMessage("TWorkingNodeModel: acquring sessions list from registry");
             
             // todo: ask the registry node for sessions in step of hardcode
-            TSessionInfo session = new TSessionInfo( util.getSetting("Temp", "DummySessionName" ) );
-            
-            
-            mData.sessions.add( session );
-            
+            ArrayList<TSessionInfo> tempList = sendGetSessionInfoMessageToRegistry();
+            if(tempList!=null)
+                mData.sessions.setList(tempList);
+            else
+                javax.swing.JOptionPane.showMessageDialog(null,"A error occur when acquring sessions list");
         }
         
         //------------------------------
@@ -461,21 +585,12 @@ public class TWorkingNodeModel implements INodeModel {
                 mData.sessions.setCurrent(sessionId);
                 
                 TSession session = mData.sessions.getCurrent();
-                
-                int workerCnt = Integer.parseInt( util.getSetting("Temp", "NoOfWorkers") );
-                for(int i=0; i<workerCnt; ++i) {
-                    
-                    session.AddNode(
-                            new cotex.TNodeInfo(
-                            util.getSetting("Temp", "WorkerName" + Integer.toString(i) ),
-                            InetAddress.getByName( util.getSetting("Temp", "WorkerAddr" + Integer.toString(i) ) ), connection.mCmdPort, connection.mRegPort, connection.mDataPort ) );
-                }
-                
-                int selfIdx = Integer.parseInt( util.getSetting("Temp", "Self") );
-                TLogManager.logMessage("TWorkingNodeModel: self = " + Integer.toString(selfIdx) );
-                
-                mData.nodes.setSelf( session.getNodeAt( selfIdx ) );
-                
+                ArrayList<TNodeInfo> tempList = sendJoinSessionMessageToRegistry(sessionId);
+                if(tempList!=null){
+                    session.setList(tempList);
+                    mData.nodes.setSelf( selfNodeInfo );
+                }else
+                    javax.swing.JOptionPane.showMessageDialog(null,"A error occur when acquring worker list");
             } catch(TException e) {
                 
                 TLogManager.logException(e);
@@ -489,12 +604,12 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         public void acquireCurrentDocument() {
-            
+            mData.paragraphs.clear();
             try {
                 
-                int selfIdx = Integer.parseInt( util.getSetting("Temp", "Self") );
+                int nodeCount=mData.nodes.getNodeCount();
                 
-                if(selfIdx == 0) {
+                if( nodeCount == 1) {
                     
                     TContent content;
                     
@@ -506,7 +621,7 @@ public class TWorkingNodeModel implements INodeModel {
                     
                     content.setContent("Testing paragraph line 1\nTesting paragraph line 2");
                     
-                } else {
+                } else if(nodeCount>=2){
                     
                     connection.sendObjectToLeftNode(
                             connection.DATA,
@@ -526,6 +641,8 @@ public class TWorkingNodeModel implements INodeModel {
             
             TLogManager.logMessage("TWorkingNodeModel: reg object received: " + obj.toString() );
             
+            if(obj.getClass().equals( TReplyJoinSessionMsg.class) )
+                _processReplyJoinSessionMsg( (TReplyJoinSessionMsg)obj );
         }
         
         //------------------------------
@@ -791,6 +908,28 @@ public class TWorkingNodeModel implements INodeModel {
         }
         
         //------------------------------
+        private void _processReplyJoinSessionMsg(TReplyJoinSessionMsg msg) {
+            
+            try {
+                
+                TLogManager.logMessage("TWorkingNodeModel: acquring worker list from registry");
+           
+                TSession session = mData.sessions.getCurrent();
+                
+                ArrayList<TNodeInfo> tempList = msg.existingNodes;
+                if(tempList!=null){
+                    mData.sessions.setNodeList(tempList);
+                    mData.nodes.setSelf( selfNodeInfo );
+                }else
+                    javax.swing.JOptionPane.showMessageDialog(null,"A error occur when acquring worker list");
+            }  catch(Exception e) {
+                
+                TLogManager.logError("TWorkingNodeModel: failed to acquire sessions worker list: " + e.getMessage() );
+                
+            }
+        }
+        
+        //------------------------------
         private void _processInsertParagraphMsg(TInsertParagraphMsg msg) {
             
             try {
@@ -1018,7 +1157,7 @@ public class TWorkingNodeModel implements INodeModel {
     
     private TNode mNode;
     private TWorkingNodeData mData;
-    
+    private TNodeInfo selfNodeInfo  = null;
 //----------------------------------
     public TWorkingNodeModel(TNode node) {
         
