@@ -70,36 +70,34 @@ public class TSessionPanel extends javax.swing.JPanel {
         add(jScrollPane2);
 
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void mSessionListMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mSessionListMouseReleased
 // TODO add your handling code here:
         if( evt.isPopupTrigger() ) {
-        
-            mSessionList.setSelectedIndex( mSessionList.locationToIndex( evt.getPoint() ) );
             
-            if( mSessionList.getSelectedValue() != null ) {
-                JMenuItem menuItem;
-                JPopupMenu popup = new JPopupMenu();
+            JMenuItem menuItem;
+            JPopupMenu popup = new JPopupMenu();
+            
+            mSessionList.setSelectedIndex( mSessionList.locationToIndex( evt.getPoint() ) );
+            java.awt.event.ActionListener listener = new java.awt.event.ActionListener() {
                 
-                java.awt.event.ActionListener listener = new java.awt.event.ActionListener() {
-                    
-                    public void actionPerformed(java.awt.event.ActionEvent e) {
-                        onSessionMenuAction(e);
-                    }
-                };
-
-                menuItem = new JMenuItem("New");
-                menuItem.setActionCommand("New");
-                menuItem.addActionListener(listener);
-                popup.add(menuItem);
-
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    onSessionMenuAction(e);
+                }
+            };
+            menuItem = new JMenuItem("New");
+            menuItem.setActionCommand("New");
+            menuItem.addActionListener(listener);
+            popup.add(menuItem);
+            if( mSessionList.getSelectedValue() != null ) {
+                
                 menuItem = new JMenuItem("Join");
                 menuItem.setActionCommand("Join");
                 menuItem.addActionListener(listener);
-                popup.add(menuItem);
-
-                popup.show( evt.getComponent(), evt.getX(), evt.getY() );
+                popup.add(menuItem);                
+                
             }
+            popup.show( evt.getComponent(), evt.getX(), evt.getY() );
         }
     }//GEN-LAST:event_mSessionListMouseReleased
     
@@ -110,22 +108,26 @@ public class TSessionPanel extends javax.swing.JPanel {
     private javax.swing.JList mSessionList;
     private javax.swing.JList mWorkerList;
     // End of variables declaration//GEN-END:variables
- 
+    
     private TNode mNode = null;
     
     /*
     public void setNode(TNode node) {
         mNode = node;
     }
-    */
+     */
     
     private void onSessionMenuAction(java.awt.event.ActionEvent evt) {
         
         if( evt.getActionCommand().equals("Join") ) {
-         
-            cotex.TSessionInfo session = (cotex.TSessionInfo)mSessionList.getSelectedValue();
             
+            cotex.TSessionInfo session = (cotex.TSessionInfo)mSessionList.getSelectedValue();
             mNode.execute( new TWorkingNodeModel.TJoinSessionCmd( session.getId() ) );
+            
+        } else if( evt.getActionCommand().equals("New") ) {
+            
+            cotex.TSessionInfo session = (cotex.TSessionInfo)mSessionList.getSelectedValue();
+            mNode.execute( new TWorkingNodeModel.TNewSessionCmd() );
         }
     }
 }

@@ -67,7 +67,7 @@ public class TNodeInfo implements java.io.Serializable {
             return false;
         
         TNodeInfo rhs = (TNodeInfo)obj;
-        return mAddr.equals(rhs.mAddr);
+        return mAddr.equals(rhs.mAddr) && mCmdPort==rhs.mCmdPort && mDataPort==rhs.mDataPort && mRegPort==rhs.mRegPort && mName.equals(rhs.mName);
     }
     
     public final String toString() {

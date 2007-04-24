@@ -44,6 +44,9 @@ public class TWorkingNodeData  {
             mParagraphs = new ArrayList<TParagraph>();
         }
         
+        public void clear(){
+            mParagraphs.clear();
+        }
         //------------------------------
         public TContent createContent() throws TException  {
             
@@ -304,9 +307,15 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
-        public void setList(ArrayList<TSessionInfo> sessions) {            
+        public void setList(ArrayList<TSessionInfo> sessions) {
             mSessions=sessions;
-            listModel.notifyContentChanged();
+            listModel.notifyContentChanged();            
+        }
+        
+        public void setNodeList(ArrayList<TNodeInfo> nodeInfos) {
+            getCurrent().setList(nodeInfos);
+            listModel.notifyContentChanged();            
+            nodes.listModel.notifyContentChanged();
         }
         
         //------------------------------
@@ -415,7 +424,6 @@ public class TWorkingNodeData  {
             TNodeInfo node = null;
             
             if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
-                
                 try {
                     
                     node = sessions.getCurrent().getLeftNode( mSelfNodeInfo );
@@ -428,6 +436,13 @@ public class TWorkingNodeData  {
             return node;
             
         }
+        public int getNodeCount(){
+            if(null != mSelfNodeInfo && sessions.hasCurrent() ) {
+                return sessions.getCurrent().getNodeCount();
+            }
+            return 0;
+        }
+        
         
         //------------------------------
         public TNodeInfo getRight() {

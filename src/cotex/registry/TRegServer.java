@@ -10,11 +10,12 @@
 package cotex.registry;
 
 import cotex.TConfig;
+import cotex.TNodeInfo;
 import cotex.TSessionInfo;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Vector;
+
 /**
  *
  * @author wing
@@ -33,13 +34,11 @@ public class TRegServer {
         Socket mSendSock = null;
         
         ArrayList<TSessionInfo> mSessionList = new ArrayList<TSessionInfo>();
-        ArrayList<Vector> mNodeList = new ArrayList<Vector>();
+        ArrayList<ArrayList<TNodeInfo>> mNodeList = new ArrayList<ArrayList<TNodeInfo>>();
         TConfig config = new TConfig("cotex.config.xml");
         String strRegListenPort = config.getSetting("Reg", "listenPort");
         int regListenPort = Integer.parseInt(strRegListenPort );
         
-        TSessionInfo session = new TSessionInfo( config.getSetting("Temp", "DummySessionName" ) );
-        mSessionList.add(session);
         try {
             servSock = new ServerSocket(regListenPort);
             System.out.println("TRegServer: Start and listen at port: "+strRegListenPort );
