@@ -27,7 +27,7 @@ Purpose of the document follows.
 
 	<section name="Signal" >
 		
-		<setting key="Interval" value="200" />
+		<setting key="Interval" value="250" />
 		<setting key="MaxHBMiss" value="4" />
 		<setting key="MaxAckMiss" value="8" />
 		
