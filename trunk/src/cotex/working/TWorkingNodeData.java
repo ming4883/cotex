@@ -154,6 +154,21 @@ public class TWorkingNodeData  {
         }
         
         //------------------------------
+        public void setNullCreatorIfMatch(TNodeInfo nodeInfo) {
+         
+            Iterator<TParagraph> iter = mParagraphs.iterator();
+            
+            while( iter.hasNext() ) {
+                
+                TParagraph paragraph = iter.next();
+                
+                if(paragraph.getCreator().equals(nodeInfo) )
+                    paragraph.setNullCreator();
+            }
+            
+        }
+        
+        //------------------------------
         public synchronized void setLocking(TUniqueId id) throws TException {
             
             getById(id).notifyLocking();

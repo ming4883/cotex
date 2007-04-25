@@ -846,7 +846,7 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         public void onAckSignalLost() {
             
-            TLogManager.logError("Connection to the session is lost");
+            //TLogManager.logError("Connection to the session is lost");
         }
         
         //------------------------------
@@ -868,6 +868,8 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processNotifyRemoveNodeMsg(TNotifyRemoveNodeMsg msg) {
             
             try {
+                
+                mData.paragraphs.setNullCreatorIfMatch(msg.nodeInfo);
                 
                 if( util.isSelf(msg.initiateNodeAddr) ) {
                     
