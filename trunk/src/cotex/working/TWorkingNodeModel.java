@@ -103,77 +103,77 @@ public class TWorkingNodeModel implements INodeModel {
             
             // exit
             mCmdDispatcher.put(
-                    TExitCmd.class,
-                    new ICmdInvoke() {
+                TExitCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onExit(cmd);}
             } );
             
             // new session
             mCmdDispatcher.put(
-                    TNewSessionCmd.class,
-                    new ICmdInvoke() {
+                TNewSessionCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onNewSession(cmd);}
             } );
             
             // join session
             mCmdDispatcher.put(
-                    TJoinSessionCmd.class,
-                    new ICmdInvoke() {
+                TJoinSessionCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onJoinSession(cmd);}
             } );
             
             // lock paragraph
             mCmdDispatcher.put(
-                    TLockParagraphCmd.class,
-                    new ICmdInvoke() {
+                TLockParagraphCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onLockParagraph(cmd);}
             } );
             
             // commit paragraph
             mCmdDispatcher.put(
-                    TCommitParagraphCmd.class,
-                    new ICmdInvoke() {
+                TCommitParagraphCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onCommitParagraph(cmd);}
             } );
             
             // insert paragraph
             mCmdDispatcher.put(
-                    TInsertParagraphCmd.class,
-                    new ICmdInvoke() {
+                TInsertParagraphCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onInsertParagraph(cmd);}
             } );
             
             // erase paragraph
             mCmdDispatcher.put(
-                    TEraseParagraphCmd.class,
-                    new ICmdInvoke() {
+                TEraseParagraphCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onEraseParagraph(cmd);}
             } );
             
             // cancel paragraph editing
             mCmdDispatcher.put(
-                    TCancelParagraphCmd.class,
-                    new ICmdInvoke() {
+                TCancelParagraphCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onCancelParagraph(cmd);}
             } );
             
             // grant paragraph access right
             mCmdDispatcher.put(
-                    TGrantAccessRightCmd.class,
-                    new ICmdInvoke() {
+                TGrantAccessRightCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onGrantAccessRight(cmd);}
             } );
             // reply grant paragraph access right
             mCmdDispatcher.put(
-                    TReplyGrantAccessRightCmd.class,
-                    new ICmdInvoke() {
+                TReplyGrantAccessRightCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onReplyGrantAccessRight(cmd);}
             } );
             
             // refresh session list
             mCmdDispatcher.put(
-                    TRefreshSessionListCmd.class,
-                    new ICmdInvoke() {
+                TRefreshSessionListCmd.class,
+                new ICmdInvoke() {
                 public void invoke(TNodeCommand cmd) {_onRefreshSessionList();}
             } );
         }
@@ -188,7 +188,6 @@ public class TWorkingNodeModel implements INodeModel {
         //------------------------------
         private void _onExit(TNodeCommand cmd) {
             
-            javax.swing.JOptionPane.showMessageDialog(null, "TWorkingNodeModel._onExit Invoke");
         }
         
         //------------------------------
@@ -285,8 +284,8 @@ public class TWorkingNodeModel implements INodeModel {
                 //mStates.put("LockingParagraph", paragraph);
                 
                 connection.sendObjectToRightNode(
-                        connection.CMD,
-                        new TLockParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
+                    connection.CMD,
+                    new TLockParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 
@@ -313,11 +312,11 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 // init commit check list
                 protocol.mNodeCommitCheckList = new TNodeCheckList( mData.sessions.getCurrent() );
-                protocol.mNodeCommitCheckList.set( mData.nodes.self().getAddr() );
+                protocol.mNodeCommitCheckList.set( mData.nodes.self().getSocketAddr() );
                 
                 connection.sendObjectToRightNode(
-                        connection.CMD,
-                        new TCommitParagraphMsg( mData.nodes.self().getSocketAddr(), mData.nodes.self().getDataPort(), paragraph.getId() ) );
+                    connection.CMD,
+                    new TCommitParagraphMsg( mData.nodes.self().getSocketAddr(), mData.nodes.self().getDataPort(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -342,11 +341,11 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 // init commit check list
                 protocol.mNodeCommitCheckList = new TNodeCheckList( mData.sessions.getCurrent() );
-                protocol.mNodeCommitCheckList.set( mData.nodes.self().getAddr() );
+                protocol.mNodeCommitCheckList.set( mData.nodes.self().getSocketAddr() );
                 
                 connection.sendObjectToRightNode(
-                        connection.CMD,
-                        new TInsertParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId(), newParagraph, newGap ) );
+                    connection.CMD,
+                    new TInsertParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId(), newParagraph, newGap ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -369,11 +368,11 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 // init commit check list
                 protocol.mNodeCommitCheckList = new TNodeCheckList( mData.sessions.getCurrent() );
-                protocol.mNodeCommitCheckList.set( mData.nodes.self().getAddr() );
+                protocol.mNodeCommitCheckList.set( mData.nodes.self().getSocketAddr() );
                 
                 connection.sendObjectToRightNode(
-                        connection.CMD,
-                        new TEraseParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
+                    connection.CMD,
+                    new TEraseParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -391,8 +390,8 @@ public class TWorkingNodeModel implements INodeModel {
                 TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
                 
                 connection.sendObjectToLeftNode(
-                        connection.CMD,
-                        new TCancelParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ));
+                    connection.CMD,
+                    new TCancelParagraphMsg( mData.nodes.self().getSocketAddr(), paragraph.getId() ));
                 
             } catch(TException e) {
                 
@@ -409,10 +408,10 @@ public class TWorkingNodeModel implements INodeModel {
                 
                 TParagraph paragraph = (TParagraph)cmd.getArg("paragraph");
                 connection.sendObject(
-                        connection.CMD,
-                        paragraph.getCreator().getAddr(),
-                        paragraph.getCreator().getCmdPort(),
-                        new TRequestParagraphRight(paragraph.getId(), mData.nodes.self()) );
+                    connection.CMD,
+                    paragraph.getCreator().getAddr(),
+                    paragraph.getCreator().getCmdPort(),
+                    new TRequestParagraphRight(paragraph.getId(), mData.nodes.self()) );
                 
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -429,10 +428,10 @@ public class TWorkingNodeModel implements INodeModel {
                 boolean result = Boolean.valueOf((String)(cmd.getArg("result")));
                 
                 connection.sendObject(
-                        connection.CMD,
-                        requester.getAddr(),
-                        requester.getCmdPort(),
-                        new TReplyParagraphRight(query.getParagraphId(),result) );
+                    connection.CMD,
+                    requester.getAddr(),
+                    requester.getCmdPort(),
+                    new TReplyParagraphRight(query.getParagraphId(),result) );
                 mData.accessRightList.remove(query);
             } catch(TException e) {
                 TLogManager.logException(e);
@@ -504,13 +503,13 @@ public class TWorkingNodeModel implements INodeModel {
         public void shutDown() {
             
             try {
-            
+                
                 get(CMD).close();
                 get(DATA).close();
-
+                
                 mNode.getConnectionManager().removeConnection(CMD);
                 mNode.getConnectionManager().removeConnection(DATA);
-            
+                
             } catch(TException e) {
                 
                 TLogManager.logException(e);
@@ -590,8 +589,9 @@ public class TWorkingNodeModel implements INodeModel {
             try{
                 
                 get(connectionName).sendObject( addr, port, obj );
-                TLogManager.logMessage(
-                        "TWorkingNodeModel: sending message to " + addr.getHostAddress() + ":" + Integer.toString(port) + ";" + obj.toString() );
+                
+                //TLogManager.logMessage(
+                //    "TWorkingNodeModel: sending message to " + addr.getHostAddress() + ":" + Integer.toString(port) + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -620,12 +620,12 @@ public class TWorkingNodeModel implements INodeModel {
                 TNodeInfo nodeInfo = mData.nodes.getRight();
                 
                 get(connectionName).sendObject(
-                        nodeInfo.getAddr(),
-                        getNodePort(nodeInfo, connectionName),
-                        obj );
+                    nodeInfo.getAddr(),
+                    getNodePort(nodeInfo, connectionName),
+                    obj );
                 
-                TLogManager.logMessage(
-                        "TWorkingNodeModel: sending message to right node = " + nodeInfo.toString() + ";" + obj.toString() );
+                //TLogManager.logMessage(
+                //   "TWorkingNodeModel: sending message to right node = " + nodeInfo.toString() + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -637,15 +637,16 @@ public class TWorkingNodeModel implements INodeModel {
         public void sendObjectToLeftNode(String connectionName, Object obj) {
             
             try{
+                
                 TNodeInfo nodeInfo = mData.nodes.getLeft();
                 
                 get(connectionName).sendObject(
-                        nodeInfo.getAddr(),
-                        getNodePort(nodeInfo, connectionName),
-                        obj );
+                    nodeInfo.getAddr(),
+                    getNodePort(nodeInfo, connectionName),
+                    obj );
                 
-                TLogManager.logMessage(
-                        "TWorkingNodeModel: sending message to left node = " + nodeInfo.toString() + ";" + obj.toString() );
+                //TLogManager.logMessage(
+                //    "TWorkingNodeModel: sending message to left node = " + nodeInfo.toString() + ";" + obj.toString() );
                 
             } catch(TException e) {
                 
@@ -703,14 +704,14 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         public void shutDown() {
-         
+            
             if(mData.nodes.getNodeCount() == 1) {
                 
                 // notify the registry if it is the remaining node in the session
                 connection.sendRequestToRegistry(
                     new TLeaveSessionMsg(
-                        mData.sessions.getCurrent().getInfo().getId(),
-                        mData.nodes.self() ) );
+                    mData.sessions.getCurrent().getInfo().getId(),
+                    mData.nodes.self() ) );
                 
             }
         }
@@ -757,8 +758,8 @@ public class TWorkingNodeModel implements INodeModel {
                 } else {
                     
                     connection.sendObjectToLeftNode(
-                            connection.DATA,
-                            new TRequestDocumentMsg( mData.nodes.self() ) );
+                        connection.DATA,
+                        new TRequestDocumentMsg( mData.nodes.self() ) );
                 }
                 
             } catch(TException e) {
@@ -832,18 +833,20 @@ public class TWorkingNodeModel implements INodeModel {
             
             mData.nodes.removeFromCurrentSession( deadNode );
             
+            signal.restart();
+            
             connection.sendObjectToRightNode(
                 connection.CMD,
                 new TNotifyRemoveNodeMsg(
-                    deadNode,
-                    mData.nodes.self().getSocketAddr() ) );
+                deadNode,
+                mData.nodes.self().getSocketAddr() ) );
             
-            signal.restart();
         }
         
         //------------------------------
         public void onAckSignalLost() {
             
+            TLogManager.logError("Connection to the session is lost");
         }
         
         //------------------------------
@@ -863,18 +866,18 @@ public class TWorkingNodeModel implements INodeModel {
         
         //------------------------------
         private void _processNotifyRemoveNodeMsg(TNotifyRemoveNodeMsg msg) {
-         
+            
             try {
                 
                 if( util.isSelf(msg.initiateNodeAddr) ) {
                     
                     connection.sendRequestToRegistry(
                         new TLeaveSessionMsg(
-                            mData.sessions.getCurrent().getInfo().getId(),
-                            msg.nodeInfo) );
+                        mData.sessions.getCurrent().getInfo().getId(),
+                        msg.nodeInfo) );
                     
                 } else {
-                  
+                    
                     mData.nodes.removeFromCurrentSession(msg.nodeInfo);
                     
                     _forwardNotifyRemoveNodeMsg(msg);
@@ -883,7 +886,7 @@ public class TWorkingNodeModel implements INodeModel {
                 }
                 
             } catch(TException e) {
-             
+                
                 TLogManager.logException(e);
             }
             
@@ -928,8 +931,8 @@ public class TWorkingNodeModel implements INodeModel {
                 if( true == msg.Result ) {
                     
                     mData.paragraphs.setLocked(
-                            msg.ParagraphId,
-                            mData.nodes.getBySocketAddr(msg.InitiateNodeAddr) );
+                        msg.ParagraphId,
+                        mData.nodes.getBySocketAddr(msg.InitiateNodeAddr) );
                     
                     if( util.isSelf( msg.InitiateNodeAddr ) )
                         _notifyViewLockPositiveResult();
@@ -995,6 +998,7 @@ public class TWorkingNodeModel implements INodeModel {
                         Thread.yield();
                     }
                     
+                    TLogManager.logMessage("received paragraph reply from all nodes, send +ve commit result");
                     mNodeCommitCheckList = null;
                     
                     _sendPositiveCommitResultMsg(msg);
@@ -1061,10 +1065,10 @@ public class TWorkingNodeModel implements INodeModel {
         private void _processRequestDocumentMsg(TRequestDocumentMsg msg) {
             
             connection.sendObject(
-                    connection.DATA,
-                    msg.NodeInfo.getAddr(),
-                    msg.NodeInfo.getDataPort(),
-                    new TReplyDocumentMsg( mData.paragraphs.getList() ) );
+                connection.DATA,
+                msg.NodeInfo.getAddr(),
+                msg.NodeInfo.getDataPort(),
+                new TReplyDocumentMsg( mData.paragraphs.getList() ) );
             
         }
         
@@ -1081,10 +1085,10 @@ public class TWorkingNodeModel implements INodeModel {
                 TParagraph paragraph = mData.paragraphs.getById(msg.ParagraphId);
                 
                 connection.sendObject(
-                        connection.DATA,
-                        msg.RequestorAddr,
-                        msg.DataPort,
-                        new TReplyParagraphMsg( msg.ParagraphId, ( (TContent)paragraph ).getPendingContent() ) );
+                    connection.DATA,
+                    msg.RequestorAddr.getAddress(),
+                    msg.DataPort,
+                    new TReplyParagraphMsg( msg.ParagraphId, ( (TContent)paragraph ).getPendingContent() ) );
                 
                 mNodeCommitCheckList.set( msg.RequestorAddr );
             } catch(TException e) {
@@ -1105,7 +1109,7 @@ public class TWorkingNodeModel implements INodeModel {
             }
             //mData.paragraphs.setList( msg.ParagraphList );
         }
-   
+        
         //------------------------------
         private void _processInsertParagraphMsg(TInsertParagraphMsg msg) {
             
@@ -1160,8 +1164,8 @@ public class TWorkingNodeModel implements INodeModel {
             
             // already locked, tell left node the failed result
             connection.sendObjectToLeftNode(
-                    connection.CMD,
-                    new TLockResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, false ) );
+                connection.CMD,
+                new TLockResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, false ) );
         }
         
         //------------------------------
@@ -1181,8 +1185,8 @@ public class TWorkingNodeModel implements INodeModel {
         private void _sendPositiveLockResultMsg(final TLockParagraphMsg msg) {
             
             connection.sendObjectToRightNode(
-                    connection.CMD,
-                    new TLockResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, true ) );
+                connection.CMD,
+                new TLockResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, true ) );
         }
         
         //------------------------------
@@ -1220,8 +1224,8 @@ public class TWorkingNodeModel implements INodeModel {
             
             // oops, inconsistence locking state, commit failed and tell others
             connection.sendObjectToLeftNode(
-                    connection.CMD,
-                    new TCommitResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, false ) );
+                connection.CMD,
+                new TCommitResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, false ) );
         }
         
         //------------------------------
@@ -1229,10 +1233,10 @@ public class TWorkingNodeModel implements INodeModel {
             
             // requet paragraph content from initiator
             connection.sendObject(
-                    connection.DATA,
-                    msg.InitiateNodeAddr.getAddress(),
-                    msg.DataPort,
-                    new TRequestParagraphMsg( mData.nodes.self().getAddr(), mData.nodes.self().getDataPort(), msg.ParagraphId ) );
+                connection.DATA,
+                msg.InitiateNodeAddr.getAddress(),
+                msg.DataPort,
+                new TRequestParagraphMsg( mData.nodes.self().getSocketAddr(), mData.nodes.self().getDataPort(), msg.ParagraphId ) );
         }
         
         //------------------------------
@@ -1263,8 +1267,8 @@ public class TWorkingNodeModel implements INodeModel {
             
             // message from self, commit success, tell others
             connection.sendObjectToRightNode(
-                    connection.CMD,
-                    new TCommitResultMsg(msg.InitiateNodeAddr, msg.ParagraphId, true) );
+                connection.CMD,
+                new TCommitResultMsg(msg.InitiateNodeAddr, msg.ParagraphId, true) );
         }
         
         //------------------------------
@@ -1350,7 +1354,7 @@ public class TWorkingNodeModel implements INodeModel {
     //----------------------------------
     // Signal
     private class Signal implements ISignalReceiverListener {
-     
+        
         private TSignalEmitter mAckEmitter;
         private TSignalEmitter mHBEmitter;
         
@@ -1360,16 +1364,16 @@ public class TWorkingNodeModel implements INodeModel {
         private int mInterval;
         
         public void onSignalLost(TSignalReceiver receiver) {
-         
+            
             
             if(receiver == mAckReceiver) {
-            
+                
                 TLogManager.logMessage("TWorkingNodeModel: Ack signal from right node is lost");
                 protocol.onAckSignalLost();
             }
             
             else if(receiver == mHBReceiver) {
-             
+                
                 TLogManager.logMessage("TWorkingNodeModel: HB signal from left node is lost");
                 protocol.onHBSignalLost();
             }
@@ -1378,25 +1382,30 @@ public class TWorkingNodeModel implements INodeModel {
         
         public void startUp() {
             
-            int maxSignalMiss = 4;
+            int maxHBSignalMiss = 4;
+            int maxAckSignalMiss = 8;
             mInterval = 500;
             
             try {
                 
-                maxSignalMiss = Integer.parseInt( util.getSetting("Working", "HBMaxMiss") );
-                mInterval = Integer.parseInt( util.getSetting("Working", "HBInterval") );
+                maxHBSignalMiss = Integer.parseInt( util.getSetting("Signal", "MaxHBMiss") );
+                maxAckSignalMiss = Integer.parseInt( util.getSetting("Signal", "MaxAckMiss") );
+                mInterval = Integer.parseInt( util.getSetting("Signal", "Interval") );
                 
             } catch (NumberFormatException ex) {
                 
             }
             
-            TLogManager.logMessage("TWorkingNodeModel: HB interval = " + Integer.toString(mInterval) + "; maxSignalMiss = " + Integer.toString(maxSignalMiss) );
+            TLogManager.logMessage("TWorkingNodeModel: signal interval = "
+                + Integer.toString(mInterval)
+                + "; maxHBSignalMiss = " + Integer.toString(maxHBSignalMiss) 
+                + "; maxAckSignalMiss = " + Integer.toString(maxAckSignalMiss));
             
             mAckEmitter = new TSignalEmitter();
             mHBEmitter = new TSignalEmitter();
             
-            mAckReceiver = new TSignalReceiver(maxSignalMiss);
-            mHBReceiver = new TSignalReceiver(maxSignalMiss);
+            mAckReceiver = new TSignalReceiver(maxAckSignalMiss);
+            mHBReceiver = new TSignalReceiver(maxHBSignalMiss);
             
             mAckReceiver.addListener(this);
             mHBReceiver.addListener(this);
@@ -1404,7 +1413,7 @@ public class TWorkingNodeModel implements INodeModel {
         }
         
         public void shutDown() {
-         
+            
             stop();
         }
         
@@ -1428,7 +1437,7 @@ public class TWorkingNodeModel implements INodeModel {
                 leftNode.getCmdPort(),
                 mInterval);
             
-            mAckEmitter.startup( 
+            mAckEmitter.startup(
                 new InetSocketAddress(leftNode.getAddr(), self.getDataPort() ),
                 mInterval);
             
@@ -1475,16 +1484,16 @@ public class TWorkingNodeModel implements INodeModel {
         signal.startUp();
         
         protocol.startUp();
- 
+        
         try {
             
             TNodeInfo selfNodeInfo = new TNodeInfo(
-                    
-                    util.getSetting("Working", "Username"),
-                    InetAddress.getLocalHost(),
-                    connection.mCmdPort,
-                    connection.mDataPort
-                    );
+                
+                util.getSetting("Working", "Username"),
+                InetAddress.getLocalHost(),
+                connection.mCmdPort,
+                connection.mDataPort
+                );
             
             mData.nodes.setSelf( selfNodeInfo );
             

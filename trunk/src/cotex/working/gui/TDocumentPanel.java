@@ -59,7 +59,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
             
             // commit
             btn = new JButton();
-            btn.setText("Grant Access");
+            btn.setText("Request Access");
             btn.setActionCommand("GrantAccess");
             btn.addActionListener( mActionListener );
             
@@ -85,8 +85,10 @@ public class TDocumentPanel extends javax.swing.JPanel {
             if(evt.getActionCommand().equals( "GrantAccess" ) ) {
                 mNode.execute( new TWorkingNodeModel.TGrantAccessRightCmd(mPendingParagraph) );
             }
+            
             if(evt.getActionCommand().equals( "Cancel" ) ) {
             }
+            
             mPendingParagraph = null;
             mPendingRow = -1;
             mPopup.hide();
@@ -98,8 +100,10 @@ public class TDocumentPanel extends javax.swing.JPanel {
             
             if(null != mPopup)
                 mPopup.hide();
+            
             if(null == mAccessRightPanel)
                 createActionPanel();
+            
             java.awt.Rectangle rect = mTable.getCellRect(mPendingRow, 0, true);
             
             java.awt.Point p = new java.awt.Point(rect.x, rect.y);
@@ -192,19 +196,44 @@ public class TDocumentPanel extends javax.swing.JPanel {
         int row = mTable.rowAtPoint( evt.getPoint() );
         
         TParagraph paragraph = (TParagraph)mTable.getModel().getValueAt(row, 0);
+        
         TWorkingNodeModel mModel = (TWorkingNodeModel)mNode.getModel();
         TWorkingNodeData.Paragraphs paragraphs = mModel.getData().paragraphs;
-        if(!paragraphs.isParagraphGranted(paragraph.getId()) &&
-                !paragraph.getCreator().equals(mModel.getData().nodes.self()) &&
-                mTable.getModel().getValueAt(row, 0).getClass().equals(TContent.class)){
+        
+        if(paragraph.getState() == TParagraph.State.UNLOCKED) {
+            
+            mPendingRow = row;
+            mPendingParagraph = paragraph;
+                
+            if( paragraph.getClass().equals(TGap.class) ||
+                paragraph.getCreator().equals( mModel.getData().nodes.self() ) ||
+                mModel.getData().paragraphs.isParagraphGranted( paragraph.getId() ) ) {
+
+                mNode.execute( new TWorkingNodeModel.TLockParagraphCmd(paragraph) );
+                
+            } else {
+                
+                mAccessRightPanel.popup();
+            }
+        } 
+        
+        /*
+        
+        if(
+            !paragraphs.isParagraphGranted(paragraph.getId()) &&
+            !paragraph.getCreator().equals(mModel.getData().nodes.self()) &&
+            mTable.getModel().getValueAt(row, 0).getClass().equals(TContent.class)){
+            
             mPendingRow = row;
             mPendingParagraph = paragraph;
             mAccessRightPanel.popup();
-        }else if(paragraph.getState() == TParagraph.State.UNLOCKED) {
+            
+        } else if(paragraph.getState() == TParagraph.State.UNLOCKED) {
+            
             mPendingRow = row;
             mPendingParagraph = paragraph;
             mNode.execute( new TWorkingNodeModel.TLockParagraphCmd(paragraph) );
-        }
+        } */
         
     }//GEN-LAST:event_mTableMousePressed
     

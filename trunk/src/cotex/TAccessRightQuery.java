@@ -20,16 +20,20 @@ public class TAccessRightQuery {
     
     /** Creates a new instance of TAccessRightQuery */
     public TAccessRightQuery(TNodeInfo Requester, TUniqueId ParagraphId) {
+        
         requester = Requester;
         paragraphId = ParagraphId;
     }
-    public TNodeInfo getRequester(){
+    
+    public TNodeInfo getRequester() {
         return requester;
     }
-    public TUniqueId getParagraphId(){
+    
+    public TUniqueId getParagraphId() {
         return paragraphId;
     }
+    
     public String toString(){
-        return requester.toString()+"request: "+paragraphId.toString();
+        return requester.toString() + " request: " + paragraphId.toString();
     }
 }

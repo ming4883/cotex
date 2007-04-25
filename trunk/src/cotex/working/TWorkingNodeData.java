@@ -249,13 +249,14 @@ public class TWorkingNodeData  {
             
             tableModel.notifyContentChanged();
         }
-        
-        
+           
+        //------------------------------
         public void addGrantedParagraph(TUniqueId paragraphId){
             if(!isParagraphGranted(paragraphId))
                 mGrantedParagraphs.add(paragraphId);
         }
         
+        //------------------------------
         public boolean isParagraphGranted(TUniqueId paragraphId){
             return mGrantedParagraphs.contains(paragraphId);
         }
@@ -276,11 +277,10 @@ public class TWorkingNodeData  {
                 
                 TParagraph paragraph = mParagraphs.get(r);
                 
-                return
-                        ( paragraph.getState() == TParagraph.State.LOCKED ) &&
-                        ( nodes.self().equals( paragraph.getLockOwner() ) &&
-                        (isParagraphGranted(paragraph.getId()) || paragraph.getCreator()==nodes.self()));
-                
+                return ( paragraph.getState() == TParagraph.State.LOCKED );
+                    //( paragraph.getState() == TParagraph.State.LOCKED ) &&
+                    //( nodes.self().equals( paragraph.getLockOwner() ) &&
+                    //(isParagraphGranted(paragraph.getId()) || paragraph.getCreator()==nodes.self()));                
             }
             
             public void setValueAt(Object value, int r, int c) {
