@@ -10,7 +10,7 @@
 package cotex.msg;
 
 import cotex.TUniqueId;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  *
@@ -18,12 +18,12 @@ import java.net.InetAddress;
  */
 public class TRequestParagraphMsg implements java.io.Serializable {
     
-    public InetAddress RequestorAddr;
+    public InetSocketAddress RequestorAddr;
     public TUniqueId ParagraphId;
     public int DataPort;
     
     /** Creates a new instance of TRequestParagraphMsg */
-    public TRequestParagraphMsg(InetAddress requestorAddr, int port, TUniqueId paragraphId) {
+    public TRequestParagraphMsg(InetSocketAddress requestorAddr, int port, TUniqueId paragraphId) {
         DataPort = port;
         RequestorAddr = requestorAddr;
         ParagraphId = paragraphId;
@@ -42,7 +42,7 @@ public class TRequestParagraphMsg implements java.io.Serializable {
 
         in.defaultReadObject();
         
-        RequestorAddr = (InetAddress)in.readObject();
+        RequestorAddr = (InetSocketAddress)in.readObject();
         ParagraphId = (TUniqueId)in.readObject();
         DataPort = in.readInt();
     }

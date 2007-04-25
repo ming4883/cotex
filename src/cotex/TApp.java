@@ -236,21 +236,37 @@ public class TApp extends javax.swing.JFrame {
             
             try {
                 
-                DockingWindow currWnd = mDockingViews.get(0);
+                TabWindow tabWnd = new TabWindow();
                 
-                for(int i=1; i<mDockingViews.size(); ++i) {
+                for(int i = 0; i < mDockingViews.size() - 1; ++i) {
+                
+                    tabWnd.addTab( mDockingViews.get(i) );
+                }
+                
+                DockingWindow currWnd;
+                
+                if(mDockingViews.size() == 1) {
+                
+                    // only 1 view, add to the tab
+                    tabWnd.addTab( mDockingViews.get(0) );
+                    currWnd = tabWnd;
                     
+                } else {
+                
+                    // more than 1, create a h-split window for the last view
                     currWnd = new SplitWindow(
                         true,
                         0.3f,
-                        currWnd,
-                        mDockingViews.get(i) );
-                    
+                        tabWnd,
+                        mDockingViews.get( mDockingViews.size() - 1 ) );
+                
                 }
                 
+                tabWnd.setSelectedTab(0);
+
                 DockingWindow layout = new SplitWindow(
                     false,
-                    0.6f,
+                    0.7f,
                     currWnd,
                     mConsoleDockingView );
                 

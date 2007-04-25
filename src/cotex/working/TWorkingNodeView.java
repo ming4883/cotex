@@ -12,6 +12,7 @@ package cotex.working;
 import cotex.*;
 import cotex.working.gui.TDocumentPanel;
 import cotex.working.gui.TSessionPanel;
+import cotex.working.gui.TAccessRightRequestPanel;
 import javax.swing.JComponent;
 import java.util.HashMap;
 
@@ -50,6 +51,7 @@ public class TWorkingNodeView implements INodeView {
     TNode mNode;
     TSessionPanel mSessionPanel;
     TDocumentPanel mDocumentPanel;
+    TAccessRightRequestPanel mAccessRightRequestPanel;
     
     
     /** Creates a new instance of TWorkingNodeView */
@@ -60,6 +62,7 @@ public class TWorkingNodeView implements INodeView {
         mGuiList = new java.util.ArrayList<javax.swing.JComponent>();
         
         mGuiList.add( mSessionPanel = new TSessionPanel(node) );
+        mGuiList.add( mAccessRightRequestPanel = new TAccessRightRequestPanel(node) );
         mGuiList.add( mDocumentPanel = new TDocumentPanel(node) );
         
         initDispatcher();

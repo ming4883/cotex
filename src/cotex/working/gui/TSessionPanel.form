@@ -15,7 +15,7 @@
 
   <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
     <Property name="columns" type="int" value="0"/>
-    <Property name="rows" type="int" value="3"/>
+    <Property name="rows" type="int" value="2"/>
     <Property name="verticalGap" type="int" value="2"/>
   </Layout>
   <SubComponents>
@@ -65,31 +65,6 @@
             </Property>
             <Property name="selectionMode" type="int" value="0"/>
           </Properties>
-        </Component>
-      </SubComponents>
-    </Container>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane3">
-      <AuxValues>
-        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-      </AuxValues>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-      <SubComponents>
-        <Component class="javax.swing.JList" name="mGrantAccessList">
-          <Properties>
-            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-              <StringArray count="5">
-                <StringItem index="0" value="Item 1"/>
-                <StringItem index="1" value="Item 2"/>
-                <StringItem index="2" value="Item 3"/>
-                <StringItem index="3" value="Item 4"/>
-                <StringItem index="4" value="Item 5"/>
-              </StringArray>
-            </Property>
-          </Properties>
-          <Events>
-            <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mGrantAccessListMouseReleased"/>
-          </Events>
         </Component>
       </SubComponents>
     </Container>

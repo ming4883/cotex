@@ -22,9 +22,15 @@ Purpose of the document follows.
 		<setting key="RegistryAddress" value="localhost" />
 		<setting key="StartingPort" value="10002" />
 		<setting key="Username" value="TestUser" />
-		<setting key="HBInterval" value="200" />
-		<setting key="HBMaxMiss" value="4" />
-
+		
 	</section>
 
+	<section name="Signal" >
+		
+		<setting key="Interval" value="200" />
+		<setting key="MaxHBMiss" value="4" />
+		<setting key="MaxAckMiss" value="8" />
+		
+	</section>
+	
 </config>

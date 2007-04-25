@@ -12,7 +12,7 @@ package cotex.working;
 import cotex.*;
 
 import java.util.HashMap;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -22,23 +22,22 @@ import java.util.Iterator;
  */
 public class TNodeCheckList {
     
-    private HashMap<InetAddress, Boolean> mList;
+    private HashMap<InetSocketAddress, Boolean> mList;
     
     /** Creates a new instance of TNodeCheckList */
     public TNodeCheckList(TSession session) {
         
-        mList = new HashMap<InetAddress, Boolean>();
+        mList = new HashMap<InetSocketAddress, Boolean>();
         
         for(int i=0; i<session.getNodeCount(); ++i) {
-            mList.put( session.getNodeAt(i).getAddr(), Boolean.FALSE );
+            mList.put( session.getNodeAt(i).getSocketAddr(), Boolean.FALSE );
         }
         
     }
     
-    public synchronized void set(InetAddress addr) {
+    public synchronized void set(InetSocketAddress addr) {
         
         TLogManager.logMessage( "TNodeCheckList: setting node: " + addr.toString() );
-        
         
         mList.put(addr, Boolean.TRUE);
         
