@@ -89,6 +89,9 @@ public abstract class TParagraph implements java.io.Serializable {
     
     public void setLockOwner(TNodeInfo owner) {
         mLockOwner = owner;
+        
+        if(mCreator == null)
+            mCreator = owner;
     }
     
     public TNodeInfo getLockOwner() {
@@ -97,7 +100,12 @@ public abstract class TParagraph implements java.io.Serializable {
     
     public TNodeInfo getCreator() {
         return mCreator;
-    }    
+    }
+    
+    public void setNullCreator() {
+     
+        mCreator = null;
+    }
     
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
 

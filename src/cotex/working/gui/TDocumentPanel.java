@@ -206,6 +206,7 @@ public class TDocumentPanel extends javax.swing.JPanel {
             mPendingParagraph = paragraph;
                 
             if( paragraph.getClass().equals(TGap.class) ||
+                (paragraph.getCreator() == null) ||
                 paragraph.getCreator().equals( mModel.getData().nodes.self() ) ||
                 mModel.getData().paragraphs.isParagraphGranted( paragraph.getId() ) ) {
 
