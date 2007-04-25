@@ -93,6 +93,32 @@ public class TApp extends javax.swing.JFrame {
         }
     };
     
+    private class TErrorLogger implements ILogger {
+    
+        TApp mSelf;
+        
+        TErrorLogger(TApp self) {
+            mSelf = self;
+        }
+        
+        public void logMessage(String str) {
+        
+        }
+
+        public void logError(String str) {
+            
+            javax.swing.JOptionPane.showMessageDialog(
+                mSelf, 
+                str,
+                "Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+
+        public void logException(TException e) {
+
+        }
+    }
+    
     public void run(String[] args) {
         
         try {
@@ -157,6 +183,7 @@ public class TApp extends javax.swing.JFrame {
         mConsole = new TConsolePanel();
         
         TLogManager.addLogger(mConsole);
+        TLogManager.addLogger( new TErrorLogger(this) );
         
     }
     

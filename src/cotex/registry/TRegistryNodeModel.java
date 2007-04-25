@@ -283,12 +283,16 @@ public class TRegistryNodeModel implements INodeModel {
                         _processRequestSessionInfoMsg( (TRequestSessionInfoMsg)obj, outStream );
                     }
                     
-                    if( obj.getClass().equals(TNewSessionMsg.class) ) {
+                    else if( obj.getClass().equals(TNewSessionMsg.class) ) {
                         _processNewSessionMsg( (TNewSessionMsg)obj, outStream );
                     }
                     
-                    if( obj.getClass().equals(TJoinSessionMsg.class) ) {
+                    else if( obj.getClass().equals(TJoinSessionMsg.class) ) {
                         _processJoinSessionMsg( (TJoinSessionMsg)obj, outStream );
+                    }
+                    
+                    else if( obj.getClass().equals(TLeaveSessionMsg.class) ) {
+                        _processLeaveSessionMsg( (TLeaveSessionMsg)obj, outStream );
                     }
                     
                 } catch(java.io.IOException e) {
@@ -405,6 +409,27 @@ public class TRegistryNodeModel implements INodeModel {
                 _sendReply( outStream, new TReplyJoinSessionMsg(false, null) );
                 
             }
+        }
+        
+        //------------------------------
+        private void _processLeaveSessionMsg(
+            TLeaveSessionMsg msg,
+            java.io.ObjectOutputStream outStream)
+            
+            throws java.io.IOException {
+            
+             TLogManager.logMessage("TRegistryNodeModel: handling leave session msg");
+             
+             TSession session2Leave = data.getSessionById(msg.sessionId);
+            
+            if(null != session2Leave) {
+                 
+                 session2Leave.removeNode(msg.workerInfo);
+                 
+                 data.treeModel.notifyContentChanged();
+            }
+             
+             _sendReply( outStream, new TDummyMsg() );
         }
         
         //------------------------------

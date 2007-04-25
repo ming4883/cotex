@@ -11,6 +11,8 @@ package cotex.working;
 
 import cotex.*;
 import cotex.msg.*;
+import cotex.signal.*;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
@@ -242,6 +244,8 @@ public class TWorkingNodeModel implements INodeModel {
                         mData.nodes.setListToCurrentSession(msg.existingNodes);
                         
                         protocol.acquireCurrentDocument();
+                        
+                        signal.restart();
                         
                         TLogManager.logMessage("TWorkingNodeModel: session connected");
                         
@@ -497,6 +501,24 @@ public class TWorkingNodeModel implements INodeModel {
         }
         
         //------------------------------
+        public void shutDown() {
+            
+            try {
+            
+                get(CMD).close();
+                get(DATA).close();
+
+                mNode.getConnectionManager().removeConnection(CMD);
+                mNode.getConnectionManager().removeConnection(DATA);
+            
+            } catch(TException e) {
+                
+                TLogManager.logException(e);
+            }
+            
+        }
+        
+        //------------------------------
         private void _getRegInfo() {
             
             try {
@@ -675,6 +697,25 @@ public class TWorkingNodeModel implements INodeModel {
         private TNodeCheckList mNodeCommitCheckList = null;
         
         //------------------------------
+        public void startUp() {
+            
+        }
+        
+        //------------------------------
+        public void shutDown() {
+         
+            if(mData.nodes.getNodeCount() == 1) {
+                
+                // notify the registry if it is the remaining node in the session
+                connection.sendRequestToRegistry(
+                    new TLeaveSessionMsg(
+                        mData.sessions.getCurrent().getInfo().getId(),
+                        mData.nodes.self() ) );
+                
+            }
+        }
+        
+        //------------------------------
         public void acquireSessionsFromRegistry() {
             
             TLogManager.logMessage("TWorkingNodeModel: acquring sessions list from registry");
@@ -735,25 +776,28 @@ public class TWorkingNodeModel implements INodeModel {
             if(obj.getClass().equals( TNotifyAddNodeMsg.class) )
                 _processNotifyAddNodeMsg( (TNotifyAddNodeMsg)obj );
             
-            if(obj.getClass().equals( TLockParagraphMsg.class) )
+            else if(obj.getClass().equals( TNotifyRemoveNodeMsg.class) )
+                _processNotifyRemoveNodeMsg( (TNotifyRemoveNodeMsg)obj );
+            
+            else if(obj.getClass().equals( TLockParagraphMsg.class) )
                 _processLockParagraphMsg( (TLockParagraphMsg)obj );
             
-            if(obj.getClass().equals( TLockResultMsg.class) )
+            else if(obj.getClass().equals( TLockResultMsg.class) )
                 _processLockResultMsg( (TLockResultMsg)obj );
             
-            if(obj.getClass().equals( TCommitParagraphMsg.class) )
+            else if(obj.getClass().equals( TCommitParagraphMsg.class) )
                 _processCommitParagraphMsg( (TCommitParagraphMsg)obj );
             
-            if(obj.getClass().equals( TCommitResultMsg.class) )
+            else if(obj.getClass().equals( TCommitResultMsg.class) )
                 _processCommitResultMsg( (TCommitResultMsg)obj );
             
-            if(obj.getClass().equals( TCancelParagraphMsg.class) )
+            else if(obj.getClass().equals( TCancelParagraphMsg.class) )
                 _processCancelParagraphMsg( (TCancelParagraphMsg)obj );
             
-            if(obj.getClass().equals( TInsertParagraphMsg.class) )
+            else if(obj.getClass().equals( TInsertParagraphMsg.class) )
                 _processInsertParagraphMsg( (TInsertParagraphMsg)obj );
             
-            if(obj.getClass().equals( TEraseParagraphMsg.class) )
+            else if(obj.getClass().equals( TEraseParagraphMsg.class) )
                 _processEraseParagraphMsg( (TEraseParagraphMsg)obj );
             
             if(obj.getClass().equals( TRequestParagraphRight.class) )
@@ -771,14 +815,78 @@ public class TWorkingNodeModel implements INodeModel {
             if(obj.getClass().equals( TRequestDocumentMsg.class ) )
                 _processRequestDocumentMsg( (TRequestDocumentMsg)obj );
             
-            if(obj.getClass().equals( TReplyDocumentMsg.class ) )
+            else if(obj.getClass().equals( TReplyDocumentMsg.class ) )
                 _processReplyDocumentMsg( (TReplyDocumentMsg)obj );
             
-            if(obj.getClass().equals( TRequestParagraphMsg.class) )
+            else if(obj.getClass().equals( TRequestParagraphMsg.class) )
                 _processRequestParagraphMsg( (TRequestParagraphMsg)obj );
             
-            if(obj.getClass().equals( TReplyParagraphMsg.class) )
+            else if(obj.getClass().equals( TReplyParagraphMsg.class) )
                 _processReplyParagraphMsg( (TReplyParagraphMsg)obj );
+        }
+        
+        //------------------------------
+        public void onHBSignalLost() {
+            
+            TNodeInfo deadNode = mData.nodes.getLeft();
+            
+            mData.nodes.removeFromCurrentSession( deadNode );
+            
+            connection.sendObjectToRightNode(
+                connection.CMD,
+                new TNotifyRemoveNodeMsg(
+                    deadNode,
+                    mData.nodes.self().getSocketAddr() ) );
+            
+            signal.restart();
+        }
+        
+        //------------------------------
+        public void onAckSignalLost() {
+            
+        }
+        
+        //------------------------------
+        private void _processNotifyAddNodeMsg(TNotifyAddNodeMsg msg) {
+            
+            try {
+                
+                TLogManager.logMessage("adding node " + msg.nodeInfo.getName() );
+                mData.nodes.addToCurrentSession(msg.nodeInfo);
+                
+                signal.restart();
+                
+            } catch(Exception e) {
+                
+            }
+        }
+        
+        //------------------------------
+        private void _processNotifyRemoveNodeMsg(TNotifyRemoveNodeMsg msg) {
+         
+            try {
+                
+                if( util.isSelf(msg.initiateNodeAddr) ) {
+                    
+                    connection.sendRequestToRegistry(
+                        new TLeaveSessionMsg(
+                            mData.sessions.getCurrent().getInfo().getId(),
+                            msg.nodeInfo) );
+                    
+                } else {
+                  
+                    mData.nodes.removeFromCurrentSession(msg.nodeInfo);
+                    
+                    _forwardNotifyRemoveNodeMsg(msg);
+                    
+                    signal.restart();
+                }
+                
+            } catch(TException e) {
+             
+                TLogManager.logException(e);
+            }
+            
         }
         
         //------------------------------
@@ -997,20 +1105,7 @@ public class TWorkingNodeModel implements INodeModel {
             }
             //mData.paragraphs.setList( msg.ParagraphList );
         }
-        
-        //------------------------------
-        private void _processNotifyAddNodeMsg(TNotifyAddNodeMsg msg) {
-            
-            try {
-                
-                TLogManager.logMessage("adding node " + msg.nodeInfo.getName() );
-                mData.nodes.addToCurrentSession(msg.nodeInfo);
-                
-            } catch(Exception e) {
-                
-            }
-        }
-        
+   
         //------------------------------
         private void _processInsertParagraphMsg(TInsertParagraphMsg msg) {
             
@@ -1067,6 +1162,12 @@ public class TWorkingNodeModel implements INodeModel {
             connection.sendObjectToLeftNode(
                     connection.CMD,
                     new TLockResultMsg( msg.InitiateNodeAddr, msg.ParagraphId, false ) );
+        }
+        
+        //------------------------------
+        private void _forwardNotifyRemoveNodeMsg(final TNotifyRemoveNodeMsg msg) throws TException {
+            
+            connection.sendObjectToRightNode(connection.CMD, msg);
         }
         
         //------------------------------
@@ -1147,6 +1248,7 @@ public class TWorkingNodeModel implements INodeModel {
             // correct locking state, _forward the message
             connection.sendObjectToRightNode(connection.CMD, msg);
         }
+        
         //------------------------------
         private void _forwardEraseMsg(final TEraseParagraphMsg msg) {
             
@@ -1202,7 +1304,6 @@ public class TWorkingNodeModel implements INodeModel {
             connection.sendObjectToLeftNode(connection.CMD, msg);
         }
         
-        
         //------------------------------
         private void _notifyViewCancelLockResult() {
             
@@ -1247,11 +1348,114 @@ public class TWorkingNodeModel implements INodeModel {
     }
     
     //----------------------------------
+    // Signal
+    private class Signal implements ISignalReceiverListener {
+     
+        private TSignalEmitter mAckEmitter;
+        private TSignalEmitter mHBEmitter;
+        
+        private TSignalReceiver mAckReceiver;
+        private TSignalReceiver mHBReceiver;
+        
+        private int mInterval;
+        
+        public void onSignalLost(TSignalReceiver receiver) {
+         
+            
+            if(receiver == mAckReceiver) {
+            
+                TLogManager.logMessage("TWorkingNodeModel: Ack signal from right node is lost");
+                protocol.onAckSignalLost();
+            }
+            
+            else if(receiver == mHBReceiver) {
+             
+                TLogManager.logMessage("TWorkingNodeModel: HB signal from left node is lost");
+                protocol.onHBSignalLost();
+            }
+            
+        }
+        
+        public void startUp() {
+            
+            int maxSignalMiss = 4;
+            mInterval = 500;
+            
+            try {
+                
+                maxSignalMiss = Integer.parseInt( util.getSetting("Working", "HBMaxMiss") );
+                mInterval = Integer.parseInt( util.getSetting("Working", "HBInterval") );
+                
+            } catch (NumberFormatException ex) {
+                
+            }
+            
+            TLogManager.logMessage("TWorkingNodeModel: HB interval = " + Integer.toString(mInterval) + "; maxSignalMiss = " + Integer.toString(maxSignalMiss) );
+            
+            mAckEmitter = new TSignalEmitter();
+            mHBEmitter = new TSignalEmitter();
+            
+            mAckReceiver = new TSignalReceiver(maxSignalMiss);
+            mHBReceiver = new TSignalReceiver(maxSignalMiss);
+            
+            mAckReceiver.addListener(this);
+            mHBReceiver.addListener(this);
+            
+        }
+        
+        public void shutDown() {
+         
+            stop();
+        }
+        
+        public void restart() {
+            
+            stop();
+            start();
+        }
+        
+        public void start() {
+            
+            TNodeInfo leftNode = mData.nodes.getLeft();
+            TNodeInfo rightNode = mData.nodes.getRight();
+            TNodeInfo self = mData.nodes.self();
+            
+            mHBEmitter.startup(
+                new InetSocketAddress(rightNode.getAddr(), self.getCmdPort() ),
+                mInterval);
+            
+            mHBReceiver.startup(
+                leftNode.getCmdPort(),
+                mInterval);
+            
+            mAckEmitter.startup( 
+                new InetSocketAddress(leftNode.getAddr(), self.getDataPort() ),
+                mInterval);
+            
+            mAckReceiver.startup(
+                rightNode.getDataPort(),
+                mInterval);
+            
+        }
+        
+        public void stop() {
+            
+            mAckEmitter.shutdown();
+            mHBEmitter.shutdown();
+            
+            mAckReceiver.shutdown();
+            mHBReceiver.shutdown();
+        }
+        
+    }
+    
+    //----------------------------------
     // Inner classes
     private Cmd cmd                 = new Cmd();
     private Connection connection   = new Connection();
     private Util util               = new Util();
     private Protocol protocol       = new Protocol();
+    private Signal signal           = new Signal();
     
     private TNode mNode;
     private TWorkingNodeData mData;
@@ -1268,6 +1472,10 @@ public class TWorkingNodeModel implements INodeModel {
         
         connection.startUp();
         
+        signal.startUp();
+        
+        protocol.startUp();
+ 
         try {
             
             TNodeInfo selfNodeInfo = new TNodeInfo(
@@ -1289,6 +1497,12 @@ public class TWorkingNodeModel implements INodeModel {
     
     //----------------------------------
     public void shutDown() {
+        
+        protocol.shutDown();
+        
+        signal.shutDown();
+        
+        connection.shutDown();
     }
     
     //-------------------------------------------

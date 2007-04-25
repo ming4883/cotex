@@ -504,6 +504,13 @@ public class TWorkingNodeData  {
         }
         
         //----------------------------------
+        public void removeFromCurrentSession(TNodeInfo nodeInfo) {
+         
+            sessions.getCurrent().removeNode(nodeInfo);
+            listModel.notifyContentChanged();
+        }
+        
+        //----------------------------------
         // ListModel
         private class ListModel extends AbstractListModel {
             
